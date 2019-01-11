@@ -1,0 +1,15 @@
+{:paths ["resources" "src"]
+ :deps {org.clojure/clojure {:mvn/version "RELEASE"}
+        org.clojure/tools.logging {:mvn/version "0.4.1"}
+        org.apache.maven/maven-artifact {:mvn/version "3.6.0"}}
+ :aliases
+ {:test {:extra-paths ["test"]
+         :extra-deps {org.clojure/test.check {:mvn/version "RELEASE"}}}
+  :runner
+  {:extra-deps {com.cognitect/test-runner
+                {:git/url "https://github.com/cognitect-labs/test-runner"
+                 :sha "76568540e7f40268ad2b646110f237a60295fa3c"}}
+   :main-opts ["-m" "cognitect.test-runner"
+               "-d" "test"]}
+  :display {:main-opts ["-m" "deps-v.display"]}
+  }}
