@@ -19,7 +19,7 @@ When releasing, developer indicates the characteristic of the changes regarding 
 
 ### Repository organization
 
-SCM repository organization is important, with many decisions to make: mono or multirepos, modules slicing, links with the CI and build process. Monorepos are a popular way of organizing source code at the moment to promote better code sharing behavior, knowledge spreading, refactoring, etc. (see the article ["Monorepos and the fallacy of scale"](https://presumably.de/monorepos-and-the-fallacy-of-scale.html)). **The library is intended to accomodate Monorepos and Multirepos style of organization**, in case of _Monorepo_ style Metav's tagging behavior ensures isolation between components living in the same repo.
+SCM repository organization is important, with many decisions to make: mono or multirepos, modules slicing, links with the CI and build process. Monorepos are a popular way of organizing source code at the moment to promote better code sharing behavior, knowledge spreading, refactoring, etc. (see the article ["Monorepos and the fallacy of scale"](https://presumably.de/monorepos-and-the-fallacy-of-scale.html)). **The library is intended to accomodate Monorepos and Multirepos style of organization**, in case of _Monorepos_ style Metav's tagging behavior ensures isolation between components living in the same repo.
 
 ### Version
 
@@ -30,14 +30,14 @@ Extract from the [semver](https://semver.org) website:
 > Given a version number MAJOR.MINOR.PATCH, increment the:
 
 > - MAJOR version when you make incompatible API changes,
-- MINOR version when you add functionality in a backwards-compatible manner, and
-- PATCH version when you make backwards-compatible bug fixes.
-Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format.
+> - MINOR version when you add functionality in a backwards-compatible manner, and
+> - PATCH version when you make backwards-compatible bug fixes.
+> Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format.
 
 
 ## Behavior
 
-Monorepos, or at least a reduced number of repos, brings better code sharing for the team. The way we manage the version and release from the source code should be independant of whether the source code is in a dedicated repo or a shared one (monorepo). 
+Monorepos, or at least a reduced number of repos, brings better code sharing for the team. The way we manage the version and release from the source code should be independant of whether the source code is in a dedicated repo (Multirepos) or a shared one (Monorepos). 
 Many tools implicitly depends on having a dedicated repository per component. I'm fond of using git tags to denote the current version.
 
 > __Every artifact should be reproduceable from the source code hash ([git reference](https://git-scm.com/book/en/v2/Git-Internals-Git-References))__
@@ -48,7 +48,7 @@ Many tools implicitly depends on having a dedicated repository per component. I'
 Version is deduced from the current state of the SCM working copy: 
 
 - is the source code on a tag? version is `1.5.2` 
-- on a commit after a tag? version is `1.5.2-f34b91` 
+- on a commit mane after the tag? (possibly several commits) version is `1.5.2-f34b91` 
 - with uncommitted change (DIRTY state)? `1.5.2-f34b91-DIRTY`
 
 The version is never persisted somewhere in source code to avoid any desynchronisation between SCM state and version number. _However_, the library can optionaly spit the metadata (module name and version) in file to be included in an artefact during the build process.
