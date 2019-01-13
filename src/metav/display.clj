@@ -13,9 +13,14 @@
     (when-not scm (log/warn "No SCM data available! is it a git repository? is there a proper .git dir?"))
     (apply f scm)))
 
+(defn- name
+  "Determine the name for the project by analyzing the environment, path until the git root or folder name if just under the root"
+  []
+  (git/prefix))
 
 (defn -main
   "Display the current version obtained from the SCM environment"
   [& args]
+  (println (name))
   (println (str (version {:from-scm 'metav.semver/from-scm})))
   (shutdown-agents))

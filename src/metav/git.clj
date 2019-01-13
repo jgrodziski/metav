@@ -12,6 +12,7 @@
 (def windows? (some->> (System/getProperty "os.name")
                        (re-matches #"(?i).*windows.*")))
 
+
 (defn abort
   "Print msg to standard err and exit with a value of 1."
   [& msg]
@@ -42,35 +43,65 @@
       (string/split-lines out)
       (do (log/warn err) nil))))
 
-(defn- root-distance
+(defn- git-in-dir [repo-dir & arguments]
+  (if repo-dir
+    (apply git-command "--git-dir" (str repo-dir "/.git") arguments);;apply is used to preserve the variadic arguments between function call
+    (apply git-command arguments)))
+
+(defn- inside-work-tree?
+  "returns true if inside a git work tree"
   []
-  (count (git-command "rev-list" "HEAD")))
+  (= "true" (first (git-command "rev-parse" "--is-inside-work-tree"))))
 
-(defn- git-status []
-  (git-command "status" "-b" "--porcelain"))
+(defn- toplevel
+  "return the toplevel path as a string on the local filesystem corresponding to the dir containing the .git dir"
+  []
+  (first (git-command "rev-parse" "--show-toplevel")))
 
-(defn- git-describe [prefix min-sha-length]
-  (git-command "describe" "--long" "--match"
-               (str prefix "*.*")
-               (format "--abbrev=%d" min-sha-length)
-               (str "--dirty=-" *dirty-mark*)
-               "--always"))
+(defn prefix
+  "return the prefix (dirt path relative to toplevel git dir). When invoked from a subdirectory, show the path of the current directory relative to the top-level directory."
+  []
+  (first (git-command "rev-parse" "--show-prefix")))
+
+(defn- root-distance
+  ([] (root-distance nil))
+  ([repo-dir] (count (git-in-dir repo-dir "rev-list" "HEAD"))))
+
+(defn- git-status
+  ([] (git-status nil))
+  ([repo-dir]
+   (let [status-args ["status" "-b" "--porcelain"]]
+     (if (nil? repo-dir)
+       (apply git-in-dir repo-dir status-args)
+       (apply git-in-dir repo-dir (conj status-args repo-dir))))))
+
+(defn- git-describe
+  ([prefix min-sha-length] (git-describe nil prefix min-sha-length))
+  ([repo-dir prefix min-sha-length] (git-in-dir repo-dir "describe" "--long" "--match"
+                                                (str prefix "*.*")
+                                                (format "--abbrev=%d" min-sha-length)
+                                                (str "--dirty=-" *dirty-mark*)
+                                                "--always")))
 
 (defn tag! [v & {:keys [prefix sign] :or {prefix *prefix* sign "--sign"}}]
   (apply git-command (filter identity ["tag" sign "--annotate"
                                        "--message" "Automated lein-v release" (str prefix v)])))
 
+(defn git-dir-opt [repo-dir]
+  "--git-dir" (str repo-dir "/.git"))
+
 (defn version
-  [& {:keys [prefix min-sha-length]
-      :or {prefix *prefix* min-sha-length *min-sha-length*}}]
-  (let [re0 (re-pattern (format "^%s(.+)-(\\d+)-g([^\\-]{%d,})?(?:-(%s))?$"
-                                prefix min-sha-length *dirty-mark*))
-        re1 (re-pattern (format "^(Z)?(Z)?([a-z0-9]{%d,})(?:-(%s))?$" ; fallback when no matching tag
-                                min-sha-length *dirty-mark*))]
-    (when-let [v (first (git-describe prefix min-sha-length))]
-      (let [[_ base distance sha dirty] (or (re-find re0 v) (re-find re1 v))]
-        (let [distance (or (when distance (Integer/parseInt distance)) (root-distance))]
-          [base distance sha (boolean dirty)])))))
+  ([] (version nil))
+  ([repo-dir & {:keys [prefix min-sha-length]
+                :or {prefix *prefix* min-sha-length *min-sha-length*}}]
+   (let [re0 (re-pattern (format "^%s(.+)-(\\d+)-g([^\\-]{%d,})?(?:-(%s))?$"
+                                 prefix min-sha-length *dirty-mark*))
+         re1 (re-pattern (format "^(Z)?(Z)?([a-z0-9]{%d,})(?:-(%s))?$" ; fallback when no matching tag
+                                 min-sha-length *dirty-mark*))]
+     (when-let [v (first (git-describe repo-dir prefix min-sha-length))]
+       (let [[_ base distance sha dirty] (or (re-find re0 v) (re-find re1 v))]
+         (let [distance (or (when distance (Integer/parseInt distance)) (root-distance repo-dir))]
+           [base distance sha (boolean dirty)]))))))
 
 (defn workspace-state [& {:keys [prefix min-sha-length]
                           :or {prefix *prefix* min-sha-length *min-sha-length*}}]

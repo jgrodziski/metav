@@ -48,7 +48,7 @@ Many tools implicitly depends on having a dedicated repository per component. I'
 Version is deduced from the current state of the SCM working copy: 
 
 - is the source code on a tag? version is `1.5.2` 
-- on a commit made after the tag? (possibly several commits) version is `1.5.2-f34b91` (use the commit hash in version number)
+- on a commit made after the tag? (possibly several commits, compute the distance from last tag and use it as patch number) version is `1.5.2+f34b91` (use the commit hash in version number)
 - with uncommitted change (DIRTY state)? `1.5.2-f34b91-DIRTY`
 
 The version is never persisted somewhere in source code to avoid any desynchronisation between SCM state and version number. _However_, the library can optionaly spit the metadata (module name and version) in file to be included in an artefact during the build process.
