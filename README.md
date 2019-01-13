@@ -121,8 +121,9 @@ See [spit function](#spit).
 
 Using tools.deps, add several alias in your `deps.edn` for each main task (display, spit, release) like this:
 ```
-{:aliases {:display  {:extra-deps {jgrodziski/metav {:mvn/version "0.1.0"}}
-                      :main-opts ["-m" "metav.display"]
+{:aliases {:metav {:extra-deps {jgrodziski/metav {:mvn/version "0.1.0"}}}
+           :display {:extra-deps {jgrodziski/metav {:mvn/version "0.1.0"}}
+                     :main-opts ["-m" "metav.display"]
 }}}
 ```
 
@@ -130,8 +131,14 @@ Using tools.deps, add several alias in your `deps.edn` for each main task (displ
 
 ### Display current version
 
+One liner:
 ```
-clj -A:metav -m metav.display
+clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "cbcb938e15f3cbde6db24bac962190c3e9b53744"}}}' -m metav.display
+```
+
+If you've installed Metav's dependency in `deps.edn` like in the above, just run:
+```
+clj -A:display
 ```
 
 ### Release
