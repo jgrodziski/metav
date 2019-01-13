@@ -5,14 +5,18 @@ All notable changes to this project will be documented in this file. This change
 ### Changed
 - Add a new arity to `make-widget-async` to provide a different widget shape.
 
-## [0.1.1] - 2019-01-11
-### Changed
+# [0.1.1] - 2019-01-11 #
+
+## Changed ##
+
 - Documentation on how to make the widgets.
 
-### Removed
+## Removed ##
+
 - `make-widget-sync` - we're all async, all the time.
 
-### Fixed
+## Fixed ##
+
 - Fixed widget maker to keep working when daylight savings switches over.
 
 ## 0.1.0 - 2019-01-11

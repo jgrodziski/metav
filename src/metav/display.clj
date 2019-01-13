@@ -1,6 +1,6 @@
-(ns deps-v.display
+(ns metav.display
   (:require [clojure.tools.logging :as log]
-            [deps-v.git :as git]))
+            [metav.git :as git]))
 
 (defn- version
   "Determine the version for the project by dynamically interrogating the environment"
@@ -10,9 +10,8 @@
     (when-not scm (log/warn "No SCM data available! is it a git repository? is there a proper .git dir?"))
     (apply f scm)))
 
-
 (defn -main
   "Display the current version obtained from the SCM environment"
   [& args]
-  (println version)
+  (println (version))
   (shutdown-agents))

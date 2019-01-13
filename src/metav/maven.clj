@@ -1,4 +1,4 @@
-;;; An implementation of Maven version 3 (borrowed from [lein-v]())
+;;; An implementation of Maven version 3 (borrowed from [lein-v](https://github.com/roomkey/lein-v))
 ;;; It supports three levels of numeric versions (major, minor & patch).  Commit distance
 ;;; is represented by the Maven build number (e.g. 1.2.3-9) when there is no qualifier, and
 ;;; by a trailing, dash-separated numeric qualifier (practically, a build number) in the presence
@@ -13,12 +13,13 @@
 ;;; Example Versions & Interpretations:
 ;;; 1.2.3-rc4 => major 1, minor 2, patch 3, qualifier rc incremented to 4
 ;;; NB: java -jar ~/.m2/repository/org/apache/maven/maven-artifact/3.2.5/maven-artifact-3.2.5.jar <v1> <v2> ...<vn>
-(ns deps-v.maven
-  "An implementation of lein-v version protocols that complies with Maven v3"
+
+(ns metav.maven
+  "An implementation of version protocols that complies with Maven v3"
   (:import [java.lang Comparable]
            [org.apache.maven.artifact.versioning ComparableVersion DefaultArtifactVersion])
   (:require [clojure.string :as string]
-            [deps-v.version.protocols :refer :all]))
+            [metav.version.protocols :refer :all]))
 
 (defn- string->qualifier
   [qstring]

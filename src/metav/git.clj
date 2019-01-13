@@ -1,4 +1,4 @@
-(ns deps-v.git
+(ns metav.git
   (:require [clojure.string :as string]
             [clojure.java.shell :as shell]
             [clojure.tools.logging :as log]))
@@ -56,7 +56,7 @@
                (str "--dirty=-" *dirty-mark*)
                "--always"))
 
-(defn tag [v & {:keys [prefix sign] :or {prefix *prefix* sign "--sign"}}]
+(defn tag! [v & {:keys [prefix sign] :or {prefix *prefix* sign "--sign"}}]
   (apply git-command (filter identity ["tag" sign "--annotate"
                                        "--message" "Automated lein-v release" (str prefix v)])))
 

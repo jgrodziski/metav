@@ -1,4 +1,4 @@
-(ns deps-v.version.protocols
+(ns metav.version.protocols
   "Handle abstract versions as a set of malleable components")
 
 (defprotocol SCMHosted
