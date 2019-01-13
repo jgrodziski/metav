@@ -72,8 +72,8 @@
         (let [distance (or (when distance (Integer/parseInt distance)) (root-distance))]
           [base distance sha (boolean dirty)])))))
 
-(defn workspace-state [project & {:keys [prefix min-sha-length]
-                                  :or {prefix *prefix* min-sha-length *min-sha-length*}}]
+(defn workspace-state [& {:keys [prefix min-sha-length]
+                          :or {prefix *prefix* min-sha-length *min-sha-length*}}]
   (when-let [status (git-status)]
     {:status {:tracking (filter #(re-find #"^##\s" %) status)
               :files (remove empty? (remove #(re-find #"^##\s" %) status))}
