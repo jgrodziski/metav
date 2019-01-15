@@ -9,7 +9,7 @@
 (use-fixtures :once setup-tear-down)
 
 
-;; test0.repo: (shell! (init!) (commit!) (tag "v1.2.3") (commit!))
+;; test0.repo: (shell! (init!) (commit!) (tag! "v1.2.3") (commit!))
 
 (deftest bare-repo
   (testing "testing "
