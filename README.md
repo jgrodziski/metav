@@ -90,7 +90,6 @@ The tagging function use [git annotated tag](https://git-scm.com/book/en/v2/Git-
  :msg "Add new attachment feature in the message part of the system"}
 ``` 
 
-
 ### Meta management
 
 Metadata, like module name and version, should be deduced from the SCM and include in the binary artefact (JAR, docker image) but never commited as file along the source code to avoid any desynchronisation. Metadata file is called `meta.edn`.
@@ -117,7 +116,8 @@ See [spit function](#spit).
 ## Installation
 
 Using tools.deps, add several alias in your `deps.edn` for each main task (display, spit, release) like this:
-```
+
+```clojure
 {:aliases {:metav {:extra-deps {jgrodziski/metav {:mvn/version "0.1.0"}}}
            :display {:extra-deps {jgrodziski/metav {:mvn/version "0.1.0"}}
                      :main-opts ["-m" "metav.display"]
