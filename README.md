@@ -6,7 +6,7 @@ Metav is a library that helps the release and versioning process of Clojure proj
 
 **At every moment we should be able to link a SCM hash to a software's binary artefact and also the inverse: link a binary artefact to a point in the SCM tree.** 
 
-**The idea is to drive the version from git instead of the other way around.**
+__The idea is to drive the version from git instead of the other way around.__
 
 ### Release semantic
 
