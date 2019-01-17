@@ -2,26 +2,54 @@
 
 Metav is a library that helps the release and versioning process of Clojure projects, particularly the one using [tools.deps](https://github.com/clojure/tools.deps.alpha).
 
-## Rationale
+<div id="TOC">
+<ul>
+<li><a href="#metav">Metav</a><ul>
+<li><a href="#rationale">Rationale</a><ul>
+<li><a href="#release-semantic">Release semantic</a></li>
+<li><a href="#change-level-major-minor-patch">Change level (major, minor, patch)</a></li>
+<li><a href="#repository-organization">Repository organization</a></li>
+<li><a href="#version">Version</a></li>
+</ul></li>
+<li><a href="#behavior">Behavior</a><ul>
+<li><a href="#version-bumping">Version bumping</a></li>
+<li><a href="#module-naming">Module Naming</a></li>
+<li><a href="#tagging-behavior">Tagging behavior</a></li>
+<li><a href="#meta-management">Meta management</a></li>
+<li><a href="#metav-interface">Metav interface</a></li>
+</ul></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#usage">Usage</a><ul>
+<li><a href="#display-current-version">Display current version</a></li>
+<li><a href="#release">Release</a></li>
+<li><a href="#spit-current-versioning">Spit current versioning</a></li>
+</ul></li>
+<li><a href="#license">License</a></li>
+</ul></li>
+</ul>
+</div>
+
+
+# Rationale
 
 **At every moment we should be able to link a SCM hash to a software's binary artefact and also the inverse: link a binary artefact to a point in the SCM tree.** 
 
 __The idea is to drive the version from git instead of the other way around.__
 
-### Release semantic
+## Release semantic
 
 _Release_ means some source code changes in one or several commits are ready to be "published" in the repository for later deployment. The _Release_ process assigns a version number, tags the repo with it and push the changes. The _Release_ task is invoked by developer when she considers changes in source code are ready. Pushing binary artefact (JAR, docker image) is out of the scope of the _Release_ process and should be the responsibility of the CI system.
 
 
-### Change level (major, minor, patch)
+## Change level (major, minor, patch)
 
 When releasing, developer indicates the characteristic of the changes regarding the breaks potentially introduced (*major* level change), whether new features were pushed (*minor* level with no breaking change) or just a fix with no new features nor breaking changes (_patch_ level). The _Release_ process takes care of dealing with the SCM and version number to left the developer only decides what she's releasing to the world. 
 
-### Repository organization
+## Repository organization
 
 SCM repository organization is important, with many decisions to make: mono or multirepos, modules slicing, links with the CI and build process. Monorepos are a popular way of organizing source code at the moment to promote better code sharing behavior, knowledge spreading, refactoring, etc. (see the article ["Monorepos and the fallacy of scale"](https://presumably.de/monorepos-and-the-fallacy-of-scale.html)). **The library is intended to accomodate Monorepos and Multirepos style of organization**, in case of _Monorepos_ style Metav's tagging behavior ensures isolation between components living in the same repo. Many tools implicitly depends on having a dedicated repository per component, in our case the way we manage the version and release from the source code should be independant of whether the source code is in a dedicated repo (Multirepos) or a shared one (Monorepos). 
 
-### Version
+## Version
 
 Each version should gives a clear semantic about the content of the change, [Semantic Versioning](https://semver.org) is a great way to do that.
 I'm fond of using git tags to denote the current version of a component whether we use a Monorepo or a Multirepo.
@@ -36,11 +64,11 @@ Extract from the [semver](https://semver.org) website:
 > Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format.
 
 
-## Behavior
+# Behavior
 
 > __Every artifact should be reproduceable from the source code hash ([git reference](https://git-scm.com/book/en/v2/Git-Internals-Git-References))__
 
-### Version bumping
+## Version bumping
 
 Version is deduced from the current state of the SCM working copy: 
 
@@ -57,7 +85,7 @@ The version is never persisted somewhere in source code to avoid any desynchroni
 We never use SNAPSHOT in version number as it's difficult to know what's really inside the binary artefact.
 
 
-### Module Naming
+## Module Naming
 
 We believe repo layout should follows some convention regarding the system, container, component organization and relationships (following the [C4 model](https://c4model.com) for example, but any other layout should be possible). Hence the naming scheme should reflect that organization, if we take the same example used in the C4 model documentation, the folders in the monorepo should be:
 
@@ -78,7 +106,7 @@ We believe repo layout should follows some convention regarding the system, cont
 Module's name is by default deduced from the repo layout (but can also be overriden) and is given by Metav along the version.
 In case of a dedicated repo for the module Metav takes the folder name containing the working copy (aka. containing the `.git` folder)
 
-### Tagging behavior
+## Tagging behavior
 
 Each _release_ invocation tags the current SCM state with the following naming scheme: `system-container-version`.
 The tagging function use [git annotated tag](https://git-scm.com/book/en/v2/Git-Basics-Tagging) using the naming scheme describe previously, the message contains an EDN data structure described the module that is tagged: 
@@ -90,7 +118,7 @@ The tagging function use [git annotated tag](https://git-scm.com/book/en/v2/Git-
  :msg "Add new attachment feature in the message part of the system"}
 ``` 
 
-### Meta management
+## Meta management
 
 Metadata, like module name and version, should be deduced from the SCM and include in the binary artefact (JAR, docker image) but never commited as file along the source code to avoid any desynchronisation. Metadata file is called `meta.edn`.
 
@@ -103,17 +131,17 @@ Metadata are:
 
 See [spit function](#spit).
 
-### Metav interface
+## Metav interface
 
-#### Display Module name and Version
+### Display Module name and Version
 
-#### Release changes
+### Release changes
 
-#### Spit meta information (module name and version)
+### Spit meta information (module name and version)
 
 
 
-## Installation
+# Installation
 
 Using tools.deps, add several alias in your `deps.edn` for each main task (display, spit, release) like this:
 
@@ -124,9 +152,9 @@ Using tools.deps, add several alias in your `deps.edn` for each main task (displ
 }}}
 ```
 
-## Usage
+# Usage
 
-### Display current version
+## Display current version
 
 One liner:
 ```
@@ -138,20 +166,20 @@ If you've installed Metav's dependency in `deps.edn` like in the above, just run
 clj -A:display
 ```
 
-### Release
+## Release
 
 ```
 clj -A:metav -m metav.release -l minor
 ```
 
-### Spit current versioning
+## Spit current versioning
 
 ```
 clj -A:metav -m metav.spit
 ```
 
 
-## License
+# License
 
 Copyright © 2019 Jeremie Grodziski
 
