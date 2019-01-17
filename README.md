@@ -4,7 +4,6 @@ Metav is a library that helps the release and versioning process of Clojure proj
 
 <div id="TOC">
 <ul>
-<li><a href="#metav">Metav</a><ul>
 <li><a href="#rationale">Rationale</a><ul>
 <li><a href="#release-semantic">Release semantic</a></li>
 <li><a href="#change-level-major-minor-patch">Change level (major, minor, patch)</a></li>
@@ -28,7 +27,6 @@ Metav is a library that helps the release and versioning process of Clojure proj
 </ul></li>
 </ul>
 </div>
-
 
 # Rationale
 
