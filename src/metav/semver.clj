@@ -3,7 +3,7 @@
 ;;; distance from the last major/minor version-tagged commit.  SCM tags are, however, of the
 ;;; form "major.minor.0" to be more aesthetically pleasing and consistent with the standard.
 ;;; SHA metadata is added for positive commit distances, and a "DIRTY" metadatum is added when
-;;; approprite.  There is no support for Semantic Version's pre-releases!  The ordering/
+;;; appropriate.  There is no support for Semantic Version's pre-releases!  The ordering/
 ;;; precedence rules cannot be reconciled with the automatic assignment of patch releases.
 ;;; http://semver.org/spec/v2.0.0.html
 (ns metav.semver
@@ -44,7 +44,7 @@
       (assert (= "0" patch) "Non-zero patch level found in SCM base")
       (mapv #(Integer/parseInt %) [major minor]))))
 
-(defn from-scm
+(defn version
   ([] (SemVer. [0 1] 0 nil nil))
   ([base distance sha dirty?]
    (if base

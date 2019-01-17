@@ -77,7 +77,7 @@
         qualifier (and qstr (string->qualifier qstr))]
     [subversions qualifier]))
 
-(defn from-scm
+(defn version
   ([] (MavenVersion. [0 0 0] nil nil 0 nil))
   ([tag distance sha dirty?]
    (if tag

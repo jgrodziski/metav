@@ -13,5 +13,5 @@
 
 (deftest bare-repo
   (testing "testing "
-    (let [repo (shell! (clone! "test0.repo"))]
-      (version))))
+    (let [repo (shell! (init!) (commit!) (tag! "v1.2.3"))]
+      (println (version repo)))))
