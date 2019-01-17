@@ -53,15 +53,16 @@
   []
   (= "true" (first (git-command "rev-parse" "--is-inside-work-tree"))))
 
-(defn- toplevel
+(defn toplevel
   "return the toplevel path as a string on the local filesystem corresponding to the dir containing the .git dir"
   []
   (first (git-command "rev-parse" "--show-toplevel")))
 
 (defn prefix
-  "return the prefix (dirt path relative to toplevel git dir). When invoked from a subdirectory, show the path of the current directory relative to the top-level directory."
+  "return the prefix (dir path relative to toplevel git dir). When invoked from a subdirectory, show the path of the current directory relative to the top-level directory."
   []
   (first (git-command "rev-parse" "--show-prefix")))
+
 
 (defn- root-distance
   ([] (root-distance nil))

@@ -10,6 +10,8 @@
   []
   (.getCanonicalFile (clojure.java.io/file ".")))
 
+(defn temp-dir )
+
 (defmacro shell!
   [& body]
   `(let [tmpdir# (Files/createTempDirectory
@@ -31,6 +33,8 @@
                       (assert (->  result :exit zero?) (:err result))))
 
 (defn init! [] (sh "git init"))
+
+(defn add-dummy-file! [] (sh "echo \"Some stuff\" >> "))
 
 (defn commit! [] (sh "git commit -m \"Commit\" --allow-empty"))
 
