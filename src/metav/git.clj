@@ -76,6 +76,10 @@
        (apply git-in-dir repo-dir status-args)
        (apply git-in-dir repo-dir (conj status-args repo-dir))))))
 
+(defn assert-committed
+  ([] (assert-committed))
+  ([repo-dir] ))
+
 (defn- git-describe
   ([prefix min-sha-length] (git-describe nil prefix min-sha-length))
   ([repo-dir prefix min-sha-length] (git-in-dir repo-dir "describe" "--long" "--match"

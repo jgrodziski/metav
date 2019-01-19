@@ -3,14 +3,15 @@
   (:import [java.nio.file Files])
   (:require [clojure.java.io :as io]
             [clojure.test :as t]
-            [clojure.java.shell :as shell]))
+            [clojure.java.shell :as shell]
+            [me.raynes.fs :as fs]))
 
 (defn pwd
   "return working dir of the JVM (cannot be changed once JVM is started)"
   []
   (.getCanonicalFile (clojure.java.io/file ".")))
 
-(defn temp-dir )
+(defn temp-dir [])
 
 (defmacro shell!
   [& body]
@@ -34,7 +35,15 @@
 
 (defn init! [] (sh "git init"))
 
-(defn add-dummy-file! [] (sh "echo \"Some stuff\" >> "))
+(defn mkdir-p!
+  "create a bunch of dirs all at the same time"
+  [& dirs]
+  (when dirs
+    (sh (str "mkdir -p " (apply str (interpose "/" dirs))))))
+
+(defn add-dummy-file! [& dirs]
+  (apply mkdir-p! dirs)
+  (sh (str "echo \"Some stuff\" >> " (apply str (interpose "/" dirs)) "/" (fs/temp-name "dummy" ".txt"))))
 
 (defn commit! [] (sh "git commit -m \"Commit\" --allow-empty"))
 

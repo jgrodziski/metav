@@ -3,14 +3,16 @@
 Metav is a library that helps the release and versioning process of Clojure projects, particularly the one using [tools.deps](https://github.com/clojure/tools.deps.alpha).
 
 <div id="TOC">
+<ul> 
+<li><a href="#rationale">Rationale</a>
 <ul>
-<li><a href="#rationale">Rationale</a><ul>
 <li><a href="#release-semantic">Release semantic</a></li>
 <li><a href="#change-level-major-minor-patch">Change level (major, minor, patch)</a></li>
 <li><a href="#repository-organization">Repository organization</a></li>
 <li><a href="#version">Version</a></li>
 </ul></li>
-<li><a href="#behavior">Behavior</a><ul>
+<li><a href="#behavior">Behavior</a>
+<ul>
 <li><a href="#version-bumping">Version bumping</a></li>
 <li><a href="#module-naming">Module Naming</a></li>
 <li><a href="#tagging-behavior">Tagging behavior</a></li>
