@@ -30,6 +30,8 @@
          ~@body
          (str tmpdir#)))))
 
+(def deps-edn (slurp "deps.edn"))
+
 (defn- sh [command] (let [result (shell/sh "/bin/bash" "-c" command)]
                       (assert (->  result :exit zero?) (:err result))))
 
@@ -41,9 +43,15 @@
   (when dirs
     (sh (str "mkdir -p " (apply str (interpose "/" dirs))))))
 
-(defn add-dummy-file! [& dirs]
+(defn write-dummy-file-in! [& dirs]
   (apply mkdir-p! dirs)
-  (sh (str "echo \"Some stuff\" >> " (apply str (interpose "/" dirs)) "/" (fs/temp-name "dummy" ".txt"))))
+  (sh (str "echo \"Some stuff\" >> " (apply str (interpose "/" dirs)) (when dirs "/") (fs/temp-name "dummy" ".txt"))))
+
+(defn write-dummy-deps-edn-in! [& dirs]
+  (apply mkdir-p! dirs)
+  (sh (str "echo \"" deps-edn "\" >> " (apply str (interpose "/" dirs)) (when dirs "/") "deps.edn")))
+
+(defn add! [] (sh "git add ."))
 
 (defn commit! [] (sh "git commit -m \"Commit\" --allow-empty"))
 

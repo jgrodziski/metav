@@ -57,8 +57,8 @@
   (distance [this] distance)
   (sha [this] sha)
   (dirty? [this] dirty?)
-  Releasable
-  (release [this level]
+  Bumpable
+  (bump [this level]
     (condp contains? level
       #{:major :minor :patch} (let [l ({:major 0 :minor 1 :patch 2} level)
                                     subversions (map-indexed (fn [i el] (cond (< i l) el
@@ -67,9 +67,9 @@
                                 (MavenVersion. (vec subversions) nil 0 sha dirty?))
       #{:alpha :beta :rc} (MavenVersion. subversions (qualify* qualifier (name level)) 0 sha dirty?)
       #{:snapshot} (MavenVersion. subversions (qualify* qualifier "SNAPSHOT") 0 sha dirty?)
-      #{:release} (do (assert qualifier "There is no pre-release version pending")
+      #{:release} (do (assert qualifier "There is no pre-bump version pending")
                       (MavenVersion. subversions nil 0 sha dirty?))
-      (throw (Exception. (str "Not a supported release operation: " level))))))
+      (throw (Exception. (str "Not a supported bump operation: " level))))))
 
 (defn- parse-tag [vstring]
   (let [[sstr qstr & _] (string/split vstring #"-")

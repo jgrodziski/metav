@@ -9,7 +9,8 @@
 (ns metav.semver
   "An implementation of version protocols that complies with Semantic Versioning 2.0.0"
   (:require [clojure.string :as string]
-            [metav.version.protocols :refer :all]))
+            [metav.version.protocols :refer :all]
+            [clojure.tools.logging :as log]))
 
 (deftype SemVer [subversions distance sha dirty?]
   Object
@@ -27,21 +28,22 @@
   (distance [this] distance)
   (sha [this] sha)
   (dirty? [this] dirty?)
-  Releasable
-  (release [this level]
+  Bumpable
+  (bump [this level]
     (condp contains? level
       #{:major :minor} (let [l ({:major 0 :minor 1} level)
                              subversions (map-indexed (fn [i el] (cond (< i l) el
                                                                       (= i l) (inc el)
                                                                       (> i l) 0)) subversions)]
                          (SemVer. (vec subversions) 0 sha dirty?))
-      #{:patch} (throw (Exception. "Patch releases are implicit by commit distance"))
-      (throw (Exception. (str "Not a supported release operation: " level))))))
+      #{:patch} (throw (Exception. "Patch bump are implicit by commit distance"))
+      (throw (Exception. (str "Not a supported bump operation: " level))))))
 
 (let [re #"(\d+)\.(\d+)\.(\d+)"]
   (defn- parse-base [base]
+    (log/debug "parse-base(" base ")")
     (let [[_ major minor patch] (re-matches re base)]
-      (assert (= "0" patch) "Non-zero patch level found in SCM base")
+      (assert (= "0" patch) (str "Non-zero patch level (" patch ") found in SCM base"))
       (mapv #(Integer/parseInt %) [major minor]))))
 
 (defn version

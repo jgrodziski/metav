@@ -13,11 +13,13 @@
 (defn version
   "Determine the version for the project by dynamically interrogating the environment, we can choose the Maven or SemVer version scheme"
   ([] (version "semver"));default value is semver
-  ([scheme]
-   (let [version-scheme-fn (version-scheme-fn scheme)
-         git-state (git/version)]
-     (when-not git-state (log/warn "No Git data available! is it a git repository? is there a proper .git dir?"))
-     (apply version-scheme-fn git-state))))
+  ([scheme] (version scheme nil))
+  ([scheme repo-dir]
+   (let [version-scheme-fn (version-scheme-fn (clojure.string/lower-case scheme))
+         state (git/working-copy-description repo-dir)]
+     (when-not version-scheme-fn (throw (Exception. (str "No version scheme " scheme " found! version scheme currently supported are: \"maven\" or \"semver\" "))))
+     (when-not state (log/warn "No Git data available! is it a git repository? is there a proper .git dir? if so is there any commits? return default starting version"))
+     (apply version-scheme-fn state))))
 
 (defn module-name
   "Determine the name for the project by analyzing the environment, path until the git root or folder name if just under the root"

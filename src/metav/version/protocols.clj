@@ -7,5 +7,5 @@
   (sha [this])
   (dirty? [this]))
 
-(defprotocol Releasable
-  (release [this level]))
+(defprotocol Bumpable
+  (bump [this level]))

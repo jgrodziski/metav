@@ -1,7 +1,8 @@
 (ns metav.git
   (:require [clojure.string :as string]
             [clojure.java.shell :as shell]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log]
+            [metav.git :as git]))
 
 (def ^:dynamic *prefix* "v")
 (def ^:dynamic *min-sha-length* 4)
@@ -11,7 +12,6 @@
 
 (def windows? (some->> (System/getProperty "os.name")
                        (re-matches #"(?i).*windows.*")))
-
 
 (defn abort
   "Print msg to standard err and exit with a value of 1."
@@ -38,15 +38,16 @@
 (defn- git-command
   [& arguments]
   (let [cmd (conj arguments (git-exe))
+        _ (log/info "Will execute in shell: " (apply str (interpose " " cmd)))
         {:keys [exit out err]} (apply shell/sh cmd)]
     (if (zero? exit)
       (string/split-lines out)
-      (do (log/warn err) nil))))
+      (do (log/error err) nil))))
 
 (defn- git-in-dir [repo-dir & arguments]
   (if repo-dir
-    (apply git-command "--git-dir" (str repo-dir "/.git") arguments);;apply is used to preserve the variadic arguments between function call
-    (apply git-command arguments)))
+      (apply git-command "-C" repo-dir arguments);;apply is used to preserve the variadic arguments between function call
+      (apply git-command arguments)))
 
 (defn- inside-work-tree?
   "returns true if inside a git work tree"
@@ -59,10 +60,10 @@
   (first (git-command "rev-parse" "--show-toplevel")))
 
 (defn prefix
-  "return the prefix (dir path relative to toplevel git dir). When invoked from a subdirectory, show the path of the current directory relative to the top-level directory."
+  "return the prefix (dir path relative to toplevel git dir).
+  When invoked from a subdirectory, show the path of the current directory relative to the top-level directory."
   []
   (first (git-command "rev-parse" "--show-prefix")))
-
 
 (defn- root-distance
   ([] (root-distance nil))
@@ -76,12 +77,14 @@
        (apply git-in-dir repo-dir status-args)
        (apply git-in-dir repo-dir (conj status-args repo-dir))))))
 
-(defn assert-committed
-  ([] (assert-committed))
-  ([repo-dir] ))
+(defn assert-committed?
+  ([] (assert-committed nil))
+  ([repo-dir]
+   (when (re-find #"Changes (not staged for commit|to be committed)" (apply str (interpose " " (git-in-dir repo-dir "status"))))
+     (throw (Exception. (str "Uncommitted changes in " repo-dir " git directory."))))))
 
-(defn- git-describe
-  ([prefix min-sha-length] (git-describe nil prefix min-sha-length))
+(defn describe
+  ([prefix min-sha-length] (git/describe nil prefix min-sha-length))
   ([repo-dir prefix min-sha-length] (git-in-dir repo-dir "describe" "--long" "--match"
                                                 (str prefix "*.*")
                                                 (format "--abbrev=%d" min-sha-length)
@@ -90,27 +93,47 @@
 
 (defn tag! [v & {:keys [prefix sign] :or {prefix *prefix* sign "--sign"}}]
   (apply git-command (filter identity ["tag" sign "--annotate"
-                                       "--message" "Automated lein-v release" (str prefix v)])))
+                                       "--message" "Automated metav release" (str prefix v)])))
+
+(defn commit!
+  "commit with message"
+  ([msg] (commit! nil msg))
+  ([repo-dir msg]
+   (git-in-dir repo-dir "commit" "-m" msg)))
+
+(defn push!
+  ([] (push! nil))
+  ([repo-dir] (git-in-dir repo-dir "push")))
 
 (defn git-dir-opt [repo-dir]
   "--git-dir" (str repo-dir "/.git"))
 
-(defn version
-  ([] (version nil))
+(defn any-commits?
+  "return whether the repo has any commits in it"
+  ([] (any-commits? nil))
+  ([repo-dir]
+   (git-in-dir repo-dir "log")))
+
+(defn working-copy-description
+  "return the git working copy description as [base distance sha dirty?]"
+  ([] (working-copy-description nil))
   ([repo-dir & {:keys [prefix min-sha-length]
                 :or {prefix *prefix* min-sha-length *min-sha-length*}}]
-   (let [re0 (re-pattern (format "^%s(.+)-(\\d+)-g([^\\-]{%d,})?(?:-(%s))?$"
-                                 prefix min-sha-length *dirty-mark*))
-         re1 (re-pattern (format "^(Z)?(Z)?([a-z0-9]{%d,})(?:-(%s))?$" ; fallback when no matching tag
-                                 min-sha-length *dirty-mark*))]
-     (when-let [v (first (git-describe repo-dir prefix min-sha-length))]
-       (let [[_ base distance sha dirty] (or (re-find re0 v) (re-find re1 v))]
-         (let [distance (or (when distance (Integer/parseInt distance)) (root-distance repo-dir))]
-           [base distance sha (boolean dirty)]))))))
+   (when (git/any-commits? repo-dir)
+     (let [re0 (re-pattern (format "^%s(.+)-(\\d+)-g([^\\-]{%d,})?(?:-(%s))?$"
+                                   prefix min-sha-length *dirty-mark*))
+           re1 (re-pattern (format "^(Z)?(Z)?([a-z0-9]{%d,})(?:-(%s))?$" ; fallback when no matching tag
+                                   min-sha-length *dirty-mark*))]
+       (when-let [v (first (git/describe repo-dir prefix min-sha-length))]
+         (let [[_ base distance sha dirty] (or (re-find re0 v) (re-find re1 v))]
+           ;;(prn "working copy description v" v " re-find re0 " (re-find re0 v) " re-find re1 " (re-find re1 v))
+           (let [distance (or (when distance (Integer/parseInt distance)) (root-distance repo-dir))]
+             [base distance sha (boolean dirty)])))))))
 
-(defn workspace-state [& {:keys [prefix min-sha-length]
-                          :or {prefix *prefix* min-sha-length *min-sha-length*}}]
+(defn working-copy-state
+  "return the git working copy state with :status and :describe keys"
+  [& {:keys [prefix min-sha-length] :or {prefix *prefix* min-sha-length *min-sha-length*}}]
   (when-let [status (git-status)]
     {:status {:tracking (filter #(re-find #"^##\s" %) status)
               :files (remove empty? (remove #(re-find #"^##\s" %) status))}
-     :describe (first (git-describe prefix min-sha-length))}))
+     :describe (first (git/describe prefix min-sha-length))}))
