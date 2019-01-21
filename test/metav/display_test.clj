@@ -94,10 +94,9 @@
        (monorepo? moduleA1) => truthy
        (monorepo? moduleA2) => truthy
        (monorepo? moduleB1) => truthy
-       (monorepo? moduleB2) => truthy)
-      (prn (str (module-name moduleA1) (version "semver" moduleA1)))
-     ; (fs/delete-dir monorepo)
-      ))
+       (monorepo? moduleB2) => truthy
+       (str (module-name moduleA1) (version "semver" moduleA1)) =in=> #"sysA-container1-1.2.3.*")
+      (fs/delete-dir monorepo)))
   (testing "testing a monorepo with two systems of two containers"
     (let [[monorepo moduleA1 moduleA2 moduleB1 moduleB2] (monorepo)]
 
