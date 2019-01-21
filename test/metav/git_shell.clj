@@ -4,7 +4,8 @@
   (:require [clojure.java.io :as io]
             [clojure.test :as t]
             [clojure.java.shell :as shell]
-            [me.raynes.fs :as fs]))
+            [me.raynes.fs :as fs]
+            [clojure.tools.logging :as log]))
 
 (defn pwd
   "return working dir of the JVM (cannot be changed once JVM is started)"
@@ -45,11 +46,15 @@
 
 (defn write-dummy-file-in! [& dirs]
   (apply mkdir-p! dirs)
-  (sh (str "echo \"Some stuff\" >> " (apply str (interpose "/" dirs)) (when dirs "/") (fs/temp-name "dummy" ".txt"))))
+  (let [command (str "echo \"some stuff\" >> " (apply str (interpose "/" dirs)) (when dirs "/") (fs/temp-name "dummy" ".txt"))]
+    (log/debug "will execute: " command)
+    (sh command)))
 
 (defn write-dummy-deps-edn-in! [& dirs]
   (apply mkdir-p! dirs)
-  (sh (str "echo \"" deps-edn "\" >> " (apply str (interpose "/" dirs)) (when dirs "/") "deps.edn")))
+  (let [command (str "echo \"" deps-edn "\" >> " (apply str (interpose "/" dirs)) (when dirs "/") "deps.edn")]
+    ;(log/debug "will execute: "command)
+    (sh command)))
 
 (defn add! [] (sh "git add ."))
 

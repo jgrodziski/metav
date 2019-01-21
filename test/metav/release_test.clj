@@ -4,7 +4,8 @@
             [metav.git-shell :refer :all]
             [metav.display :refer :all]
             [metav.git :as git]
-            [clojure.test :as t]))
+            [clojure.test :as t]
+            [me.raynes.fs :as fs]))
 
 (deftest release-repo
   (testing "from a clean tagged repo"

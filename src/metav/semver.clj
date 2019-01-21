@@ -43,7 +43,7 @@
   (defn- parse-base [base]
     (log/debug "parse-base(" base ")")
     (let [[_ major minor patch] (re-matches re base)]
-      (assert (= "0" patch) (str "Non-zero patch level (" patch ") found in SCM base"))
+     ; (assert (= "0" patch) (str "Non-zero patch level (" patch ") found in SCM base"))
       (mapv #(Integer/parseInt %) [major minor]))))
 
 (defn version
