@@ -80,7 +80,7 @@
        (apply git-in-dir repo-dir (conj status-args repo-dir))))))
 
 (defn assert-committed?
-  ([] (assert-committed nil))
+  ([] (assert-committed? nil))
   ([repo-dir]
    (when (re-find #"Changes (not staged for commit|to be committed)" (apply str (interpose " " (git-in-dir repo-dir "status"))))
      (throw (Exception. (str "Uncommitted changes in " repo-dir " git directory."))))))

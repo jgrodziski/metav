@@ -7,15 +7,12 @@
             [metav.git :as git]
             [me.raynes.fs :as fs]))
 
-(defn setup-tear-down [test-to-run]
-  (test-to-run))
-
-(use-fixtures :once setup-tear-down)
 
 (deftest dedicated-repo-with-semver
   (testing "testing initialized repo should return 0.1.0"
     (let [repo (shell! (init!) (write-dummy-deps-edn-in!))]
       (facts (str (version repo)) => "0.1.0"
+             (monorepo? repo) => falsey
              (dedicated-repo? repo) => true)
       (fs/delete-dir repo)))
   (testing "testing untracked file should not impact the version"

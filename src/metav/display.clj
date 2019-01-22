@@ -26,7 +26,7 @@
 (defn version
   "Determine the version for the project by dynamically interrogating the environment,
   you can choose the \"maven\" or \"semver\" version scheme"
-  ([] (version nil "semver"));default value is semver
+  ([] (version nil :scheme "semver"));default value is semver
   ([working-dir & {:keys [scheme]
                    :or {scheme *scheme*}}]
    (let [version-scheme-fn (version-scheme-fn (clojure.string/lower-case scheme))
