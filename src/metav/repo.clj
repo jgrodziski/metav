@@ -10,8 +10,8 @@
   ([] (monorepo? nil))
   ([dir]
    (boolean (or (and (= (fs/normalized (fs/file dir))
-                        (fs/normalized(fs/file (git/toplevel dir))))
-                     (not-empty (fs/find-files dir #"deps.edn")))
+                        (fs/normalized (fs/file (git/toplevel dir))))
+                     (> (count (fs/find-files dir #"deps.edn")) 1))
                 (and (not (nil? (git/prefix dir)))
                      (fs/file? (if dir
                                  (str dir "/" module-build-file)

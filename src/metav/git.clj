@@ -38,7 +38,7 @@
 (defn- git-command
   [& arguments]
   (let [cmd (conj arguments (git-exe))
-        _ (log/info "Will execute in shell: " (apply str (interpose " " cmd)))
+        _ (log/debug "Will execute in shell: " (apply str (interpose " " cmd)))
         {:keys [exit out err]} (apply shell/sh cmd)]
     (if (zero? exit)
       (string/split-lines out)
@@ -127,10 +127,11 @@
            re1 (re-pattern (format "^(Z)?(Z)?([a-z0-9]{%d,})(?:-(%s))?$" ; fallback when no matching tag
                                    min-sha-length *dirty-mark*))]
        (when-let [v (first (git/describe repo-dir prefix min-sha-length))]
-         (let [[_ base distance sha dirty] (or (re-find re0 v) (re-find re1 v))]
-           ;;(prn "working copy description v" v " re-find re0 " (re-find re0 v) " re-find re1 " (re-find re1 v))
-           (let [distance (or (when distance (Integer/parseInt distance)) (root-distance repo-dir))]
-             [base distance sha (boolean dirty)])))))))
+         (let [[_ base distance sha dirty] (or (re-find re0 v) (re-find re1 v))
+               distance (or (when distance (Integer/parseInt distance)) (root-distance repo-dir))]
+           ;;(prn "working copy description v" v " re-find re0 " (re-find re0 v) " re-f ind re1 " (re-find re1 v))
+           (log/debug "working copy description: [" base distance sha (boolean dirty) "] {:prefix " prefix "}" )
+           [base distance sha (boolean dirty)]))))))
 
 (defn working-copy-state
   "return the git working copy state with :status and :describe keys"

@@ -14,10 +14,12 @@
 
 (deftype SemVer [subversions distance sha dirty?]
   Object
-  (toString [this] (let [be (string/join "." (conj subversions distance))
+  (toString [this] (let [be (string/join "." subversions); (conj subversions distance))
+                         _ (log/debug "be" be)
                          metadata (string/join "." (cond-> []
                                                      (and distance (pos? distance)) (conj (str "0x" sha))
-                                                     dirty? (conj "DIRTY")))]
+                                                     dirty? (conj "DIRTY")))
+                         _ (log/debug "metadata" metadata)]
                      (cond-> be
                        (not (string/blank? metadata)) (str "+" metadata))))
   Comparable
@@ -43,13 +45,13 @@
   (defn- parse-base [base]
     (log/debug "parse-base(" base ")")
     (let [[_ major minor patch] (re-matches re base)]
-     ; (assert (= "0" patch) (str "Non-zero patch level (" patch ") found in SCM base"))
-      (mapv #(Integer/parseInt %) [major minor]))))
+      ;(assert (= "0" patch) (str "Non-zero patch level (" patch ") found in SCM base"))
+      (mapv #(Integer/parseInt %) [major minor patch]))))
 
 (defn version
-  ([] (SemVer. [0 1] 0 nil nil))
+  ([] (SemVer. [0 1 0] 0 nil nil))
   ([base distance sha dirty?]
    (if base
      (let [subversions (parse-base base)]
        (SemVer. subversions distance sha dirty?))
-     (SemVer. [0 1] distance sha dirty?))))
+     (SemVer. [0 1 0] distance sha dirty?))))
