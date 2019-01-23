@@ -7,7 +7,12 @@
             [metav.git :as git]
             [me.raynes.fs :as fs]))
 
-  (def ^:dynamic *scheme* "semver")
+(def ^:dynamic *scheme* "semver")
+
+(defn pwd
+  "return working dir of the JVM (cannot be changed once JVM is started)"
+  []
+  (.getCanonicalFile (clojure.java.io/file ".")))
 
 (defn module-name
   "Determine the name for the project by analyzing the environment, path until the git root or folder name if just under the root"
@@ -53,8 +58,7 @@
 (defn -main
   "Display the current version obtained from the SCM environment"
   [& args]
-  (parse-opts args cli-options)
-  ;(println (git/toplevel))
-  (println (str (module-name) "-" (version)))
-  (println (str (version)))
-  (shutdown-agents))
+  (let [working-dir (pwd)]
+    (parse-opts args cli-options)
+    (println (str (module-name working-dir) "-" (version working-dir)))
+    (shutdown-agents)))
