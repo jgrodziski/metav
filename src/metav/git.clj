@@ -45,9 +45,10 @@
       (do (log/error err) nil))))
 
 (defn- git-in-dir [repo-dir & arguments]
+  ;(prn "git-in-dir" (str repo-dir) arguments)
   (if repo-dir
-      (apply git-command "-C" repo-dir arguments);;apply is used to preserve the variadic arguments between function call
-      (apply git-command arguments)))
+    (apply git-command (cons "-C" (cons repo-dir arguments)));;apply is used to preserve the variadic arguments between function call
+    (apply git-command arguments)))
 
 (defn- inside-work-tree?
   "returns true if inside a git work tree"

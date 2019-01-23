@@ -1,0 +1,18 @@
+<configuration scan="true" scanPeriod="5 seconds">
+
+    <appender name="SETUP-CORR-ID" class="io.aviso.logging.CorrelationIdAppender"/>
+    <appender name="SETUP-MDC" class="io.aviso.logging.ExtraMDCAppender"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{HH:mm:ss.SSS} %mdc{correlation-id} %mdc{magic} %-5level [%thread] %logger{} - %msg%n%ex</pattern>
+        </encoder>
+    </appender>
+
+    <root level="ERROR">
+        <appender-ref ref="SETUP-CORR-ID"/>
+        <appender-ref ref="SETUP-MDC"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>

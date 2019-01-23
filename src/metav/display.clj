@@ -56,9 +56,9 @@
     :validate #{"semver" "maven"}]])
 
 (defn -main
-  "Display the current version obtained from the SCM environment"
+  "Display the artefact name built from the module name + the current version obtained from the SCM environment"
   [& args]
-  (let [working-dir (pwd)]
-    (parse-opts args cli-options)
+  (let [working-dir (str (pwd))]
+    ;(parse-opts args cli-options)
     (println (str (module-name working-dir) "-" (version working-dir)))
     (shutdown-agents)))
