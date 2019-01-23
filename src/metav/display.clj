@@ -48,7 +48,7 @@
   ([] (artefact-name nil))
   ([working-dir & {:keys [scheme]
                    :or {scheme *scheme*}}]
-   (str (module-name working-dir) (version working-dir :scheme scheme))))
+   (str (module-name working-dir) (version working-dir :scheme scheme) ".jar")))
 
 (def cli-options
   [["-vs" "--version-scheme SCHEME" "Version Scheme ('maven' or 'semver')"
@@ -60,5 +60,5 @@
   [& args]
   (let [working-dir (str (pwd))]
     ;(parse-opts args cli-options)
-    (println (str (module-name working-dir) "-" (version working-dir)))
+    (println (artefact-name working-dir))
     (shutdown-agents)))
