@@ -23,7 +23,8 @@
          (fs/split)
          (last))
      ;;monorepo
-     (clojure.string/replace (git/prefix working-dir) "/" "-"))))
+     (let [name (clojure.string/replace (git/prefix working-dir) "/" "-")]
+       (subs name 0 (dec (count name)))))))
 
 (defn- version-scheme-fn [scheme]
   (ns-resolve (the-ns 'metav.display) (symbol (str "metav." scheme "/version"))))
@@ -48,7 +49,7 @@
   ([] (artefact-name nil))
   ([working-dir & {:keys [scheme]
                    :or {scheme *scheme*}}]
-   (str (module-name working-dir) (version working-dir :scheme scheme) ".jar")))
+   (str (module-name working-dir) "\t" (version working-dir :scheme scheme))))
 
 (def cli-options
   [["-vs" "--version-scheme SCHEME" "Version Scheme ('maven' or 'semver')"
