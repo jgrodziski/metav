@@ -47,9 +47,10 @@
 
 (defn artefact-name
   ([] (artefact-name nil))
-  ([working-dir & {:keys [scheme]
-                   :or {scheme *scheme*}}]
-   (str (module-name working-dir) "\t" (version working-dir :scheme scheme))))
+  ([working-dir & {:keys [scheme separator]
+                   :or {scheme *scheme*
+                        separator "-"}}]
+   (str (module-name working-dir) separator (version working-dir :scheme scheme))))
 
 (def cli-options
   [["-vs" "--version-scheme SCHEME" "Version Scheme ('maven' or 'semver')"
@@ -61,5 +62,5 @@
   [& args]
   (let [working-dir (str (pwd))]
     ;(parse-opts args cli-options)
-    (println (artefact-name working-dir))
+    (println (artefact-name working-dir :separator "\t"))
     (shutdown-agents)))

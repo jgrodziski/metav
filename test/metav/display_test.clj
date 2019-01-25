@@ -2,7 +2,7 @@
   (:require [clojure.test :refer :all]
             [testit.core :refer :all]
             [metav.git-shell :refer :all]
-            [metav.display :refer :all]
+            [metav.display :refer [version module-name artefact-name]]
             [metav.repo :refer [monorepo? dedicated-repo?]]
             [metav.git :as git]
             [me.raynes.fs :as fs]))
@@ -60,7 +60,7 @@
       (facts (str (version repo)) => "1.3.0" )
       (fs/delete-dir repo))))
 
-(defn- monorepo []
+(defn monorepo []
   (let [monorepo (shell! (init!)
                          (write-dummy-deps-edn-in! "sysA" "container1")
                          (add!)

@@ -84,7 +84,7 @@
   ([] (assert-committed? nil))
   ([repo-dir]
    (when (re-find #"Changes (not staged for commit|to be committed)" (apply str (interpose " " (git-in-dir repo-dir "status"))))
-     (throw (Exception. (str "Uncommitted changes in " repo-dir " git directory."))))))
+     (throw (Exception. (str "Untracked or uncommitted changes in " repo-dir " git directory (as stated by 'git status command')."))))))
 
 (defn describe
   ([prefix min-sha-length] (git/describe nil prefix min-sha-length))

@@ -31,6 +31,9 @@
          ~@body
          (str tmpdir#)))))
 
+(defmacro shell-in-dir! [dir & body]
+  )
+
 (def deps-edn (slurp "deps.edn"))
 
 (defn- sh [command] (let [result (shell/sh "/bin/bash" "-c" command)]
