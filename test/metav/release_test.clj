@@ -9,13 +9,15 @@
             [me.raynes.fs :as fs]))
 
 (deftest release-repo
-  (testing "from a clean tagged repo"
-    (let [[monorepo moduleA1 moduleA2 moduleB1 moduleB2] (monorepo)
-          bumped-version (release/execute moduleA1 "semver" :patch)]
+  (testing "bump from a clean tagged repo"
+    (let [[monorepo moduleA1 moduleA2 moduleB1 moduleB2] (monorepo);module A1 latest tag is 1.3.4
+          bumped-version (release/execute moduleA1 "semver" :patch)
+          [base distance sha dirty?] (git/working-copy-description moduleA1)]
       (prn monorepo)
       (prn bumped-version )
       (facts
-       (str bumped-version) => "1.3.5")
+       (str bumped-version) => "1.3.5"
+       base => "1.3.5")
       )))
 
 ;; execute several release in different module with different level each time (major, minor, patch)

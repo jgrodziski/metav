@@ -1,5 +1,5 @@
 (ns metav.repo
-  (:require [metav.git :as git]
+  (:require [metav.git :as git :refer [pwd]]
             [me.raynes.fs :as fs]))
 
 (def module-build-file "deps.edn")
@@ -7,7 +7,7 @@
 (defn monorepo?
   "Does a single repo contains several modules? (dir with a build config like deps.edn in it). A monorepo is detected when the metav library is invoked correctly in a subdirectory of a git repo
   (so a deps.edn file is present in a subdirectory) "
-  ([] (monorepo? nil))
+  ([] (monorepo? (pwd)))
   ([dir]
    (boolean (or (and (= (fs/normalized (fs/file dir))
                         (fs/normalized (fs/file (git/toplevel dir))))
@@ -19,7 +19,7 @@
 
 (defn dedicated-repo?
   "Does the current working directory contains a build system for a module (like deps.edn)"
-  ([] (dedicated-repo? nil))
+  ([] (dedicated-repo? (pwd)))
   ([repo-dir]
    ;;assume the working dir contains a deps.edn
    (and (nil? (git/prefix repo-dir))

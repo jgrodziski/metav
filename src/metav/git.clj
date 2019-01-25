@@ -1,12 +1,16 @@
 (ns metav.git
   (:require [clojure.string :as string]
             [clojure.java.shell :as shell]
-            [clojure.tools.logging :as log]
-            [metav.git :as git]))
+            [clojure.tools.logging :as log]))
 
 (def ^:dynamic *prefix* "v")
 (def ^:dynamic *min-sha-length* 4)
 (def ^:dynamic *dirty-mark* "DIRTY")
+
+(defn pwd
+  "return working dir of the JVM (cannot be changed once JVM is started)"
+  []
+  (.getCanonicalFile (clojure.java.io/file ".")))
 
 (def unix-git-command "git")
 
@@ -87,7 +91,7 @@
      (throw (Exception. (str "Untracked or uncommitted changes in " repo-dir " git directory (as stated by 'git status command')."))))))
 
 (defn describe
-  ([prefix min-sha-length] (git/describe nil prefix min-sha-length))
+  ([prefix min-sha-length] (describe nil prefix min-sha-length))
   ([repo-dir prefix min-sha-length] (git-in-dir repo-dir "describe" "--long" "--match"
                                                 (str prefix "*.*")
                                                 (format "--abbrev=%d" min-sha-length)
@@ -124,12 +128,12 @@
   ([] (working-copy-description nil))
   ([repo-dir & {:keys [prefix min-sha-length]
                 :or {prefix *prefix* min-sha-length *min-sha-length*}}]
-   (when (git/any-commits? repo-dir)
+   (when (any-commits? repo-dir)
      (let [re0 (re-pattern (format "^%s(.+)-(\\d+)-g([^\\-]{%d,})?(?:-(%s))?$"
                                    prefix min-sha-length *dirty-mark*))
            re1 (re-pattern (format "^(Z)?(Z)?([a-z0-9]{%d,})(?:-(%s))?$" ; fallback when no matching tag
                                    min-sha-length *dirty-mark*))]
-       (when-let [v (first (git/describe repo-dir prefix min-sha-length))]
+       (when-let [v (first (describe repo-dir prefix min-sha-length))]
          (let [[_ base distance sha dirty] (or (re-find re0 v) (re-find re1 v))
                distance (or (when distance (Integer/parseInt distance)) (root-distance repo-dir))]
            ;;(prn "working copy description v" v " re-find re0 " (re-find re0 v) " re-f ind re1 " (re-find re1 v))
@@ -142,4 +146,4 @@
   (when-let [status (git-status)]
     {:status {:tracking (filter #(re-find #"^##\s" %) status)
               :files (remove empty? (remove #(re-find #"^##\s" %) status))}
-     :describe (first (git/describe prefix min-sha-length))}))
+     :describe (first (describe prefix min-sha-length))}))

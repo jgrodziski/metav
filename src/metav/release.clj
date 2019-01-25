@@ -1,6 +1,7 @@
 (ns metav.release
   (:require [metav.git :as git]
-            [metav.display :refer [version]]
+            [metav.display :refer [version tag]]
+            [metav.repo :refer [monorepo? dedicated-repo?]]
             [metav.version.protocols :refer [bump]]))
 
 (defn assert-in-module?
@@ -17,11 +18,14 @@
   ([module-dir scheme level]
    (assert-in-module? module-dir)
    (git/assert-committed? module-dir)
-   (let [current-version (version module-dir :scheme scheme)
-         next-version (bump current-version level)]
+   (let [repo-dir (git/toplevel module-dir)
+         current-version (version module-dir :scheme scheme)
+         next-version (bump current-version level)
+         tag (tag module-dir next-version)]
      (prn "next version" next-version)
+     (prn "next tag to be applied" tag)
     ; (git/commit! (str "Bump to version" next-version))
-     (git/tag! (git/toplevel module-dir) next-version)
+     (git/tag! repo-dir next-version)
     ; (git/push!)
      next-version)))
 

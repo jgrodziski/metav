@@ -12,8 +12,6 @@
   []
   (.getCanonicalFile (clojure.java.io/file ".")))
 
-(defn temp-dir [])
-
 (defmacro shell!
   [& body]
   `(let [tmpdir# (Files/createTempDirectory
@@ -36,8 +34,9 @@
 
 (def deps-edn (slurp "deps.edn"))
 
-(defn- sh [command] (let [result (shell/sh "/bin/bash" "-c" command)]
-                      (assert (->  result :exit zero?) (:err result))))
+(defn sh [command] (let [result (shell/sh "/bin/bash" "-c" command)]
+                      (assert (->  result :exit zero?) (:err result))
+                      result))
 
 (defn init! [] (sh "git init"))
 

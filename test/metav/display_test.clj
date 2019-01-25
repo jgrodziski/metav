@@ -2,11 +2,24 @@
   (:require [clojure.test :refer :all]
             [testit.core :refer :all]
             [metav.git-shell :refer :all]
-            [metav.display :refer [version module-name artefact-name]]
+            [metav.display :refer [version module-name artefact-name tag]]
             [metav.repo :refer [monorepo? dedicated-repo?]]
             [metav.git :as git]
             [me.raynes.fs :as fs]))
 
+(defn- remove-newline [s]
+  (clojure.string/replace s "\n" ""))
+
+(defn dedicated-repo-tagged-then-2-commits [v]
+  (shell!
+   (let [pwd (remove-newline (:out (sh "pwd")))]
+     (init!) (write-dummy-file-in! "1" "11" "111") (add!) (commit!)
+     (tag! (tag pwd v))
+     (write-dummy-file-in! "2" "22" "222") (add!) (commit!)
+     (write-dummy-file-in! "3" "33" "333") (add!) (commit!))))
+
+(defn dedicated-repo-tagged []
+  (shell! (init!) (write-dummy-file-in! "1" "11" "111") (add!) (commit!) (tag! "v1.3.0")))
 
 (deftest dedicated-repo-with-semver
   (testing "testing initialized repo should return 0.1.0"
@@ -50,13 +63,11 @@
       (facts (str (version repo)) => "1.3.0+DIRTY")
       (fs/delete-dir repo)))
   (testing "testing 2 commits should increase the patch number by 2"
-    (let [repo (shell! (init!) (write-dummy-file-in! "1" "11" "111") (add!) (commit!) (tag! "v1.3.0")
-                       (write-dummy-file-in! "2" "22" "222") (add!) (commit!)
-                       (write-dummy-file-in! "3" "33" "333") (add!) (commit!))]
+    (let [repo (dedicated-repo-tagged-then-2-commits "1.3.0")]
       (facts (str (version repo)) =in=> #"1.3.0+.*")
       (fs/delete-dir repo)))
   (testing "testing tagged"
-    (let [repo (shell! (init!) (write-dummy-file-in! "1" "11" "111") (add!) (commit!) (tag! "v1.3.0"))]
+    (let [repo (dedicated-repo-tagged)]
       (facts (str (version repo)) => "1.3.0" )
       (fs/delete-dir repo))))
 
@@ -84,7 +95,15 @@
         moduleB2 (str monorepo "/sysB/container2")]
     [monorepo moduleA1 moduleA2 moduleB1 moduleB2]))
 
-(deftest monorepo-with-semver
+(deftest tag-name
+  (testing "a monorepo should prefix the tag with the module-name"
+    (let [[monorepo moduleA1 moduleA2 moduleB1 moduleB2] (monorepo)]
+      (facts
+       (tag moduleA1 "1.3.4") => "sysA-container1-1.3.4"
+       (tag moduleA2 "1.1.1") => "sysA-container2-1.1.1")
+      (fs/delete-dir monorepo))))
+
+(deftest monorepo-artefact-name-with-semver
   (testing "testing a monorepo with two systems of two containers"
     (let [[monorepo moduleA1 moduleA2 moduleB1 moduleB2] (monorepo)]
       (facts
