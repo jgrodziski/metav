@@ -8,6 +8,7 @@
             [me.raynes.fs :as fs]))
 
 (def ^:dynamic *scheme* "semver")
+(def ^:dynamic *separator* "-")
 
 (defn pwd
   "return working dir of the JVM (cannot be changed once JVM is started)"
@@ -36,7 +37,7 @@
   ([working-dir & {:keys [scheme]
                    :or {scheme *scheme*}}]
    (let [version-scheme-fn (version-scheme-fn (clojure.string/lower-case scheme))
-         prefix (if (monorepo? working-dir) (module-name working-dir) "v")
+         prefix (if (monorepo? working-dir) (str (module-name working-dir) *separator*) "v")
          state (git/working-copy-description working-dir :prefix prefix :min-sha-length 4)]
      (when-not version-scheme-fn
        (throw (Exception. (str "No version scheme " scheme " found! version scheme currently supported are: \"maven\" or \"semver\" "))))
@@ -49,7 +50,7 @@
   ([] (artefact-name nil))
   ([working-dir & {:keys [scheme separator]
                    :or {scheme *scheme*
-                        separator "-"}}]
+                        separator *separator*}}]
    (str (module-name working-dir) separator (version working-dir :scheme scheme))))
 
 (def cli-options

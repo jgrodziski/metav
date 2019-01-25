@@ -33,12 +33,12 @@
   Bumpable
   (bump [this level]
     (condp contains? level
-      #{:major :minor} (let [l ({:major 0 :minor 1} level)
-                             subversions (map-indexed (fn [i el] (cond (< i l) el
-                                                                      (= i l) (inc el)
-                                                                      (> i l) 0)) subversions)]
-                         (SemVer. (vec subversions) 0 sha dirty?))
-      #{:patch} (throw (Exception. "Patch bump are implicit by commit distance"))
+      #{:major :minor :patch} (let [l ({:major 0 :minor 1 :patch 2} level)
+                                    subversions (map-indexed (fn [i el] (cond (< i l) el
+                                                                             (= i l) (inc el)
+                                                                             (> i l) 0)) subversions)]
+                                (SemVer. (vec subversions) 0 sha dirty?))
+      ;#{:patch} (throw (Exception. "Patch bump are implicit by commit distance"))
       (throw (Exception. (str "Not a supported bump operation: " level))))))
 
 (let [re #"(\d+)\.(\d+)\.(\d+)"]

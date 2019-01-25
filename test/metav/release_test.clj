@@ -14,6 +14,8 @@
           bumped-version (release/execute moduleA1 "semver" :patch)]
       (prn monorepo)
       (prn bumped-version )
+      (facts
+       (str bumped-version) => "1.3.5")
       )))
 
 ;; execute several release in different module with different level each time (major, minor, patch)
