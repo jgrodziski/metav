@@ -21,7 +21,7 @@
          next-version (bump current-version level)]
      (prn "next version" next-version)
     ; (git/commit! (str "Bump to version" next-version))
-     (git/tag! next-version)
+     (git/tag! (git/toplevel module-dir) next-version)
     ; (git/push!)
      next-version)))
 

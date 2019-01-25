@@ -94,9 +94,11 @@
                                                 (str "--dirty=-" *dirty-mark*)
                                                 "--always")))
 
-(defn tag! [v & {:keys [prefix sign] :or {prefix *prefix* sign "--sign"}}]
-  (apply git-command (filter identity ["tag" sign "--annotate"
-                                       "--message" "Automated metav release" (str prefix v)])))
+(defn tag!
+  ([v] (tag! nil v))
+  ([repo-dir v & {:keys [prefix sign] :or {prefix *prefix* sign "--sign"}}]
+    (apply git-in-dir repo-dir (filter identity ["tag" sign "--annotate"
+                                                 "--message" "Automated metav release" (str prefix v)]))))
 
 (defn commit!
   "commit with message"
