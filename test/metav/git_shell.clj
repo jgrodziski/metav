@@ -12,25 +12,31 @@
   []
   (.getCanonicalFile (clojure.java.io/file ".")))
 
+(def GIT_ENV {"GIT_AUTHOR_NAME" "Test User"
+              "GIT_AUTHOR_EMAIL" "user@domain.com"
+              "GIT_AUTHOR_DATE" "2019-01-16T22:22:22"
+              "GIT_COMMITTER_NAME" "Test User"
+              "GIT_COMMITTER_EMAIL" "user@domain.com"
+              "GIT_COMMITTER_DATE" "2019-01-16T22:22:22"})
+
+(defn repo-temp-dir []
+  (Files/createTempDirectory
+   (.toPath (io/as-file (System/getProperty "java.io.tmpdir")))
+   "repo"
+   (into-array java.nio.file.attribute.FileAttribute [])))
+
 (defmacro shell!
   [& body]
-  `(let [tmpdir# (Files/createTempDirectory
-                  (.toPath (io/as-file (System/getProperty "java.io.tmpdir")))
-                  "repo"
-                  (into-array java.nio.file.attribute.FileAttribute []))
-         env# {"GIT_AUTHOR_NAME" "Test User"
-               "GIT_AUTHOR_EMAIL" "user@domain.com"
-               "GIT_AUTHOR_DATE" "2019-01-16T22:22:22"
-               "GIT_COMMITTER_NAME" "Test User"
-               "GIT_COMMITTER_EMAIL" "user@domain.com"
-               "GIT_COMMITTER_DATE" "2019-01-16T22:22:22"}]
+  `(let [tmpdir# (repo-temp-dir)]
      (shell/with-sh-dir (str tmpdir#)
-       (shell/with-sh-env env#
+       (shell/with-sh-env GIT_ENV
          ~@body
          (str tmpdir#)))))
 
 (defmacro shell-in-dir! [dir & body]
-  )
+  `(let [dir# (str ~dir)]
+     (shell/with-sh-dir dir#
+       (shell/with-sh-env GIT_ENV ~@body dir#))))
 
 (def deps-edn (slurp "deps.edn"))
 
@@ -39,6 +45,7 @@
                       result))
 
 (defn init! [] (sh "git init"))
+(defn init-bare! [] (sh "git init --bare"))
 
 (defn mkdir-p!
   "create a bunch of dirs all at the same time"
@@ -64,7 +71,21 @@
 
 (defn tag! [t] (sh (format "git tag -a -m \"R %s\" %s" t t)))
 
+(defn clone! [url] (sh (str "git clone " url " .")))
+
+(defn- current-branch []
+  (-> (shell/sh "bash" "-c" (str "git branch | grep \\* | cut -d ' ' -f2"))
+      :out
+      (clojure.string/replace "\n" "")))
+
+(defn remote-add! [name url]
+  (let [current-branch (current-branch)
+        add (format "git remote add %s %s" name url)
+        track (format "git branch -u %s/%s" name current-branch)]
+    (sh add)
+    (sh track)))
+
 (defn dirty! [] (sh "echo \"Hello\" >> x && git add x"))
 
 ;; Create a bundle with: `git bundle create my.repo --all`
-(defn clone! [bundle] (sh (format "git clone %s . -b master" (-> bundle io/resource io/as-file str))))
+(defn clone-bundle! [bundle] (sh (format "git clone %s . -b master" (-> bundle io/resource io/as-file str))))

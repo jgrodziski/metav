@@ -72,7 +72,8 @@
       (fs/delete-dir repo))))
 
 (defn monorepo []
-  (let [monorepo (shell! (init!)
+  (let [remote (shell! (init-bare!))
+        monorepo (shell! (clone! remote)
                          (write-dummy-deps-edn-in! "sysA" "container1")
                          (add!)
                          (commit!)
@@ -93,11 +94,11 @@
         moduleA2 (str monorepo "/sysA/container2")
         moduleB1 (str monorepo "/sysB/container1")
         moduleB2 (str monorepo "/sysB/container2")]
-    [monorepo moduleA1 moduleA2 moduleB1 moduleB2]))
+    [monorepo remote moduleA1 moduleA2 moduleB1 moduleB2]))
 
 (deftest tag-name
   (testing "a monorepo should prefix the tag with the module-name"
-    (let [[monorepo moduleA1 moduleA2 moduleB1 moduleB2] (monorepo)]
+    (let [[monorepo remote moduleA1 moduleA2 moduleB1 moduleB2] (monorepo)]
       (facts
        (tag moduleA1 "1.3.4") => "sysA-container1-1.3.4"
        (tag moduleA2 "1.1.1") => "sysA-container2-1.1.1")
@@ -105,7 +106,7 @@
 
 (deftest monorepo-artefact-name-with-semver
   (testing "testing a monorepo with two systems of two containers"
-    (let [[monorepo moduleA1 moduleA2 moduleB1 moduleB2] (monorepo)]
+    (let [[monorepo remote moduleA1 moduleA2 moduleB1 moduleB2] (monorepo)]
       (facts
        (monorepo? monorepo) => truthy
        (monorepo? moduleA1) => truthy
@@ -119,10 +120,10 @@
        )
       (fs/delete-dir monorepo)))
   (testing "testing a monorepo with two systems of two containers"
-    (let [[monorepo moduleA1 moduleA2 moduleB1 moduleB2] (monorepo)]
+    (let [[monorepo remote moduleA1 moduleA2 moduleB1 moduleB2] (monorepo)]
 
       (fs/delete-dir monorepo)))
   (testing "testing a monorepo with two systems of two containers"
-    (let [[monorepo moduleA1 moduleA2 moduleB1 moduleB2] (monorepo)]
+    (let [[monorepo remote moduleA1 moduleA2 moduleB1 moduleB2] (monorepo)]
 
       (fs/delete-dir monorepo))))

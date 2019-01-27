@@ -43,13 +43,12 @@
   [& arguments]
   (let [cmd (conj arguments (git-exe))
         _ (log/debug "Will execute in shell: " (apply str (interpose " " cmd)))
-        {:keys [exit out err]} (apply shell/sh cmd)]
+        {:keys [exit out err] :as result} (apply shell/sh cmd)]
     (if (zero? exit)
       (string/split-lines out)
-      (do (log/error err) nil))))
+      (do (log/error err) result))))
 
 (defn- git-in-dir [repo-dir & arguments]
-  ;(prn "git-in-dir" (str repo-dir) arguments)
   (if repo-dir
     (apply git-command (cons "-C" (cons repo-dir arguments)));;apply is used to preserve the variadic arguments between function call
     (apply git-command arguments)))
@@ -90,6 +89,9 @@
    (when (re-find #"Changes (not staged for commit|to be committed)" (apply str (interpose " " (git-in-dir repo-dir "status"))))
      (throw (Exception. (str "Untracked or uncommitted changes in " repo-dir " git directory (as stated by 'git status command')."))))))
 
+(defn latest-tag [repo-dir]
+  (first (git-in-dir repo-dir "describe" "--abbrev=0")) )
+
 (defn describe
   ([prefix min-sha-length] (describe nil prefix min-sha-length))
   ([repo-dir prefix min-sha-length] (git-in-dir repo-dir "describe" "--long" "--match"
@@ -110,8 +112,17 @@
   ([repo-dir msg]
    (git-in-dir repo-dir "commit" "-m" msg)))
 
+(defn current-branch
+  ([repo-dir]
+   (-> (shell/sh "bash" "-c" (str "git -C " repo-dir " branch | grep \\* | cut -d ' ' -f2"))
+       :out
+       (clojure.string/replace "\n" ""))))
+
+(comment (defn push!
+           ([remote branch] (push! nil remote branch))
+           ([repo-dir remote branch] (git-in-dir repo-dir "push"))))
+
 (defn push!
-  ([] (push! nil))
   ([repo-dir] (git-in-dir repo-dir "push")))
 
 (defn git-dir-opt [repo-dir]
