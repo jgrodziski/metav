@@ -102,9 +102,9 @@
 
 (defn tag!
   ([v] (tag! nil v))
-  ([repo-dir v & {:keys [prefix sign] :or {prefix *prefix* sign "--sign"}}]
+  ([repo-dir v & {:keys [sign] :or {sign "--sign"}}]
     (apply git-in-dir repo-dir (filter identity ["tag" sign "--annotate"
-                                                 "--message" "Automated metav release" (str prefix v)]))))
+                                                 "--message" "Automated metav release" v]))))
 
 (defn commit!
   "commit with message"

@@ -10,7 +10,6 @@
 (def ^:dynamic *scheme* "semver")
 (def ^:dynamic *separator* "-")
 
-
 (defn module-name
   "Determine the name for the project by analyzing the environment, path until the git root or folder name if just under the root"
   ([] (module-name (pwd)))
