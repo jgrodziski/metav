@@ -36,9 +36,10 @@ Using tools.deps, add several alias in your `deps.edn` for each main task (displ
 
 ```clojure
 {:aliases {:metav {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "63b8286e5c8c0513431e8024a7d2f9a57bc2c18b"}}}
-           :artifact-name {:extra-deps {jgrodziski/metav {}}
-                           :main-opts ["-m" "metav.display"]
-}}}
+           :artifact-name {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "63b8286e5c8c0513431e8024a7d2f9a57bc2c18b"}}
+                           :main-opts ["-m" "metav.display"]}
+           :release {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "63b8286e5c8c0513431e8024a7d2f9a57bc2c18b"}}
+                     :main-opts ["-m" "metav.release"]}}}
 ```
 
 # Usage
@@ -57,10 +58,22 @@ clj -A:artifact-name
 
 ## Release
 
+_Release_ is the process invoked by the developer when a code related to a change is ready for prime time, hence releasable. The release process does the following:
+- Check everything is committed (no untracked or uncommitted file(s))
+- Bump the current version according to the release level of the change (major, minor or patch)
+- Tag the repo with that version. In case of monorepo, prefix the version with the module name (automatically deduced from the module's path or provided)
+- Push the tag
+
+One liner:
 ```
-clj -A:metav -m metav.release minor
+clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "63b8286e5c8c0513431e8024a7d2f9a57bc2c18b"}}}' -m metav.release
 ```
-Will execute the _release_ process, that's to say: assert everything is committed, bump the version according to the specified level, tag with the new version and push.
+
+If you've installed Metav's dependency in `deps.edn` like in the above Installation section, just run:
+```
+clj -A:release minor
+```
+Will execute the _release_ process, the tag used for the release is printed in the standard output.
 
 
 ## Spit current versioning
