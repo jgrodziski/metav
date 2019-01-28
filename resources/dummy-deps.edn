@@ -2,9 +2,9 @@
  :deps {org.clojure/clojure {:mvn/version \"1.10.0\"}}
  :jvm-opts [\"-Djava.io.tmpdir=./tmp\"]
  :aliases {:artifact-name {:extra-deps {jgrodziski/metav {:git/url \"https://github.com/jgrodziski/metav\"
-                                                          :sha \"b48a3729720bec3f7b30fa9199ca2c3dcbd6db4c\"}}
+                                                          :sha \"5c4059c96ffeb3b097399f14739be8b5eb2d48b8\"}}
                            :main-opts [\"-m\" \"metav.display\"]}
            :release {:extra-deps {jgrodziski/metav {:git/url \"https://github.com/jgrodziski/metav\"
-                                                    :sha \"b48a3729720bec3f7b30fa9199ca2c3dcbd6db4c\"}}
+                                                    :sha \"5c4059c96ffeb3b097399f14739be8b5eb2d48b8\"}}
                      :main-opts [\"-m\" \"metav.release\"]}
            }}
