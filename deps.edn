@@ -15,4 +15,5 @@
                     :main-opts ["-m" "cognitect.test-runner"
                                 "-d" "test"]}
            :display {:main-opts ["-m" "metav.display"]}
+           :release {:main-opts ["-m" "metav.release"]}
            }}
