@@ -31,8 +31,7 @@
           [scm-base3 _ _ _] (git/working-copy-description moduleA2 :prefix (prefix moduleA2))
           _ (Thread/sleep 500)
           [_ bumped-version4 tag4 _] (release/execute! moduleA2 "semver" :major)
-          [scm-base4 _ _ _] (git/working-copy-description moduleA2 :prefix (prefix moduleA2))
-          ]
+          [scm-base4 _ _ _] (git/working-copy-description moduleA2 :prefix (prefix moduleA2))]
       (facts
        (str bumped-version1) => "1.1.3"
        scm-base1 => "1.1.3"

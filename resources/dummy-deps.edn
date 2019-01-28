@@ -1,0 +1,8 @@
+{:paths ["resources" "src"]
+ :deps {org.clojure/clojure {:mvn/version "RELEASE"}}
+ :jvm-opts ["-Djava.io.tmpdir=./tmp"]
+ :aliases {:artifact-name {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav"
+                                                          :sha ""}}
+                           :main-opts ["-m" "metav.display"]}
+
+           }}

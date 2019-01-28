@@ -1,5 +1,6 @@
 (ns metav.release
-  (:require [metav.git :as git]
+  (:require [clojure.tools.logging :as log]
+            [metav.git :as git]
             [metav.display :refer [version tag module-name]]
             [metav.repo :refer [monorepo? dedicated-repo?]]
             [metav.version.protocols :refer [bump]]))
@@ -25,8 +26,8 @@
          current-version (version module-dir :scheme scheme)
          next-version (bump current-version level)
          tag (tag module-dir next-version)]
-     (prn "Next version for module " module-name " is: " (str next-version))
-     (prn "Next tag is " tag)
+     (log/info "Next version for module " module-name " is: " (str next-version))
+     (log/info "Next tag is " tag)
     ; (git/commit! (str "Bump to version" next-version))
      (git/tag! repo-dir tag)
      (let [push-result (git/push! repo-dir)]
@@ -34,5 +35,6 @@
 
 (defn main- [& args]
   (let [level (get args 0)]
-    (prn "Release level is " level ". Assert everything is committed, bump the version, tag and push.")
-    (execute! (git/pwd) "semver" level)))
+    (log/debug "Release level is " level ". Assert everything is committed, bump the version, tag and push.")
+    (let [[module-name next-version tag push-result] (execute! (git/pwd) "semver" (keyword level))]
+      (pr tag))))

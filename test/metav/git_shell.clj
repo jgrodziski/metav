@@ -38,7 +38,7 @@
      (shell/with-sh-dir dir#
        (shell/with-sh-env GIT_ENV ~@body dir#))))
 
-(def deps-edn (slurp "deps.edn"))
+(def deps-edn (slurp (io/resource "dummy-deps.edn")))
 
 (defn sh [command] (let [result (shell/sh "/bin/bash" "-c" command)]
                       (assert (->  result :exit zero?) (:err result))
