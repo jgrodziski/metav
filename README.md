@@ -4,6 +4,12 @@ Metav is a library that helps the release and versioning process of Clojure proj
 
 <div id="TOC">
 <ul> 
+<li><a href="#installation">Installation</a></li>
+<li><a href="#usage">Usage</a><ul>
+<li><a href="#display-current-version">Display current version</a></li>
+<li><a href="#release">Release</a></li>
+<li><a href="#spit-current-versioning">Spit current versioning</a></li>
+</ul></li>
 <li><a href="#rationale">Rationale</a>
 <ul>
 <li><a href="#release-semantic">Release semantic</a></li>
@@ -19,16 +25,49 @@ Metav is a library that helps the release and versioning process of Clojure proj
 <li><a href="#meta-management">Meta management</a></li>
 <li><a href="#metav-interface">Metav interface</a></li>
 </ul></li>
-<li><a href="#installation">Installation</a></li>
-<li><a href="#usage">Usage</a><ul>
-<li><a href="#display-current-version">Display current version</a></li>
-<li><a href="#release">Release</a></li>
-<li><a href="#spit-current-versioning">Spit current versioning</a></li>
-</ul></li>
 <li><a href="#license">License</a></li>
 </ul></li>
 </ul>
 </div>
+
+# Installation
+
+Using tools.deps, add several alias in your `deps.edn` for each main task (display, spit, release) like this:
+
+```clojure
+{:aliases {:metav {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "63b8286e5c8c0513431e8024a7d2f9a57bc2c18b"}}}
+           :artifact-name {:extra-deps {jgrodziski/metav {}}
+                           :main-opts ["-m" "metav.display"]
+}}}
+```
+
+# Usage
+
+## Display current version
+
+One liner:
+```
+clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "63b8286e5c8c0513431e8024a7d2f9a57bc2c18b"}}}' -m metav.display
+```
+
+If you've installed Metav's dependency in `deps.edn` like in the above Installation section, just run:
+```
+clj -A:artifact-name
+```
+
+## Release
+
+```
+clj -A:metav -m metav.release minor
+```
+Will execute the _release_ process, that's to say: assert everything is committed, bump the version according to the specified level, tag with the new version and push.
+
+
+## Spit current versioning
+
+```
+clj -A:metav -m metav.spit
+```
 
 # Rationale
 
@@ -141,42 +180,6 @@ See [spit function](#spit).
 
 
 
-# Installation
-
-Using tools.deps, add several alias in your `deps.edn` for each main task (display, spit, release) like this:
-
-```clojure
-{:aliases {:metav {:extra-deps {jgrodziski/metav {:mvn/version "0.1.0"}}}
-           :display {:extra-deps {jgrodziski/metav {:mvn/version "0.1.0"}}
-                     :main-opts ["-m" "metav.display"]
-}}}
-```
-
-# Usage
-
-## Display current version
-
-One liner:
-```
-clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "cbcb938e15f3cbde6db24bac962190c3e9b53744"}}}' -m metav.display
-```
-
-If you've installed Metav's dependency in `deps.edn` like in the above, just run:
-```
-clj -A:display
-```
-
-## Release
-
-```
-clj -A:metav -m metav.release -l minor
-```
-
-## Spit current versioning
-
-```
-clj -A:metav -m metav.spit
-```
 
 
 # License
