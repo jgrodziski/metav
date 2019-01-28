@@ -10,13 +10,13 @@
   ;;TODO implement it :)
   true)
 
-(defn execute
+(defn execute!
   "assert that nothing leaves uncommitted or untracked,
   then bump version to a releasable one (depending on the release level),
   commit, tag with the version (hence denoting a release),
   then push
   return [module-name next-version tag push-result]"
-  ([scheme level] (execute nil scheme level))
+  ([scheme level] (execute! nil scheme level))
   ([module-dir scheme level]
    (assert-in-module? module-dir)
    (git/assert-committed? module-dir)
@@ -35,4 +35,4 @@
 (defn main- [& args]
   (let [level (get args 0)]
     (prn "Release level is " level ". Assert everything is committed, bump the version, tag and push.")
-    (execute (git/pwd) "semver" level)))
+    (execute! (git/pwd) "semver" level)))

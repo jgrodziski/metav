@@ -145,11 +145,13 @@
      (let [re0 (re-pattern (format "^%s(.+)-(\\d+)-g([^\\-]{%d,})?(?:-(%s))?$"
                                    prefix min-sha-length *dirty-mark*))
            re1 (re-pattern (format "^(Z)?(Z)?([a-z0-9]{%d,})(?:-(%s))?$" ; fallback when no matching tag
-                                   min-sha-length *dirty-mark*))]
-       (when-let [v (first (describe repo-dir prefix min-sha-length))]
+                                   min-sha-length *dirty-mark*))
+           desc (describe repo-dir prefix min-sha-length)]
+       (when-let [v (first desc)]
          (let [[_ base distance sha dirty] (or (re-find re0 v) (re-find re1 v))
                distance (or (when distance (Integer/parseInt distance)) (root-distance repo-dir))]
-           ;;(prn "working copy description v" v " re-find re0 " (re-find re0 v) " re-f ind re1 " (re-find re1 v))
+           ;(prn "desc" desc)
+           ;(prn "working copy description v" v " re-find re0 " (re-find re0 v) " re-f ind re1 " (re-find re1 v))
            (log/debug "working copy description: [" base distance sha (boolean dirty) "] {:prefix " prefix "}" )
            [base distance sha (boolean dirty)]))))))
 
