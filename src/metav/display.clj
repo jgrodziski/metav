@@ -73,5 +73,5 @@
   [& args]
   (let [working-dir (str (pwd))]
     ;(parse-opts args cli-options)
-    (println (module-name working-dir) "\t" (str (version working-dir)))
+    (println (str (module-name working-dir) "\t" (str (version working-dir))))
     (shutdown-agents)))
