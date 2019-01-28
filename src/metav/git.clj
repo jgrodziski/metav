@@ -48,7 +48,7 @@
       (string/split-lines out)
       (do (log/error err) result))))
 
-(defn- git-in-dir [repo-dir & arguments]
+(defn git-in-dir [repo-dir & arguments]
   (if repo-dir
     (apply git-command (cons "-C" (cons repo-dir arguments)));;apply is used to preserve the variadic arguments between function call
     (apply git-command arguments)))
@@ -132,7 +132,9 @@
   "return whether the repo has any commits in it"
   ([] (any-commits? nil))
   ([repo-dir]
-   (git-in-dir repo-dir "log")))
+   (let [result (git-in-dir repo-dir "log")]
+     (not (map? result);maps means an error occurs  during the git command
+       ))))
 
 (defn working-copy-description
   "return the git working copy description as [base distance sha dirty?]"
