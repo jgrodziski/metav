@@ -19,6 +19,7 @@
   return [module-name next-version tag push-result]"
   ([scheme level] (execute! nil scheme level))
   ([module-dir scheme level]
+   (log/debug "execute!" module-dir scheme level)
    (assert-in-module? module-dir)
    (git/assert-committed? module-dir)
    (let [repo-dir (git/toplevel module-dir)
@@ -33,8 +34,9 @@
      (let [push-result (git/push! repo-dir)]
        [module-name next-version tag push-result]))))
 
-(defn main- [& args]
-  (let [level (get args 0)]
+(defn -main [& args]
+  (let [level (first args)]
     (log/debug "Release level is " level ". Assert everything is committed, bump the version, tag and push.")
-    (let [[module-name next-version tag push-result] (execute! (git/pwd) "semver" (keyword level))]
-      (pr tag))))
+    (let [[module-name next-version tag push-result] (execute! (str (git/pwd)) "semver" (keyword level))]
+      (print tag)
+      (shutdown-agents))))
