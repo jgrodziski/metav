@@ -25,17 +25,17 @@
 (defn prefix
   "return the prefix used before the version in tag (not to be confused with the git prefix even if we deduce the tag prefix with the git prefix)"
   ([] (prefix (pwd)))
-  ([working-dir & {:keys [separator] :or {separator *separator*}}]
+  ([working-dir]
    (if (monorepo? working-dir)
-     (str (module-name working-dir) separator)
+     (str (module-name working-dir) "-")
      "v";in case of dedicated repo the prefix is just a "v"
      )))
 
 (defn tag
   "in case of monorepo return the tag as the module name concatenated with the version"
   ([version] (tag (pwd) version))
-  ([working-dir version & {:keys [separator] :or {separator *separator*}}]
-   (str (prefix working-dir :separator separator) version)))
+  ([working-dir version ]
+   (str (prefix working-dir) version)))
 
 (defn- version-scheme-fn [scheme]
   (ns-resolve (the-ns 'metav.display) (symbol (str "metav." scheme "/version"))))
@@ -45,10 +45,9 @@
   you can choose the \"maven\" or \"semver\" version scheme"
   ([] (version nil :scheme "semver"));default value is semver
   ([working-dir & {:keys [scheme separator]
-                   :or {scheme *scheme*
-                        separator *separator*}}]
+                   :or {scheme *scheme*}}]
    (let [version-scheme-fn (version-scheme-fn (clojure.string/lower-case scheme))
-         state (git/working-copy-description working-dir :prefix (prefix working-dir :separator separator) :min-sha-length 4)]
+         state (git/working-copy-description working-dir :prefix (prefix working-dir) :min-sha-length 4)]
      (when-not version-scheme-fn
        (throw (Exception. (str "No version scheme " scheme " found! version scheme currently supported are: \"maven\" or \"semver\" "))))
      (when-not state
@@ -58,18 +57,21 @@
 
 (defn artefact-name
   ([] (artefact-name (pwd)))
-  ([working-dir & {:keys [scheme separator] :or {scheme *scheme* separator *separator*}}]
-   (str (prefix working-dir :separator separator) (version working-dir :scheme scheme :separator separator))))
+  ([working-dir & {:keys [scheme separator] :or {scheme *scheme*}}]
+   (str (prefix working-dir) (version working-dir :scheme scheme))))
 
 (def cli-options
   [["-vs" "--version-scheme SCHEME" "Version Scheme ('maven' or 'semver')"
     :default "semver"
     :validate #{"semver" "maven"}]])
 
+(defn- replace-last-char [s c]
+  (str (subs s 0 (dec (count s))) c))
+
 (defn -main
   "Display the artefact name built from the module name + the current version obtained from the SCM environment"
   [& args]
   (let [working-dir (str (pwd))]
     ;(parse-opts args cli-options)
-    (println (artefact-name working-dir :separator "\t"))
+    (println (module-name working-dir) "\t" (str (version working-dir)))
     (shutdown-agents)))
