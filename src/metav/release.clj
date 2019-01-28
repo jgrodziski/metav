@@ -27,8 +27,9 @@
          current-version (version module-dir :scheme scheme)
          next-version (bump current-version level)
          tag (tag module-dir next-version)]
-     (log/info "Next version for module " module-name " is: " (str next-version))
-     (log/info "Next tag is " tag)
+     (log/info "Current version of module '" module-name "' is:" (str current-version))
+     (log/info "Next version of module '" module-name "' is:" (str next-version))
+     (log/info "Next tag is" tag)
     ; (git/commit! (str "Bump to version" next-version))
      (git/tag! repo-dir tag)
      (let [push-result (git/push! repo-dir)]
