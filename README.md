@@ -65,7 +65,7 @@ The tab character between the module name and version makes it easy to use `cut 
 ## Release
 
 _Release_ is the process invoked by the developer when a code related to a change is ready for prime time, hence releasable. The release process does the following:
-- **Check** everything is committed (no untracked or uncommitted file(s))
+- **Check** everything is committed (no untracked or uncommitted file(s) otherwise the release process is aborted)
 - **Bump** the current version according to the release level of the change (major, minor or patch)
 - **Tag** the repo with that version. In case of monorepo, prefix the version with the module name (automatically deduced from the module's path or provided)
 - **Push** the tag
