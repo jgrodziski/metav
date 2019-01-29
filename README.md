@@ -92,7 +92,7 @@ clj -A:metav -m metav.spit
 
 **At every moment we should be able to link a SCM hash to a software's binary artefact and also the inverse: link a binary artefact to a point in the SCM tree.** 
 
-__The idea is to drive the version from git instead of the other way around.__
+__The idea is to drive the version from git instead of the other way around and to accomodate a Monorepo style organization.__
 
 ## Release semantic
 
