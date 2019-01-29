@@ -193,6 +193,13 @@ The tagging function use [git annotated tag](https://git-scm.com/book/en/v2/Git-
  :msg "Add new attachment feature in the message part of the system"}
 ``` 
 
+The metadata in the tag message is stored as JSON and can later be extracted for use in shell script like so:
+```
+git tag -l --format %(contents:subject) v1.0.3 | jq '."module-name"'
+```
+Don't forget to start the command with a `noglob` if you use `zsh` as the `%(...)` will be interpreted otherwise.
+
+
 ## Meta management
 
 Metadata, like module name and version, should be deduced from the SCM and include in the binary artefact (JAR, docker image) but never commited as file along the source code to avoid any desynchronisation. Metadata file is called `meta.edn`.
