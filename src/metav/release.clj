@@ -2,6 +2,7 @@
   (:require [clojure.tools.logging :as log]
             [metav.git :as git]
             [metav.display :refer [version tag module-name]]
+            [metav.spit :refer [metadata-json-str]]
             [metav.repo :refer [monorepo? dedicated-repo?]]
             [metav.version.protocols :refer [bump]]))
 
@@ -31,7 +32,7 @@
      (log/info "Next version of module '" module-name "' is:" (str next-version))
      (log/info "Next tag is" tag)
     ; (git/commit! (str "Bump to version" next-version))
-     (git/tag! repo-dir tag)
+     (git/tag! repo-dir tag (metadata-json-str module-dir tag next-version))
      (let [push-result (git/push! repo-dir)]
        [module-name next-version tag push-result]))))
 

@@ -101,10 +101,10 @@
                                                 "--always")))
 
 (defn tag!
-  ([v] (tag! nil v))
-  ([repo-dir v & {:keys [sign] :or {sign "--sign"}}]
-    (apply git-in-dir repo-dir (filter identity ["tag" sign "--annotate"
-                                                 "--message" "Automated metav release" v]))))
+  ([tag] (tag! nil tag))
+  ([repo-dir tag metadata & {:keys [sign] :or {sign "--sign"}}]
+   (apply git-in-dir repo-dir (filter identity ["tag" sign "--annotate"
+                                                "--message" metadata tag]))))
 
 (defn commit!
   "commit with message"
@@ -135,6 +135,15 @@
    (let [result (git-in-dir repo-dir "log")]
      (not (map? result);maps means an error occurs  during the git command
        ))))
+
+(defn tag-timestamp [working-dir tag]
+  (git-in-dir working-dir "log" "-1" "--format=%aI" tag))
+
+(defn tag-message [working-dir tag]
+  (git-in-dir working-dir "tag" "-l" "--format" "%(contents:subject)" tag))
+
+(defn last-sha [working-dir]
+  (git-in-dir working-dir "rev-parse" "HEAD"))
 
 (defn working-copy-description
   "return the git working copy description as [base distance sha dirty?]"

@@ -108,9 +108,11 @@ When releasing, developer indicates the characteristic of the changes regarding 
 
 ## Repository organization
 
-SCM repository organization is important, with many decisions to make: mono or multirepos, modules slicing, links with the CI and build process. Monorepos are a popular way of organizing source code at the moment to promote better code sharing behavior, knowledge spreading, refactoring, etc. (see the article ["Monorepos and the fallacy of scale"](https://presumably.de/monorepos-and-the-fallacy-of-scale.html)). **The library is intended to accomodate Monorepos and Multirepos style of organization**, in case of _Monorepos_ style Metav's tagging behavior ensures isolation between components living in the same repo. Many tools implicitly depends on having a dedicated repository per component, in our case the way we manage the version and release from the source code should be independant of whether the source code is in a dedicated repo (Multirepos) or a shared one (Monorepos).
+SCM repository organization is important, with many decisions to make: mono or multirepos, modules slicing, links with the CI and build process. Monorepos are a popular way of organizing source code at the moment to promote better code sharing behavior, knowledge spreading, refactoring, etc. (see the article ["Monorepos and the fallacy of scale"](https://presumably.de/monorepos-and-the-fallacy-of-scale.html)).
 
-Monorepo layout makes it difficult to tag using only a version as several modules can collides, the used solution is to prefix the tag name with the module name then the version like so: `sys-container-version`. The annotation message of the tag can also contain some metadata in the form of an EDN data structure.
+**The library is intended to accomodate Monorepos and Multirepos style of organization**, in case of _Monorepos_ style Metav's tagging behavior ensures isolation between components living in the same repo. Many tools implicitly depends on having a dedicated repository per component, in our case the way we manage the version and release from the source code should be independant of whether the source code is in a dedicated repo (Multirepos) or a shared one (Monorepos).
+
+Monorepo layout makes it difficult to tag using only a version as several modules versions can collide, the solution used by metav is to prefix the tag name with the module name then the version like so: `sys-container-version`. The annotation message of the tag can also contain some metadata in the form of an EDN data structure.
 
 ## Version
 

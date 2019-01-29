@@ -26,3 +26,7 @@
         (fs/file? (if repo-dir
                     (str repo-dir "/" module-build-file)
                     module-build-file)))))
+
+
+(defn metadata
+  "return a map of the metadata")
