@@ -16,6 +16,7 @@ Metav is a library that helps the release and versioning process of Clojure proj
 <li><a href="#change-level-major-minor-patch">Change level (major, minor, patch)</a></li>
 <li><a href="#repository-organization">Repository organization</a></li>
 <li><a href="#version">Version</a></li>
+<li><a href="#inspiration">Inspiration</a></li>
 </ul></li>
 <li><a href="#behavior">Behavior</a>
 <ul>
@@ -125,6 +126,16 @@ Extract from the [semver](https://semver.org) website:
 > - PATCH version when you make backwards-compatible bug fixes.
 > Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format.
 
+## Inspiration
+
+Metav was inspired from these existing libraries in the Leiningen ecosystem:
+- [lein-git-version](https://github.com/arrdem/lein-git-version)
+- [lein-v](https://github.com/roomkey/lein-v) I used that one some times ago and Metav borrowed the SemVer and Maven version handling code.
+
+The monorepo concern also has solutions like:
+- [lein-modules](https://github.com/jcrossley3/lein-modules)
+- [lein-monolith](https://github.com/amperity/lein-monolith)
+and of course the [release task of lein](https://github.com/technomancy/leiningen/blob/master/doc/DEPLOY.md#releasing-simplified), all of that was the inception of Metav.
 
 # Behavior
 
