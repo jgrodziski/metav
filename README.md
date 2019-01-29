@@ -65,10 +65,10 @@ The tab character between the module name and version makes it easy to use `cut 
 ## Release
 
 _Release_ is the process invoked by the developer when a code related to a change is ready for prime time, hence releasable. The release process does the following:
-- Check everything is committed (no untracked or uncommitted file(s))
-- Bump the current version according to the release level of the change (major, minor or patch)
-- Tag the repo with that version. In case of monorepo, prefix the version with the module name (automatically deduced from the module's path or provided)
-- Push the tag
+- **Check** everything is committed (no untracked or uncommitted file(s))
+- **Bump** the current version according to the release level of the change (major, minor or patch)
+- **Tag** the repo with that version. In case of monorepo, prefix the version with the module name (automatically deduced from the module's path or provided)
+- **Push** the tag
 
 One liner:
 ```
@@ -79,10 +79,12 @@ If you've installed Metav's dependency in `deps.edn` like in the above Installat
 ```
 clj -A:release minor
 ```
-Will execute the _release_ process, the tag used for the release is printed in the standard output.
+Will execute the _release_ process described above, the tag used for the release is then printed in the standard output.
 
 
-## Spit current versioning
+## Spit current versioning in a file
+
+TODO: that feature is missing for the moment.
 
 ```
 clj -A:metav -m metav.spit
