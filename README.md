@@ -1,6 +1,6 @@
 # Metav
 
-Metav is a library that helps the release and versioning process of Clojure projects, particularly the one using [tools.deps](https://github.com/clojure/tools.deps.alpha).
+Metav is a library that helps the release and versioning process of Clojure projects, particularly the one using [tools.deps](https://github.com/clojure/tools.deps.alpha) and a _Monorepo_ style (see [Rationale](#rationale)).
 
 <div id="TOC">
 <ul> 
@@ -44,7 +44,7 @@ Using tools.deps, add several alias in your `deps.edn` for each main task (displ
 
 # Usage
 
-## Display current version
+## Display module's name and current version
 
 One liner:
 ```
@@ -55,6 +55,12 @@ If you've installed Metav's dependency in `deps.edn` like in the above Installat
 ```
 clj -A:artifact-name
 ```
+You should get something like:
+```
+myawesomesys-backend        1.3.4
+```
+The module name is deduced from the path: each directory name from the toplevel to the module dir is concatenated in the module name separated with a hyphen ('-'). Example: a module sitting in the directory `/myawesomesys/backend` would automatically give the module name `myawesomesys-backend`. 
+The tab character between the module name and version makes it easy to use `cut -f1` and `cut -f2` to extract the data in shell script. 
 
 ## Release
 
@@ -99,7 +105,9 @@ When releasing, developer indicates the characteristic of the changes regarding 
 
 ## Repository organization
 
-SCM repository organization is important, with many decisions to make: mono or multirepos, modules slicing, links with the CI and build process. Monorepos are a popular way of organizing source code at the moment to promote better code sharing behavior, knowledge spreading, refactoring, etc. (see the article ["Monorepos and the fallacy of scale"](https://presumably.de/monorepos-and-the-fallacy-of-scale.html)). **The library is intended to accomodate Monorepos and Multirepos style of organization**, in case of _Monorepos_ style Metav's tagging behavior ensures isolation between components living in the same repo. Many tools implicitly depends on having a dedicated repository per component, in our case the way we manage the version and release from the source code should be independant of whether the source code is in a dedicated repo (Multirepos) or a shared one (Monorepos). 
+SCM repository organization is important, with many decisions to make: mono or multirepos, modules slicing, links with the CI and build process. Monorepos are a popular way of organizing source code at the moment to promote better code sharing behavior, knowledge spreading, refactoring, etc. (see the article ["Monorepos and the fallacy of scale"](https://presumably.de/monorepos-and-the-fallacy-of-scale.html)). **The library is intended to accomodate Monorepos and Multirepos style of organization**, in case of _Monorepos_ style Metav's tagging behavior ensures isolation between components living in the same repo. Many tools implicitly depends on having a dedicated repository per component, in our case the way we manage the version and release from the source code should be independant of whether the source code is in a dedicated repo (Multirepos) or a shared one (Monorepos).
+
+Monorepo layout makes it difficult to tag using only a version as several modules can collides, the used solution is to prefix the tag name with the module name then the version like so: `sys-container-version`. The annotation message of the tag can also contain some metadata in the form of an EDN data structure.
 
 ## Version
 
@@ -155,8 +163,8 @@ We believe repo layout should follows some convention regarding the system, cont
     - `Mainframe_Banking`
     - `Email`
     
-Module's name is by default deduced from the repo layout (but can also be overriden) and is given by Metav along the version.
-In case of a dedicated repo for the module Metav takes the folder name containing the working copy (aka. containing the `.git` folder)
+Module's name is by default deduced from the repo path layout (but can also be overriden): each directory name from the toplevel to the module dir is concatenated in the module name separated with a hyphen ('-'). Example: a module sitting in the directory `/myawesomesys/backend` would automatically give the module name `myawesomesys-backend`. 
+In case of a dedicated repo, Metav takes only the folder name containing the working copy (aka. containing the `.git` folder), e.g. if your repo sits in the `awesomerepo` dir then the module's name will be `awesomerepo`.  
 
 ## Tagging behavior
 
