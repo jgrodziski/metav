@@ -143,7 +143,7 @@
   (git-in-dir working-dir "tag" "-l" "--format" "%(contents:subject)" tag))
 
 (defn last-sha [working-dir]
-  (git-in-dir working-dir "rev-parse" "HEAD"))
+  (first (git-in-dir working-dir "rev-parse" "HEAD")))
 
 (defn working-copy-description
   "return the git working copy description as [base distance sha dirty?]"
