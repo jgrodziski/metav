@@ -28,5 +28,3 @@
                     module-build-file)))))
 
 
-(defn metadata
-  "return a map of the metadata")
