@@ -33,13 +33,22 @@ Metav is a library that helps the release and versioning process of Clojure proj
 
 # Installation
 
-Using tools.deps, add several alias in your `deps.edn` for each main task (display, spit, release) like this:
+Using tools.deps, add several alias in your `deps.edn` for each main task (display, spit, release) like this with git ref:
 
 ```clojure
 {:aliases {:metav {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "63b8286e5c8c0513431e8024a7d2f9a57bc2c18b"}}}
            :artifact-name {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "63b8286e5c8c0513431e8024a7d2f9a57bc2c18b"}}
                            :main-opts ["-m" "metav.display"]}
            :release {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "63b8286e5c8c0513431e8024a7d2f9a57bc2c18b"}}
+                     :main-opts ["-m" "metav.release"]}}}
+```
+
+Or using the clojars version:
+```clojure
+{:aliases {:metav {:extra-deps {metav {:mvn/version "1.0.3"}}}
+           :artifact-name {:extra-deps {metav {:mvn/version "1.0.3"}}
+                           :main-opts ["-m" "metav.display"]}
+           :release {:extra-deps {metav {:mvn/version "1.0.3"}}
                      :main-opts ["-m" "metav.release"]}}}
 ```
 
