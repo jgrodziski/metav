@@ -17,4 +17,5 @@
                                 "-d" "test"]}
            :display {:main-opts ["-m" "metav.display"]}
            :release {:main-opts ["-m" "metav.release"]}
+           
            }}
