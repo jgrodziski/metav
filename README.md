@@ -36,10 +36,10 @@ Metav is a library that helps the release and versioning process of Clojure proj
 Using tools.deps, add several alias in your `deps.edn` for each main task (display, spit, release) like this with git ref:
 
 ```clojure
-{:aliases {:metav {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "63b8286e5c8c0513431e8024a7d2f9a57bc2c18b"}}}
-           :artifact-name {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "63b8286e5c8c0513431e8024a7d2f9a57bc2c18b"}}
+{:aliases {:metav {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "baf6ca60583f43e921cee18c439b19a1afc9bc14"}}}
+           :artifact-name {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "baf6ca60583f43e921cee18c439b19a1afc9bc14"}}
                            :main-opts ["-m" "metav.display"]}
-           :release {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "63b8286e5c8c0513431e8024a7d2f9a57bc2c18b"}}
+           :release {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "baf6ca60583f43e921cee18c439b19a1afc9bc14"}}
                      :main-opts ["-m" "metav.release"]}}}
 ```
 
