@@ -34,7 +34,7 @@
 (defn tag
   "in case of monorepo return the tag as the module name concatenated with the version"
   ([version] (tag (pwd) version))
-  ([working-dir version ]
+  ([working-dir version]
    (str (prefix working-dir) version)))
 
 (defn- version-scheme-fn [scheme]
