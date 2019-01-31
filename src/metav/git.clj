@@ -137,7 +137,7 @@
        ))))
 
 (defn tag-timestamp [working-dir tag]
-  (git-in-dir working-dir "log" "-1" "--format=%aI" tag))
+  (first (git-in-dir working-dir "log" "-1" "--format=%aI" tag)))
 
 (defn tag-message [working-dir tag]
   (git-in-dir working-dir "tag" "-l" "--format" "%(contents:subject)" tag))
