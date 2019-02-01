@@ -39,18 +39,21 @@
   [s]
   (when s (set (string/split s #","))))
 
+(def default-options {:output-dir "resources" :namespace "meta" :formats "edn" :verbose false})
+
 (def cli-options
   [["-o" "--output-dir DIR_PATH" "Output Directory"
-    :default "resources"
+    :default (:output-dir default-options)
     :default-desc "resources"
     :parse-fn str]
    ["-n" "--namespace NS" "Namespace used in code output"
-    :default "meta"]
+    :default (:namespace default-options)]
    ["-f" "--formats FORMATS" "Comma-separated list of output formats (clj, cljc, cljs, edn, json)"
-    :default "edn"
-    :validate [#(empty? (set/difference (parse-formats %) accepted-formats)) "Formats must be in the following list: clj, cljc, cljs, edn, json"]
-    ]
-   ["-h" "--help"]])
+    :default (:formats default-options) 
+    :validate [#(empty? (set/difference (parse-formats %) accepted-formats)) "Formats must be in the following list: clj, cljc, cljs, edn, json"]]
+   ["-v" "--verbose" "Verbose, output the metadata as json in stdout if the option is present"]
+    :default (:verbose default-options)
+   ["-h" "--help" "Help"]])
 
 (defn usage [summary]
   (->> ["The spit function of Metav output module's metadata in different files: clj, cljc, cljs, edn or json."
@@ -95,8 +98,6 @@
   (println msg)
   (System/exit status))
 
-
-
 (defn metafile [output-dir namespace format]
   (fs/with-cwd output-dir
     (let [ns-file (fs/ns-path namespace)
@@ -109,29 +110,26 @@
 (defmulti spit-file :format)
 
 (defmethod spit-file "edn" [{:keys [working-dir output-dir namespace format]}]
-  (spit (metafile output-dir namespace format)
+  (spit (metafile (str working-dir "/" output-dir) namespace format)
         (pr-str (metadata-as-edn working-dir ))))
 
 (defmethod spit-file "json" [{:keys [working-dir output-dir namespace format]}]
-  (spit (metafile output-dir namespace format)
+  (spit (metafile (str working-dir "/" output-dir) namespace format)
         (json/write-str (metadata-as-edn working-dir ))))
 
 (defmethod spit-file :default [{:keys [working-dir output-dir namespace format]}];default are cljs,clj and cljc
-  (spit (metafile output-dir namespace format)
+  (spit (metafile (str working-dir "/" output-dir) namespace format)
         (metadata-as-code working-dir namespace)))
 
-(defn spit-files [working-dir requested-formats {:keys [namespace] :as options} exit-message]
-  (doseq [format requested-formats]
-    (if (accepted-formats format)
-      (spit-file (merge options {:format format :working-dir working-dir}))
-      (exit 1 exit-message))))
+(defn spit-files [working-dir {:keys [namespace formats] :as options}]
+  (doseq [format (parse-formats formats)]
+    (spit-file (merge options {:format format :working-dir working-dir}))))
 
 (defn -main
   ""
   [& args]
-  (let [{:keys [options exit-message ok?] :as vargs} (validate-args args)
-        {:keys [output-dir namespace formats]} options]
+  (let [{:keys [options exit-message ok?]} (validate-args args)]
     (when exit-message
       (exit (if ok? 0 1) exit-message))
-    (spit-files (str (git/pwd)) (parse-formats formats) options exit-message)
+    (spit-files (str (git/pwd)) options)
     (shutdown-agents)))
