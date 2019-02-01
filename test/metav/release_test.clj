@@ -9,17 +9,18 @@
             [me.raynes.fs :as fs]))
 
 (deftest release-repo
-  (testing "bump from a clean tagged repo"
+  (testing "bump from a clean tagged repo, testing the spitted files"
     (let [[monorepo remote moduleA1 moduleA2 moduleB1 moduleB2] (monorepo);module A1 latest tag is 1.3.4
-          options {:spit true :output-dir "resources" :namespace "meta" :formats "edn"}
+          options {:spit true :output-dir "resources" :namespace "metav.meta" :formats "edn,clj,json"}
           [module-name bumped-version tag push-result] (release/execute! moduleA1 "semver" :patch options)
           [scm-base distance sha dirty?] (git/working-copy-description moduleA1 :prefix  (prefix moduleA1))]
       (facts
          (str bumped-version) => "1.3.5"
          scm-base => "1.3.5"
          tag =>   "sysA-container1-1.3.5"
-         (fs/exists? (str moduleA1 "/resources/meta.edn")) => true
-         )
+         (fs/exists? (str moduleA1 "/resources/metav/meta.edn")) => true
+         (fs/exists? (str moduleA1 "/resources/metav/meta.clj")) => true
+         (fs/exists? (str moduleA1 "/resources/metav/meta.json")) => true)
       (fs/delete monorepo)
       (fs/delete remote)))
   (testing "bump from a clean tagged repo, two patch release, one minor, then one major"
