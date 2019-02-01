@@ -51,8 +51,8 @@
    ["-f" "--formats FORMATS" "Comma-separated list of output formats (clj, cljc, cljs, edn, json)"
     :default (:formats default-options) 
     :validate [#(empty? (set/difference (parse-formats %) accepted-formats)) "Formats must be in the following list: clj, cljc, cljs, edn, json"]]
-   ["-v" "--verbose" "Verbose, output the metadata as json in stdout if the option is present"]
-    :default (:verbose default-options)
+   ["-v" "--verbose" "Verbose, output the metadata as json in stdout if the option is present"
+    :default (:verbose default-options)]
    ["-h" "--help" "Help"]])
 
 (defn usage [summary]
