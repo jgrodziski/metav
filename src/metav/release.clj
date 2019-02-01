@@ -53,10 +53,10 @@
        [module-name next-version tag push-result]))))
 
 (def cli-options
-  [(concat
-    ["-s" "--spit" "Indicates the release process should spit the metadata file as with the \"spit\" task, in that case the spit options must be provided"
-     :default false]
-    spit/cli-options)])
+  (cons
+   ["-s" "--spit" "Indicates the release process should spit the metadata file as with the \"spit\" task, in that case the spit options must be provided"
+    :default false]
+   spit/cli-options))
 
 (defn usage [summary]
   (->> ["Metav's \"release\" function does the following:"
@@ -101,7 +101,7 @@
       {:exit-message (error-msg errors)}
 
       ;; custom validation on arguments
-      (and (> (count arguments) 1)
+      (and (>= (count arguments) 1)
            (not (nil? (level (first arguments)))))
       {:options options :level (level (first arguments))}
 
