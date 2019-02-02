@@ -13,7 +13,7 @@ Metav is a library that helps the release and versioning process of Clojure proj
 <li><a href="#usage">Usage</a><ul>
 <li><a href="#display-current-version">Display current version</a></li>
 <li><a href="#release">Release</a></li>
-<li><a href="#spit-current-versioning">Spit current versioning</a></li>
+<li><a href="#spit-current-versioning-in-a-file">Spit current versioning in a file</a></li>
 </ul></li>
 <li><a href="#rationale">Rationale</a>
 <ul>
