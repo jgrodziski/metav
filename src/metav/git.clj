@@ -106,6 +106,10 @@
    (apply git-in-dir repo-dir (filter identity ["tag" sign "--annotate"
                                                 "--message" metadata tag]))))
 
+(defn add!
+  [repo-dir & args]
+  (apply git-in-dir (cons repo-dir args)))
+
 (defn commit!
   "commit with message"
   ([msg] (commit! nil msg))

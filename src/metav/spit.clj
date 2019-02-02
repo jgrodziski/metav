@@ -105,7 +105,7 @@
   (println msg)
   (System/exit status))
 
-(defn metafile [output-dir namespace format]
+(defn metafile! [output-dir namespace format]
   (fs/with-cwd output-dir
     (let [ns-file (fs/ns-path namespace)
           parent (fs/parent ns-file)
@@ -114,25 +114,27 @@
       (fs/mkdirs parent)
       (file parent (str name "." format)))))
 
-(defmulti spit-file :format)
+(defmulti spit-file! :format)
 
-(defmethod spit-file "edn" [version {:keys [working-dir output-dir namespace format]}]
-  (spit (metafile (str working-dir "/" output-dir) namespace format)
+(defmethod spit-file! "edn" [version {:keys [working-dir output-dir namespace format]}]
+  (spit (metafile! (str working-dir "/" output-dir) namespace format)
         (pr-str (metadata-as-edn working-dir version))))
 
-(defmethod spit-file "json" [version {:keys [working-dir output-dir namespace format]}]
-  (spit (metafile (str working-dir "/" output-dir) namespace format)
+(defmethod spit-file! "json" [version {:keys [working-dir output-dir namespace format]}]
+  (spit (metafile! (str working-dir "/" output-dir) namespace format)
         (json/write-str (metadata-as-edn working-dir version))))
 
-(defmethod spit-file :default [version {:keys [working-dir output-dir namespace format]}];default are cljs,clj and cljc
-  (spit (metafile (str working-dir "/" output-dir) namespace format)
+(defmethod spit-file! :default [version {:keys [working-dir output-dir namespace format]}];default are cljs,clj and cljc
+  (spit (metafile! (str working-dir "/" output-dir) namespace format)
         (metadata-as-code working-dir namespace version)))
 
-(defn spit-files
-  ([working-dir options] (spit-files working-dir (version working-dir) options));CLI invocation
+(defn spit-files!
+  ""
+  ([working-dir options] (spit-files! working-dir (version working-dir) options));CLI invocation
   ([working-dir version {:keys [namespace formats] :as options}];invocation from release, the next version is given as arguments
-   (doseq [format (parse-formats formats)]
-     (spit-file version (merge options {:format format :working-dir working-dir})))))
+   (map (fn [format]
+          (spit-file! version (merge options {:format format :working-dir working-dir})))
+        (parse-formats formats))))
 
 (defn -main
   ""
@@ -140,5 +142,5 @@
   (let [{:keys [options exit-message ok?]} (validate-args args)]
     (when exit-message
       (exit (if ok? 0 1) exit-message))
-    (spit-files (str (git/pwd)) options);spit files invoked from CLI deduce the current version from git state
+    (spit-files! (str (git/pwd)) options);spit files invoked from CLI deduce the current version from git state
     (shutdown-agents)))

@@ -6,7 +6,7 @@
             [clojure.tools.cli :refer [parse-opts]]
             [metav.git :as git]
             [metav.display :refer [version tag module-name]]
-            [metav.spit :as spit :refer [metadata-as-edn spit-files ]]
+            [metav.spit :as spit :refer [metadata-as-edn spit-files! ]]
             [metav.repo :refer [monorepo? dedicated-repo?]]
             [metav.version.protocols :refer [bump]]
             [clojure.data.json :as json]
@@ -43,8 +43,8 @@
      (log/info "Next tag is" tag)
      ;;spit meta file and commit
      (when spit
-       (do
-         (spit-files module-dir next-version options)
+       (let [spitted (spit-files! module-dir next-version options)]
+         (apply git/add! spitted)
          (git/commit! (str "Bump to version" next-version " and spit related metadata in file(s)."))))
 
      ;then tag
