@@ -41,10 +41,10 @@ Metav is a library that helps the release and versioning process of Clojure proj
 Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several alias in your `deps.edn` for each main task (display, spit, release) like this with git ref:
 
 ```clojure
-{:aliases {:metav {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "baf6ca60583f43e921cee18c439b19a1afc9bc14"}}}
-           :artifact-name {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "baf6ca60583f43e921cee18c439b19a1afc9bc14"}}
+{:aliases {:metav {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "97721905fdc88c49e97626b38b8485535fdfaa70"}}}
+           :artifact-name {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "97721905fdc88c49e97626b38b8485535fdfaa70"}}
                            :main-opts ["-m" "metav.display"]}
-           :release {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "baf6ca60583f43e921cee18c439b19a1afc9bc14"}}
+           :release {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "97721905fdc88c49e97626b38b8485535fdfaa70"}}
                      :main-opts ["-m" "metav.release"]}}}
 ```
 
@@ -68,7 +68,7 @@ Or using the clojars version `{metav {:mvn/version "1.1.2"}}`:
 
 One liner:
 ```
-clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "63b8286e5c8c0513431e8024a7d2f9a57bc2c18b"}}}' -m metav.display
+clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "97721905fdc88c49e97626b38b8485535fdfaa70"}}}' -m metav.display
 ```
 
 If you've installed Metav's dependency in `deps.edn` like in the above Installation section, just run:
@@ -93,7 +93,7 @@ _Release_ is the process invoked by the developer when a code related to a chang
 
 One liner:
 ```
-clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "63b8286e5c8c0513431e8024a7d2f9a57bc2c18b"}}}' -m metav.release
+clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "97721905fdc88c49e97626b38b8485535fdfaa70"}}}' -m metav.release
 ```
 
 If you've installed Metav's dependency in `deps.edn` like in the above Installation section, just run:
