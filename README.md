@@ -48,12 +48,12 @@ Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several ali
                      :main-opts ["-m" "metav.release"]}}}
 ```
 
-Or using the clojars version `{metav {:mvn/version "1.1.1"}}`:
+Or using the clojars version `{metav {:mvn/version "1.1.2"}}`:
 ```clojure
-{:aliases {:metav {:extra-deps {metav {:mvn/version "1.1.1"}}}
-           :artifact-name {:extra-deps {metav {:mvn/version "1.1.1"}}
+{:aliases {:metav {:extra-deps {metav {:mvn/version "1.1.2"}}}
+           :artifact-name {:extra-deps {metav {:mvn/version "1.1.2"}}
                            :main-opts ["-m" "metav.display"]}
-           :release {:extra-deps {metav {:mvn/version "1.1.0"}}
+           :release {:extra-deps {metav {:mvn/version "1.1.2"}}
                      :main-opts ["-m" "metav.release"]}}}
 ```
 
