@@ -13,7 +13,7 @@ Metav is a library that helps the release and versioning process of Clojure proj
 <li><a href="#usage">Usage</a><ul>
 <li><a href="#display-current-version">Display current version</a></li>
 <li><a href="#release">Release</a></li>
-<li><a href="#spit-current-versioning-in-a-file">Spit current versioning in a file</a></li>
+<li><a href="#spit-current-version-in-a-file">Spit current versioning in a file</a></li>
 </ul></li>
 <li><a href="#rationale">Rationale</a>
 <ul>
@@ -121,7 +121,7 @@ Options:
 
 ```
 
-## Spit current versioning in a file
+## Spit current version in a file
 
 The spit feature output the current state of the module in the repo in one or several files that can be directly Clojure source code or data literals structure like EDN or JSON.
 
@@ -260,7 +260,7 @@ Don't forget to start the command with a `noglob` if you use `zsh` as the `%(...
 
 ## Meta management
 
-Metadata, like module name and version, should be deduced from the SCM and include in the binary artefact (JAR, docker image) but never commited as file along the source code to avoid any desynchronisation. Metadata file is called `meta.edn`.
+Metadata, like module name and version, should be deduced from the SCM and include in the binary artefact (JAR, docker image). Metadata file can be named `meta.edn`.
 
 Metadata are:
 
@@ -270,7 +270,7 @@ Metadata are:
 - Timestamp
 - Path in the repo
 
-See [spit function](#spit).
+See [spit function](#spit-current-version-in-a-file).
 
 
 # License
