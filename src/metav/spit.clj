@@ -135,9 +135,9 @@
   ""
   ([working-dir options] (spit-files! working-dir (version working-dir) options));CLI invocation
   ([working-dir version {:keys [namespace formats] :as options}];invocation from release, the next version is given as arguments
-   (doall (map (fn [format]
-                 (spit-file! version (merge options {:format format :working-dir working-dir})))
-               (parse-formats formats)))))
+   (vec (map (fn [format]
+               (spit-file! version (merge options {:format format :working-dir working-dir})))
+             (parse-formats formats)))))
 
 (defn -main
   ""
