@@ -117,16 +117,19 @@
 (defmulti spit-file! :format)
 
 (defmethod spit-file! "edn" [version {:keys [working-dir output-dir namespace format]}]
-  (spit (metafile! (str working-dir "/" output-dir) namespace format)
-        (pr-str (metadata-as-edn working-dir version))))
+  (let [file (metafile! (str working-dir "/" output-dir) namespace format)]
+    (spit file (pr-str (metadata-as-edn working-dir version)))
+    (str file)))
 
 (defmethod spit-file! "json" [version {:keys [working-dir output-dir namespace format]}]
-  (spit (metafile! (str working-dir "/" output-dir) namespace format)
-        (json/write-str (metadata-as-edn working-dir version))))
+  (let [file (metafile! (str working-dir "/" output-dir) namespace format)]
+    (spit file (json/write-str (metadata-as-edn working-dir version)))
+    (str file)))
 
 (defmethod spit-file! :default [version {:keys [working-dir output-dir namespace format]}];default are cljs,clj and cljc
-  (spit (metafile! (str working-dir "/" output-dir) namespace format)
-        (metadata-as-code working-dir namespace version)))
+  (let [file (metafile! (str working-dir "/" output-dir) namespace format)]
+    (spit file (metadata-as-code working-dir namespace version))
+    (str file)))
 
 (defn spit-files!
   ""
