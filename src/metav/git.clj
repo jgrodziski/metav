@@ -108,7 +108,7 @@
 
 (defn add!
   [repo-dir & paths]
-  (git-in-dir repo-dir "add" paths))
+  (apply git-in-dir repo-dir "add" paths))
 
 (defn commit!
   "commit with message"

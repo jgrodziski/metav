@@ -44,7 +44,7 @@
      ;;spit meta file and commit
      (when spit
        (let [spitted (spit-files! module-dir next-version options)]
-         (git/add! module-dir spitted)
+         (apply git/add! module-dir spitted)
          (git/commit! module-dir (str "Bump to version" next-version " and spit related metadata in file(s)."))))
 
      ;then tag
