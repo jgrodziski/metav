@@ -44,8 +44,8 @@
      ;;spit meta file and commit
      (when spit
        (let [spitted (spit-files! module-dir next-version options)]
-         (apply git/add! spitted)
-         (git/commit! (str "Bump to version" next-version " and spit related metadata in file(s)."))))
+         (apply git/add! module-dir spitted)
+         (git/commit! module-dir (str "Bump to version " next-version " and spit related metadata in file(s)."))))
 
      ;then tag
      (git/tag! repo-dir tag (json/write-str (metadata-as-edn module-dir next-version)))

@@ -9,7 +9,7 @@
         </encoder>
     </appender>
 
-    <root level="ERROR">
+    <root level="debug">
         <appender-ref ref="SETUP-CORR-ID"/>
         <appender-ref ref="SETUP-MDC"/>
         <appender-ref ref="STDOUT"/>
