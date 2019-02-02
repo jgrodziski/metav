@@ -15,14 +15,6 @@ Metav is a library that helps the release and versioning process of Clojure proj
 <li><a href="#release">Release</a></li>
 <li><a href="#spit-current-version-in-a-file">Spit current versioning in a file</a></li>
 </ul></li>
-<li><a href="#rationale">Rationale</a>
-<ul>
-<li><a href="#release-semantic">Release semantic</a></li>
-<li><a href="#change-level-major-minor-patch">Change level (major, minor, patch)</a></li>
-<li><a href="#repository-organization">Repository organization</a></li>
-<li><a href="#version">Version</a></li>
-<li><a href="#inspiration">Inspiration</a></li>
-</ul></li>
 <li><a href="#behavior">Behavior</a>
 <ul>
 <li><a href="#version-bumping">Version bumping</a></li>
@@ -30,6 +22,14 @@ Metav is a library that helps the release and versioning process of Clojure proj
 <li><a href="#tagging-behavior">Tagging behavior</a></li>
 <li><a href="#meta-management">Meta management</a></li>
 <li><a href="#metav-interface">Metav interface</a></li>
+</ul></li>
+<li><a href="#rationale">Rationale</a>
+<ul>
+<li><a href="#release-semantic">Release semantic</a></li>
+<li><a href="#change-level-major-minor-patch">Change level (major, minor, patch)</a></li>
+<li><a href="#repository-organization">Repository organization</a></li>
+<li><a href="#version">Version</a></li>
+<li><a href="#inspiration">Inspiration</a></li>
 </ul></li>
 <li><a href="#license">License</a></li>
 </ul></li>
@@ -149,55 +149,6 @@ Options:
   -h, --help                            Help
 ```
 
-# Rationale
-
-* **SCM reference (hash) -> Artefact. Artefact -> SCM reference (Hash).** We should be able to link a SCM hash to a software's binary artefact and the inverse: link a binary artefact to a reference in the SCM tree.
-* **Version is derived from git state instead of the other way around**
-* **The library should accomodate a Monorepo style organization where several modules (directory containing a `deps.edn` file) lives under a top level repository, hence mixing the version and tag in it.**
-* **Determinism of the artifact construction from the source code SCM state.**
-
-## Release semantic
-
-_Release_ means some source code changes in one or several commits are ready to be "published" in the repository for later deployment. The _Release_ process assigns a version number, tags the repo with it and push the changes. The _Release_ task is invoked by developer when she considers changes in source code are ready. Pushing binary artefact (JAR, docker image) is out of the scope of the _Release_ process and should be the responsibility of the CI system.
-
-
-## Change level (major, minor, patch)
-
-When releasing, developer indicates the characteristic of the changes regarding the breaks potentially introduced (*major* level change), whether new features were pushed (*minor* level with no breaking change) or just a fix with no new features nor breaking changes (_patch_ level). The _Release_ process takes care of dealing with the SCM and version number to left the developer only decides what she's releasing to the world. 
-
-## Repository organization
-
-SCM repository organization is important, with many decisions to make: mono or multirepos, modules slicing, links with the CI and build process. Monorepos are a popular way of organizing source code at the moment to promote better code sharing behavior, knowledge spreading, refactoring, etc. (see the article ["Monorepos and the fallacy of scale"](https://presumably.de/monorepos-and-the-fallacy-of-scale.html)).
-
-**The library is intended to accomodate Monorepos and Multirepos style of organization**, in case of _Monorepos_ style Metav's tagging behavior ensures isolation between components living in the same repo. Many tools implicitly depends on having a dedicated repository per component, in our case the way we manage the version and release from the source code should be independant of whether the source code is in a dedicated repo (Multirepos) or a shared one (Monorepos).
-
-Monorepo layout makes it difficult to tag using only a version as several modules versions can collide, the solution used by metav is to prefix the tag name with the module name then the version like so: `sys-container-version`. The annotation message of the tag can also contain some metadata in the form of an EDN data structure.
-
-## Version
-
-Each version should gives a clear semantic about the content of the change, [Semantic Versioning](https://semver.org) is a great way to do that.
-I'm fond of using git tags to denote the current version of a component whether we use a Monorepo or a Multirepo.
-
-Extract from the [semver](https://semver.org) website:
-
-> Given a version number MAJOR.MINOR.PATCH, increment the:
-
-> - MAJOR version when you make incompatible API changes,
-> - MINOR version when you add functionality in a backwards-compatible manner, and
-> - PATCH version when you make backwards-compatible bug fixes.
-> Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format.
-
-## Inspiration
-
-Metav was inspired from these existing libraries in the Leiningen ecosystem:
-- [lein-git-version](https://github.com/arrdem/lein-git-version)
-- [lein-v](https://github.com/roomkey/lein-v) I used that one some times ago and Metav borrowed the SemVer and Maven version handling code.
-
-The monorepo concern also has solutions like:
-- [lein-modules](https://github.com/jcrossley3/lein-modules)
-- [lein-monolith](https://github.com/amperity/lein-monolith)
-and of course the [release task of lein](https://github.com/technomancy/leiningen/blob/master/doc/DEPLOY.md#releasing-simplified), all of that was the inception of Metav.
-
 # Behavior
 
 > __Every artifact should be reproduceable from the source code hash ([git reference](https://git-scm.com/book/en/v2/Git-Internals-Git-References))__
@@ -271,6 +222,55 @@ Metadata are:
 - Path in the repo
 
 See [spit function](#spit-current-version-in-a-file).
+
+# Rationale
+
+* **SCM reference (hash) -> Artefact. Artefact -> SCM reference (Hash).** We should be able to link a SCM hash to a software's binary artefact and the inverse: link a binary artefact to a reference in the SCM tree.
+* **Version is derived from git state instead of the other way around**
+* **The library should accomodate a Monorepo style organization where several modules (directory containing a `deps.edn` file) lives under a top level repository, hence mixing the version and tag in it.**
+* **Determinism of the artifact construction from the source code SCM state.**
+
+## Release semantic
+
+_Release_ means some source code changes in one or several commits are ready to be "published" in the repository for later deployment. The _Release_ process assigns a version number, tags the repo with it and push the changes. The _Release_ task is invoked by developer when she considers changes in source code are ready. Pushing binary artefact (JAR, docker image) is out of the scope of the _Release_ process and should be the responsibility of the CI system.
+
+
+## Change level (major, minor, patch)
+
+When releasing, developer indicates the characteristic of the changes regarding the breaks potentially introduced (*major* level change), whether new features were pushed (*minor* level with no breaking change) or just a fix with no new features nor breaking changes (_patch_ level). The _Release_ process takes care of dealing with the SCM and version number to left the developer only decides what she's releasing to the world. 
+
+## Repository organization
+
+SCM repository organization is important, with many decisions to make: mono or multirepos, modules slicing, links with the CI and build process. Monorepos are a popular way of organizing source code at the moment to promote better code sharing behavior, knowledge spreading, refactoring, etc. (see the article ["Monorepos and the fallacy of scale"](https://presumably.de/monorepos-and-the-fallacy-of-scale.html)).
+
+**The library is intended to accomodate Monorepos and Multirepos style of organization**, in case of _Monorepos_ style Metav's tagging behavior ensures isolation between components living in the same repo. Many tools implicitly depends on having a dedicated repository per component, in our case the way we manage the version and release from the source code should be independant of whether the source code is in a dedicated repo (Multirepos) or a shared one (Monorepos).
+
+Monorepo layout makes it difficult to tag using only a version as several modules versions can collide, the solution used by metav is to prefix the tag name with the module name then the version like so: `sys-container-version`. The annotation message of the tag can also contain some metadata in the form of an EDN data structure.
+
+## Version
+
+Each version should gives a clear semantic about the content of the change, [Semantic Versioning](https://semver.org) is a great way to do that.
+I'm fond of using git tags to denote the current version of a component whether we use a Monorepo or a Multirepo.
+
+Extract from the [semver](https://semver.org) website:
+
+> Given a version number MAJOR.MINOR.PATCH, increment the:
+
+> - MAJOR version when you make incompatible API changes,
+> - MINOR version when you add functionality in a backwards-compatible manner, and
+> - PATCH version when you make backwards-compatible bug fixes.
+> Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format.
+
+## Inspiration
+
+Metav was inspired from these existing libraries in the Leiningen ecosystem:
+- [lein-git-version](https://github.com/arrdem/lein-git-version)
+- [lein-v](https://github.com/roomkey/lein-v) I used that one some times ago and Metav borrowed the SemVer and Maven version handling code.
+
+The monorepo concern also has solutions like:
+- [lein-modules](https://github.com/jcrossley3/lein-modules)
+- [lein-monolith](https://github.com/amperity/lein-monolith)
+and of course the [release task of lein](https://github.com/technomancy/leiningen/blob/master/doc/DEPLOY.md#releasing-simplified), all of that was the inception of Metav.
 
 
 # License
