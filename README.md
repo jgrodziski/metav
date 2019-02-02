@@ -232,7 +232,7 @@ See [spit function](#spit-current-version-in-a-file).
 # Rationale
 
 * **SCM reference (hash) -> Artefact. Artefact -> SCM reference (Hash).** We should be able to link a SCM hash to a software's binary artefact and the inverse: link a binary artefact to a reference in the SCM tree.
-* **Version is derived from git state instead of the other way around**
+* **Version is derived from git state instead of the other way around** (like a file versioned in the repo, with all the desynchronisation risks)
 * **The library should accomodate a Monorepo style organization where several modules (directory containing a `deps.edn` file) lives under a top level repository, hence mixing the version and tag in it.**
 * **Determinism of the artifact construction from the source code SCM state.**
 
