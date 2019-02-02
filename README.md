@@ -47,10 +47,10 @@ Using tools.deps, add several alias in your `deps.edn` for each main task (displ
                      :main-opts ["-m" "metav.release"]}}}
 ```
 
-Or using the clojars version `{metav {:mvn/version "1.1.0"}}`:
+Or using the clojars version `{metav {:mvn/version "1.1.1"}}`:
 ```clojure
-{:aliases {:metav {:extra-deps {metav {:mvn/version "1.1.0"}}}
-           :artifact-name {:extra-deps {metav {:mvn/version "1.1.0"}}
+{:aliases {:metav {:extra-deps {metav {:mvn/version "1.1.1"}}}
+           :artifact-name {:extra-deps {metav {:mvn/version "1.1.1"}}
                            :main-opts ["-m" "metav.display"]}
            :release {:extra-deps {metav {:mvn/version "1.1.0"}}
                      :main-opts ["-m" "metav.release"]}}}
