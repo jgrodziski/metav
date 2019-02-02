@@ -107,8 +107,8 @@
                                                 "--message" metadata tag]))))
 
 (defn add!
-  [repo-dir & args]
-  (git-in-dir repo-dir "add" args))
+  [repo-dir & paths]
+  (git-in-dir repo-dir (cons "add" paths)))
 
 (defn commit!
   "commit with message"
