@@ -1,4 +1,5 @@
-Metav
+
+# Metav
 
 Metav is a library that helps the release and versioning process of Clojure projects, particularly the one using [tools.deps](https://github.com/clojure/tools.deps.alpha) and a _Monorepo_ style (see [Rationale](#rationale)).
 
@@ -37,7 +38,7 @@ Metav is a library that helps the release and versioning process of Clojure proj
 
 # Installation
 
-Using tools.deps, add several alias in your `deps.edn` for each main task (display, spit, release) like this with git ref:
+Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several alias in your `deps.edn` for each main task (display, spit, release) like this with git ref:
 
 ```clojure
 {:aliases {:metav {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "baf6ca60583f43e921cee18c439b19a1afc9bc14"}}}
@@ -95,20 +96,65 @@ clj -A:release minor
 ```
 Will execute the _release_ process described above, the tag used for the release is then printed in the standard output.
 
+The `release` can also output metadata files like the `spit` function does, the CLI options are the same than `spit` there is a boolean flag option indicating that the `spit` is done (default to `false`).
+
+The `release` usage is:
+```
+Metav's "release" function does the following:
+  - assert the command is invoked with a deps.edn in the working directory
+  - assert everything is committed (no untracked or uncommitted files).
+  - bump the version
+  - [optional: spit and commit the version metadata (module-name, tag, version, sha, timestamp) in file(s)]
+  - tag the repo with the version prefixed by the module-name in cas of a monorepo
+  - push everything
+
+Usage: metav.release [options] <level>
+with <level>: major, minor or patch
+
+Options:
+  -s, --spit                            Indicates the release process should spit the metadata file as with the "spit" task, in that case the spit options must be provided
+  -o, --output-dir DIR_PATH  resources  Output Directory
+  -n, --namespace NS         meta       Namespace used in code output
+  -f, --formats FORMATS      edn        Comma-separated list of output formats (clj, cljc, cljs, edn, json)
+  -v, --verbose                         Verbose, output the metadata as json in stdout if the option is present
+  -h, --help                            Help
+
+```
 
 ## Spit current versioning in a file
 
-TODO: that feature is added, needs to put some documentation.
+The spit feature output the current state of the module in the repo in one or several files that can be directly Clojure source code or data literals structure like EDN or JSON.
 
 ```
-clj -A:metav -m metav.spit
+clj -A:metav -m metav.spit --output-dir src --namespace metav.meta -formats clj
+;will output src/metav/meta.clj
+;or
+clj -A:metav -m metav.spit --output-dir resources --namespace meta -formats edn,json
+;will output resources/meta.edn and resources.json
+```
+
+The `spit` usage is (`clj -Ametav -m metav.spit --help`):
+
+```
+The spit function of Metav output module's metadata in files according the given formats among: clj, cljc, cljs, edn or json.
+The metadata is composed of: module-name, tag, version, path, timestamp
+
+Usage: metav.spit [options]
+
+Options:
+  -o, --output-dir DIR_PATH  resources  Output Directory
+  -n, --namespace NS         meta       Namespace used in code output
+  -f, --formats FORMATS      edn        Comma-separated list of output formats (clj, cljc, cljs, edn, json)
+  -v, --verbose                         Verbose, output the metadata as json in stdout if the option is present
+  -h, --help                            Help
 ```
 
 # Rationale
 
 * **SCM reference (hash) -> Artefact. Artefact -> SCM reference (Hash).** We should be able to link a SCM hash to a software's binary artefact and the inverse: link a binary artefact to a reference in the SCM tree.
-* **Version is derived from git state instead of the other way around and accomodate a Monorepo style organization.**
-* **Determinism of the artifact construction from the source code SCM state**
+* **Version is derived from git state instead of the other way around**
+* **The library should accomodate a Monorepo style organization where several modules (directory containing a `deps.edn` file) lives under a top level repository, hence mixing the version and tag in it.**
+* **Determinism of the artifact construction from the source code SCM state.**
 
 ## Release semantic
 
@@ -212,7 +258,6 @@ git tag -l --format %(contents:subject) v1.0.3 | jq '."module-name"'
 ```
 Don't forget to start the command with a `noglob` if you use `zsh` as the `%(...)` will be interpreted otherwise.
 
-
 ## Meta management
 
 Metadata, like module name and version, should be deduced from the SCM and include in the binary artefact (JAR, docker image) but never commited as file along the source code to avoid any desynchronisation. Metadata file is called `meta.edn`.
@@ -220,22 +265,12 @@ Metadata, like module name and version, should be deduced from the SCM and inclu
 Metadata are:
 
 - Module name
-- version number
-- timestamp
-- Hash related to the version
+- Version number
+- Tag
+- Timestamp
+- Path in the repo
 
 See [spit function](#spit).
-
-## Metav interface
-
-### Display Module name and Version
-
-### Release changes
-
-### Spit meta information (module name and version)
-
-
-
 
 
 # License

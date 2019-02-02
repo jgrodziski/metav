@@ -6,7 +6,8 @@
             [clojure.java.io :refer [file]]
             [clojure.tools.cli :refer [parse-opts]]
             [clojure.data.json :as json]
-            [me.raynes.fs :as fs])
+            [me.raynes.fs :as fs]
+            [clojure.string :as str])
   (:import [java.util Date TimeZone]
            [java.text DateFormat SimpleDateFormat]))
 
@@ -63,7 +64,7 @@
    ["-h" "--help" "Help"]])
 
 (defn usage [summary]
-  (->> ["The spit function of Metav output module's metadata in different files: clj, cljc, cljs, edn or json."
+  (->> ["The spit function of Metav output module's metadata in files according the given formats among: clj, cljc, cljs, edn or json."
         "The metadata is composed of: module-name, tag, version, path, timestamp "
         ""
         "Usage: metav.spit [options]"
@@ -146,4 +147,6 @@
     (when exit-message
       (exit (if ok? 0 1) exit-message))
     (spit-files! (str (git/pwd)) options);spit files invoked from CLI deduce the current version from git state
+    (if (:verbose options)
+      (print (json/write-str (metadata-as-edn (str (git/pwd)) (version (str (git/pwd)))))))
     (shutdown-agents)))

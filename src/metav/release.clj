@@ -54,7 +54,8 @@
 (def cli-options
   (cons
    ["-s" "--spit" "Indicates the release process should spit the metadata file as with the \"spit\" task, in that case the spit options must be provided"
-    :default false]
+    :default false
+    :default-desc "false"]
    spit/cli-options))
 
 (defn usage [summary]
@@ -114,8 +115,12 @@
 (defn -main [& args]
   (let [{:keys [level options exit-message ok?] :as vargs} (validate-args args)
         {:keys [spit output-dir namespace formats]} options]
+    (when exit-message
+      (exit (if ok? 0 1) exit-message))
     (log/debug "Release level is " level ". Assert everything is committed, bump the version, tag and push.")
     (log/debug "Spitting metadata requested? " spit ". If true spit metadata (module-name, tag, version, sha, timestamp) in dir " output-dir " with namespace " namespace " and formats " formats)
     (let [[module-name next-version tag push-result] (execute! (str (git/pwd)) "semver" level options)]
-      (print tag)
+      (if (:verbose options)
+        (print (json/write-str (metadata-as-edn (str (git/pwd)) (version (str (git/pwd))))))
+        (print tag))
       (shutdown-agents))))
