@@ -48,7 +48,7 @@
          (git/commit! (str "Bump to version" next-version " and spit related metadata in file(s)."))))
 
      ;then tag
-     (git/tag! repo-dir tag (json/write-str (metadata-as-edn module-dir)))
+     (git/tag! repo-dir tag (json/write-str (metadata-as-edn module-dir next-version)))
      (let [push-result (git/push! repo-dir)]
        [module-name next-version tag push-result]))))
 
