@@ -3,6 +3,8 @@
 Metav is a library that helps the release and versioning process of Clojure projects, particularly the one using [tools.deps](https://github.com/clojure/tools.deps.alpha) and a _Monorepo_ style (see [Rationale](#rationale)).
 
 [![Clojars Project](https://img.shields.io/clojars/v/metav.svg)](https://clojars.org/metav)
+[![cljdoc badge](https://cljdoc.org/badge/jgrodziski/metav)](https://cljdoc.org/d/jgrodziski/metav/CURRENT)
+
 
 <div id="TOC">
 <ul> 
