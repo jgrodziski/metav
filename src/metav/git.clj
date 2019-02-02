@@ -108,7 +108,7 @@
 
 (defn add!
   [repo-dir & args]
-  (git-in-dir repo-dir args))
+  (git-in-dir repo-dir "add" args))
 
 (defn commit!
   "commit with message"
