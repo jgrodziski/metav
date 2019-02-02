@@ -20,6 +20,4 @@
                                  "--spit"
                                  "--output-dir" "src"
                                  "--namespace" "metav.meta"
-                                 "--formats" "clj"]}
-           
-           }}
+                                 "--formats" "clj"]}}}
