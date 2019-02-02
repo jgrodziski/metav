@@ -54,7 +54,12 @@ Or using the clojars version `{metav {:mvn/version "1.1.2"}}`:
            :artifact-name {:extra-deps {metav {:mvn/version "1.1.2"}}
                            :main-opts ["-m" "metav.display"]}
            :release {:extra-deps {metav {:mvn/version "1.1.2"}}
-                     :main-opts ["-m" "metav.release"]}}}
+                     :main-opts ["-m" "metav.release"]}
+           :spit     {:extra-deps {metav {:mvn/version "1.1.2"}}
+                      :main-opts ["-m" "metav.spit"
+                                  "--output-dir" "src"
+                                  "--namespace" "metav.meta"
+                                  "--formats" "clj"]}}}
 ```
 
 # Usage
