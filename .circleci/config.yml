@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  test:
+  build:
     docker:
       - image: circleci/clojure:openjdk-11-tools-deps-1.10.0.411-node-browsers-legacy
     parallelism: 1
