@@ -5,6 +5,7 @@ jobs:
       - image: circleci/clojure:openjdk-11-tools-deps-1.10.0.411-node-browsers-legacy
     parallelism: 1
     steps:
+      - checkout
       - run:
           name: Running tests
           command: clojure -A:test:runner
