@@ -230,7 +230,7 @@ See [spit function](#spit-current-version-in-a-file).
 
 # Rationale
 
-* **SCM reference (hash) should give -> Artefact. **
+* **SCM reference (hash) should give -> Artefact.**
 * **Artefact should give -> SCM reference (Hash).** 
     * We should be able to link a SCM hash to a software's binary artefact and the inverse: link a binary artefact to a reference in the SCM tree.
 * **Version is derived from git state instead of the other way around** (like a file versioned in the repo, with all the desynchronisation risks)
