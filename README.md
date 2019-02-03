@@ -87,7 +87,7 @@ The tab character between the module name and version makes it easy to use `cut 
 _Release_ is the process invoked by the developer when a code related to a change is ready for prime time, hence releasable. The release process does the following:
 - **Check** everything is committed (no untracked or uncommitted file(s) otherwise the release process is aborted)
 - **Bump** the current version according to the release level of the change (major, minor or patch)
-- **[Optionaly: Spit and Commit metadata]**: Spit metadata in file(s) (version, tag, timestamp, module-name, etc.)
+- **[Optionaly: Spit and Commit metadata]**: Spit metadata in file(s) (version, tag, timestamp, module-name, etc.) with the `-s, --spit` option flag (presence means spitting metadata).
 - **Tag** the repo with that version. In case of monorepo, prefix the version with the module name (automatically deduced from the module's path or provided)
 - **Push** the tag
 
@@ -129,7 +129,7 @@ Options:
 
 ## Spit current version in a file
 
-The spit feature output the current state of the module in the repo in one or several files that can be directly Clojure source code or data literals structure like EDN or JSON.
+The spit feature output the current state of the module in the repo in one or several files that can be directly Clojure source code (`clj`, `cljc` and `cljs` formats) or data literals structure like EDN or JSON (`edn` and `json` format).
 
 ```
 clj -A:metav -m metav.spit --output-dir src --namespace metav.meta -formats clj
@@ -169,9 +169,8 @@ Version is deduced from the current state of the SCM working copy:
 
 The version is never persisted somewhere in source code to avoid any desynchronisation between SCM state and version number. _However_, the library can optionaly spit the metadata (module name and version) in file to be included in an artefact during the build process.
 
-**The SCM state drives the version.**
-
-**Version uses the Semantic Versioning scheme.**
+* **The SCM state drives the version.**
+* **Version uses the [Semantic Versioning scheme](https://semver.org).**
 
 We never use SNAPSHOT in version number as it's difficult to know what's really inside the binary artefact.
 
@@ -217,7 +216,7 @@ Don't forget to start the command with a `noglob` if you use `zsh` as the `%(...
 
 ## Meta management
 
-Metadata, like module name and version, should be deduced from the SCM and include in the binary artefact (JAR, docker image). Metadata file can be named `meta.edn`.
+Metadata, like module name and version, should be deduced from the SCM and included in the binary artefact (JAR, docker image). Metadata file can be named `meta.edn` for example.
 
 Metadata are:
 
@@ -231,10 +230,12 @@ See [spit function](#spit-current-version-in-a-file).
 
 # Rationale
 
-* **SCM reference (hash) -> Artefact. Artefact -> SCM reference (Hash).** We should be able to link a SCM hash to a software's binary artefact and the inverse: link a binary artefact to a reference in the SCM tree.
+* **SCM reference (hash) should give -> Artefact. **
+* **Artefact should give -> SCM reference (Hash).** 
+    * We should be able to link a SCM hash to a software's binary artefact and the inverse: link a binary artefact to a reference in the SCM tree.
 * **Version is derived from git state instead of the other way around** (like a file versioned in the repo, with all the desynchronisation risks)
-* **The library should accomodate a Monorepo style organization where several modules (directory containing a `deps.edn` file) lives under a top level repository, hence mixing the version and tag in it.**
-* **Determinism of the artifact construction from the source code SCM state.**
+* **The library should accomodate a Monorepo style organization** where several modules (directory containing a `deps.edn` file) lives under a top level repository, hence mixing the version and tag in it.
+* **Artifact construction from the source code SCM state should be deterministic.** An SCM reference should always give the same artefact.
 
 ## Release semantic
 
