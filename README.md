@@ -40,6 +40,13 @@ Metav is a library that helps the release and versioning process of Clojure proj
 
 Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several alias in your `deps.edn` for each main task (display, spit, release) like this with git ref:
 
+Latest version: 1.1.2
+
+[deps.edn](https://clojure.org/guides/deps_and_cli) dependency information:
+```
+{metav {:mvn/version "1.1.2"}}
+```
+
 ```clojure
 {:aliases {:metav {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "97721905fdc88c49e97626b38b8485535fdfaa70"}}}
            :artifact-name {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "97721905fdc88c49e97626b38b8485535fdfaa70"}}
@@ -239,7 +246,7 @@ See [spit function](#spit-current-version-in-a-file).
 
 ## Release semantic
 
-_Release_ means some source code changes in one or several commits are ready to be "published" in the repository for later deployment. The _Release_ process assigns a version number, tags the repo with it and push the changes. The _Release_ task is invoked by developer when she considers changes in source code are ready. Pushing binary artefact (JAR, docker image) is out of the scope of the _Release_ process and should be the responsibility of the CI system.
+_Release_ means some source code changes in one or several commits are ready to be "published" in the repository for later deployment. The _Release_ process assigns a version number, tags the repo with it and push the changes. The _Release_ task is invoked by developer when she considers changes in source code are ready. Pushing binary artefact (JAR, docker image, etc.) somewhere is out of the scope of the _Release_ process and should be the responsibility of the CI system.
 
 
 ## Change level (major, minor, patch)
