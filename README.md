@@ -5,6 +5,7 @@ Metav is a library that helps the release and versioning process of Clojure proj
 
 [![Clojars Project](https://img.shields.io/clojars/v/metav.svg)](https://clojars.org/metav)
 [![cljdoc badge](https://cljdoc.org/badge/metav/metav)](https://cljdoc.org/d/metav/metav/CURRENT)
+[![CircleCI](https://circleci.com/gh/jgrodziski/metav/tree/master.svg?style=svg)](https://circleci.com/gh/jgrodziski/metav/tree/master)
 [![License](https://img.shields.io/badge/License-EPL%201.0-blue.svg)](https://opensource.org/licenses/EPL-1.0)
 
 <div id="TOC">
