@@ -87,7 +87,7 @@
   ([] (assert-committed? nil))
   ([repo-dir]
    (when (re-find #"Changes (not staged for commit|to be committed)" (apply str (interpose " " (git-in-dir repo-dir "status"))))
-     (throw (Exception. (str "Untracked or uncommitted changes in " repo-dir " git directory (as stated by 'git status command')."))))))
+     (throw (Exception. (str "Untracked or uncommitted changes in " repo-dir " git directory (as stated by 'git status command'). Please add/commit your change to get a clean repo."))))))
 
 (defn latest-tag [repo-dir]
   (first (git-in-dir repo-dir "describe" "--abbrev=0")) )
