@@ -39,11 +39,11 @@ Metav is a library that helps the release and versioning process of Clojure proj
 
 # Installation
 
-Latest version: 1.1.4
+Latest version: 1.1.5
 
 [deps.edn](https://clojure.org/guides/deps_and_cli) dependency information:
 ```
-{metav {:mvn/version "1.1.4"}}
+{metav {:mvn/version "1.1.5"}}
 ```
 
 Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several alias in your `deps.edn` for each main task (display, spit, release) like this with git ref:
@@ -57,14 +57,14 @@ Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several ali
                      :main-opts ["-m" "metav.release"]}}}
 ```
 
-Or using the clojars version `{metav {:mvn/version "1.1.4"}}`:
+Or using the clojars version `{metav {:mvn/version "1.1.5"}}`:
 ```clojure
-{:aliases {:metav {:extra-deps {metav {:mvn/version "1.1.4"}}}
-           :artifact-name {:extra-deps {metav {:mvn/version "1.1.4"}}
+{:aliases {:metav {:extra-deps {metav {:mvn/version "1.1.5"}}}
+           :artifact-name {:extra-deps {metav {:mvn/version "1.1.5"}}
                            :main-opts ["-m" "metav.display"]}
-           :release {:extra-deps {metav {:mvn/version "1.1.4"}}
+           :release {:extra-deps {metav {:mvn/version "1.1.5"}}
                      :main-opts ["-m" "metav.release"]}
-           :spit     {:extra-deps {metav {:mvn/version "1.1.4"}}
+           :spit     {:extra-deps {metav {:mvn/version "1.1.5"}}
                       :main-opts ["-m" "metav.spit"
                                   "--output-dir" "src"
                                   "--namespace" "metav.meta"
