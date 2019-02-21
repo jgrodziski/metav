@@ -38,9 +38,9 @@
          current-version (version module-dir :scheme scheme)
          next-version (bump current-version level)
          tag (tag module-dir next-version)]
-     (log/info "Current version of module '" module-name "' is:" (str current-version))
-     (log/info "Next version of module '" module-name "' is:" (str next-version))
-     (log/info "Next tag is" tag)
+     (log/debug "Current version of module '" module-name "' is:" (str current-version))
+     (log/debug "Next version of module '" module-name "' is:" (str next-version))
+     (log/debug "Next tag is" tag)
      ;;spit meta file and commit
      (when spit
        (let [spitted (spit-files! module-dir next-version options)]
