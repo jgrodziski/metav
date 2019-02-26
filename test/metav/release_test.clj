@@ -2,9 +2,9 @@
   (:require [testit.core :refer :all]
             [metav.release :as release :refer [execute!]]
             [metav.git-shell :refer :all]
-            [metav.display :refer [version module-name prefix artefact-name *separator*]]
+            [metav.metadata :refer [invocation-context version module-name prefix artefact-name *separator*]]
             [metav.git :as git]
-            [metav.display-test :refer [monorepo]]
+            [metav.metadata-test :refer [monorepo]]
             [clojure.test :as t :refer :all]
             [me.raynes.fs :as fs]))
 
@@ -12,8 +12,8 @@
   (testing "bump from a clean tagged repo, testing the spitted files"
     (let [[monorepo remote moduleA1 moduleA2 moduleB1 moduleB2] (monorepo);module A1 latest tag is 1.3.4
           options {:spit true :output-dir "resources" :namespace "metav.meta" :formats "edn,clj,json"}
-          [module-name bumped-version tag push-result] (release/execute! moduleA1 "semver" :patch options)
-          [scm-base distance sha dirty?] (git/working-copy-description moduleA1 :prefix  (prefix moduleA1))]
+          [module-name bumped-version tag push-result] (release/execute! (invocation-context options moduleA1) :patch)
+          [scm-base distance sha dirty?] (git/working-copy-description moduleA1 :prefix (prefix moduleA1 module-name))]
       (facts
          (str bumped-version) => "1.3.5"
          scm-base => "1.3.5"
@@ -26,23 +26,23 @@
   (testing "bump from a clean tagged repo, two patch release, one minor, then one major"
     (let [[monorepo remote moduleA1 moduleA2 moduleB1 moduleB2] (monorepo);module A2 latest tag is 1.1.2
           options {:spit true :output-dir "resources" :namespace "meta" :formats "edn"}
-          [_ bumped-version1 tag1 _] (release/execute! moduleA2 "semver" :patch options)
-          [scm-base1 _ _ _] (git/working-copy-description moduleA2 :prefix (prefix moduleA2))
+          [module-name1 bumped-version1 tag1 _] (release/execute! (invocation-context options moduleA2) :patch )
+          [scm-base1 _ _ _] (git/working-copy-description moduleA2 :prefix (prefix moduleA2 module-name1))
           metadata1 (git/tag-message monorepo tag1)
           _ (Thread/sleep 500);need to wait because the time resolution of the git describe command needs some time to elapse before asking whether a new tag is available
 
-          [_ bumped-version2 tag2 _] (release/execute! moduleA2 "semver" :patch options)
-          [scm-base2 _ _ _] (git/working-copy-description moduleA2 :prefix (prefix moduleA2))
+          [module-name2 bumped-version2 tag2 _] (release/execute! (invocation-context options moduleA2) :patch)
+          [scm-base2 _ _ _] (git/working-copy-description moduleA2 :prefix (prefix moduleA2 module-name2))
           metadata2 (git/tag-message monorepo tag2)
           _ (Thread/sleep 500)
 
-          [_ bumped-version3 tag3 _] (release/execute! moduleA2 "semver" :minor options)
-          [scm-base3 _ _ _] (git/working-copy-description moduleA2 :prefix (prefix moduleA2))
+          [module-name3 bumped-version3 tag3 _] (release/execute! (invocation-context options moduleA2) :minor)
+          [scm-base3 _ _ _] (git/working-copy-description moduleA2 :prefix (prefix moduleA2 module-name3))
           metadata3 (git/tag-message monorepo tag3)
           _ (Thread/sleep 500)
 
-          [_ bumped-version4 tag4 _] (release/execute! moduleA2 "semver" :major options)
-          [scm-base4 _ _ _] (git/working-copy-description moduleA2 :prefix (prefix moduleA2))
+          [module-name4 bumped-version4 tag4 _] (release/execute! (invocation-context options moduleA2) :major)
+          [scm-base4 _ _ _] (git/working-copy-description moduleA2 :prefix (prefix moduleA2 module-name4))
           metadata4 (git/tag-message monorepo tag4)
           _ (Thread/sleep 500)
           ]

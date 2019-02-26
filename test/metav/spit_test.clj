@@ -3,5 +3,3 @@
             [testit.core :refer :all]
             [clojure.test :as t :refer [deftest testing]]))
 
-(deftest test-spit
-  )
