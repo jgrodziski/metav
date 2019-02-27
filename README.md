@@ -39,32 +39,32 @@ Metav is a library that helps the release and versioning process of Clojure proj
 
 # Installation
 
-Latest version: 1.1.5
+Latest version: 1.2.0
 
 [deps.edn](https://clojure.org/guides/deps_and_cli) dependency information:
 ```
-{metav {:mvn/version "1.1.5"}}
+{metav {:mvn/version "1.2.0"}}
 ```
 
 Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several alias in your `deps.edn` for each main task (display, spit, release) like this with git ref:
 
 
 ```clojure
-{:aliases {:metav {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "97721905fdc88c49e97626b38b8485535fdfaa70"}}}
-           :artifact-name {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "97721905fdc88c49e97626b38b8485535fdfaa70"}}
+{:aliases {:metav {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "9c35207cef45dd13ee81b2f1e092a4fc81f43861"}}}
+           :artifact-name {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "9c35207cef45dd13ee81b2f1e092a4fc81f43861"}}
                            :main-opts ["-m" "metav.display"]}
-           :release {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "97721905fdc88c49e97626b38b8485535fdfaa70"}}
+           :release {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "9c35207cef45dd13ee81b2f1e092a4fc81f43861"}}
                      :main-opts ["-m" "metav.release"]}}}
 ```
 
-Or using the clojars version `{metav {:mvn/version "1.1.5"}}`:
+Or using the clojars version `{metav {:mvn/version "1.2.0"}}`:
 ```clojure
-{:aliases {:metav {:extra-deps {metav {:mvn/version "1.1.5"}}}
-           :artifact-name {:extra-deps {metav {:mvn/version "1.1.5"}}
+{:aliases {:metav {:extra-deps {metav {:mvn/version "1.2.0"}}}
+           :artifact-name {:extra-deps {metav {:mvn/version "1.2.0"}}
                            :main-opts ["-m" "metav.display"]}
-           :release {:extra-deps {metav {:mvn/version "1.1.5"}}
+           :release {:extra-deps {metav {:mvn/version "1.2.0"}}
                      :main-opts ["-m" "metav.release"]}
-           :spit     {:extra-deps {metav {:mvn/version "1.1.5"}}
+           :spit     {:extra-deps {metav {:mvn/version "1.2.0"}}
                       :main-opts ["-m" "metav.spit"
                                   "--output-dir" "src"
                                   "--namespace" "metav.meta"
@@ -77,7 +77,7 @@ Or using the clojars version `{metav {:mvn/version "1.1.5"}}`:
 
 One liner:
 ```
-clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "97721905fdc88c49e97626b38b8485535fdfaa70"}}}' -m metav.display
+clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "9c35207cef45dd13ee81b2f1e092a4fc81f43861"}}}' -m metav.display
 ```
 
 If you've installed Metav's dependency in `deps.edn` like in the above Installation section, just run:
@@ -88,7 +88,10 @@ You should get something like:
 ```
 myawesomesys-backend        1.3.4
 ```
-The module name is deduced from the path: each directory name from the toplevel to the module dir is concatenated in the module name separated with a hyphen ('-'). Example: a module sitting in the directory `/myawesomesys/backend` would automatically give the module name `myawesomesys-backend`. 
+The module name is deduced from the path: each directory name from the toplevel to the module dir is concatenated in the module name separated with a hyphen ('-'). Example: a module sitting in the directory `/myawesomesys/backend` would automatically give the module name `myawesomesys-backend`. You also have the possibility to override the module name with the following option (available on the three tasks: display, release, spit):
+```
+  -r, --module-name-override MODULE-NAME Module Name Override
+```
 The tab character between the module name and version makes it easy to use `cut -f1` and `cut -f2` to extract the data in shell script. 
 
 ## Release
@@ -102,7 +105,7 @@ _Release_ is the process invoked by the developer when a code related to a chang
 
 One liner:
 ```
-clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "97721905fdc88c49e97626b38b8485535fdfaa70"}}}' -m metav.release
+clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha ""}}}' -m metav.release
 ```
 
 If you've installed Metav's dependency in `deps.edn` like in the above Installation section, just run:
@@ -127,12 +130,13 @@ Usage: metav.release [options] <level>
 with <level>: major, minor or patch
 
 Options:
-  -s, --spit                            Indicates the release process should spit the metadata file as with the "spit" task, in that case the spit options must be provided
-  -o, --output-dir DIR_PATH  resources  Output Directory
-  -n, --namespace NS         meta       Namespace used in code output
-  -f, --formats FORMATS      edn        Comma-separated list of output formats (clj, cljc, cljs, edn, json)
-  -v, --verbose                         Verbose, output the metadata as json in stdout if the option is present
-  -h, --help                            Help
+  -s, --spit                             Indicates the release process should spit the metadata file as with the "spit" task, in that case the spit options must be provided
+  -o, --output-dir DIR_PATH  resources   Output Directory
+  -n, --namespace NS         meta        Namespace used in code output
+  -f, --formats FORMATS      edn         Comma-separated list of output formats (clj, cljc, cljs, edn, json)
+  -r, --module-name-override MODULE-NAME Module Name Override
+  -v, --verbose                          Verbose, output the metadata as json in stdout if the option is present
+  -h, --help                             Help
 
 ```
 
@@ -157,11 +161,12 @@ The metadata is composed of: module-name, tag, version, path, timestamp
 Usage: metav.spit [options]
 
 Options:
-  -o, --output-dir DIR_PATH  resources  Output Directory
-  -n, --namespace NS         meta       Namespace used in code output
-  -f, --formats FORMATS      edn        Comma-separated list of output formats (clj, cljc, cljs, edn, json)
-  -v, --verbose                         Verbose, output the metadata as json in stdout if the option is present
-  -h, --help                            Help
+  -o, --output-dir DIR_PATH  resources   Output Directory
+  -n, --namespace NS         meta        Namespace used in code output
+  -f, --formats FORMATS      edn         Comma-separated list of output formats (clj, cljc, cljs, edn, json)
+  -r, --module-name-override MODULE-NAME Module Name Override
+  -v, --verbose                          Verbose, output the metadata as json in stdout if the option is present
+  -h, --help                             Help
 ```
 
 # Behavior
