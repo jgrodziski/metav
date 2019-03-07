@@ -20,19 +20,18 @@
 
 (defmethod spit-file! "edn" [{:keys [working-dir output-dir namespace format] :as invocation-context} version]
   (let [metafile (metafile! (str working-dir "/" output-dir) namespace format)]
-    (spit metafile (pr-str (metadata-as-edn invocation-context)))
+    (spit metafile (pr-str (metadata-as-edn invocation-context version)))
     (str metafile)))
 
 (defmethod spit-file! "json" [{:keys [working-dir output-dir namespace format] :as invocation-context} version]
   (let [metafile (metafile! (str working-dir "/" output-dir) namespace format)]
-    (spit metafile (json/write-str (metadata-as-edn invocation-context)))
+    (spit metafile (json/write-str (metadata-as-edn invocation-context version)))
     (str metafile)))
 
 (defmethod spit-file! :default [{:keys [working-dir output-dir namespace format] :as invocation-context} version];default are cljs,clj and cljc
   (let [metafile (metafile! (str working-dir "/" output-dir) namespace format)]
-    (spit metafile (metadata-as-code invocation-context))
+    (spit metafile (metadata-as-code invocation-context version))
     (str metafile)))
-
 
 (defn spit-files!
   [{:keys [namespace formats module-name-override working-dir] :as invocation-context} version];invocation from release, the next version is given as arguments
