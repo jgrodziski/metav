@@ -9,10 +9,10 @@
 (defmulti spit-stdout! :output-format)
 
 (defmethod spit-stdout! "edn" [invocation-context]
-  (print (metadata-as-edn invocation-context)))
+  (print (metadata-as-edn invocation-context (:version invocation-context))))
 
 (defmethod spit-stdout! "json" [invocation-context]
-  (print (json/write-str (metadata-as-edn invocation-context))))
+  (print (json/write-str (metadata-as-edn invocation-context (:version invocation-context)))))
 
 (defmethod spit-stdout! :default [{:keys [module-name version] :as invocation-context}];default is tab separated module-name and version
   (print (str module-name "\t" (str version))))

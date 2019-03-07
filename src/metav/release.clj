@@ -54,6 +54,6 @@
     (log/debug "Spitting metadata requested? " spit ". If true spit metadata (module-name, tag, version, sha, timestamp) in dir " output-dir " with namespace " namespace " and formats " formats)
     (let [[_ _ tag _] (execute! invocation-context level)]
       (if (:verbose options)
-        (print (json/write-str (metadata-as-edn invocation-context)))
+        (print (json/write-str (metadata-as-edn invocation-context (:version invocation-context))))
         (print tag))
       (shutdown-agents))))

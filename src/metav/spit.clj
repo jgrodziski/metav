@@ -47,5 +47,5 @@
       (exit (if ok? 0 1) exit-message))
     (spit-files! invocation-context version);spit files invoked from CLI deduce the current version from git state
     (if (:verbose options)
-      (print (json/write-str (metadata-as-edn invocation-context))))
+      (print (json/write-str (metadata-as-edn invocation-context (:version invocation-context)))))
     (shutdown-agents)))
