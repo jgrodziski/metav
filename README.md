@@ -39,32 +39,31 @@ Metav is a library that helps the release and versioning process of Clojure proj
 
 # Installation
 
-Latest version: 1.2.0
+Latest version: 1.2.2
 
 [deps.edn](https://clojure.org/guides/deps_and_cli) dependency information:
 ```
-{metav {:mvn/version "1.2.0"}}
+{metav {:mvn/version "1.2.2"}}
 ```
 
 Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several alias in your `deps.edn` for each main task (display, spit, release) like this with git ref:
 
-
 ```clojure
-{:aliases {:metav {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "9c35207cef45dd13ee81b2f1e092a4fc81f43861"}}}
-           :artifact-name {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "9c35207cef45dd13ee81b2f1e092a4fc81f43861"}}
+{:aliases {:metav {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "951566e4d3fd0fa701029d2fc9f2e20609cae953"}}}
+           :artifact-name {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "951566e4d3fd0fa701029d2fc9f2e20609cae953"}}
                            :main-opts ["-m" "metav.display"]}
-           :release {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "9c35207cef45dd13ee81b2f1e092a4fc81f43861"}}
+           :release {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "951566e4d3fd0fa701029d2fc9f2e20609cae953"}}
                      :main-opts ["-m" "metav.release"]}}}
 ```
 
-Or using the clojars version `{metav {:mvn/version "1.2.0"}}`:
+Or using the clojars version `{metav {:mvn/version "1.2.2"}}`:
 ```clojure
-{:aliases {:metav {:extra-deps {metav {:mvn/version "1.2.0"}}}
-           :artifact-name {:extra-deps {metav {:mvn/version "1.2.0"}}
+{:aliases {:metav {:extra-deps {metav {:mvn/version "1.2.2"}}}
+           :artifact-name {:extra-deps {metav {:mvn/version "1.2.2"}}
                            :main-opts ["-m" "metav.display"]}
-           :release {:extra-deps {metav {:mvn/version "1.2.0"}}
+           :release {:extra-deps {metav {:mvn/version "1.2.2"}}
                      :main-opts ["-m" "metav.release"]}
-           :spit     {:extra-deps {metav {:mvn/version "1.2.0"}}
+           :spit     {:extra-deps {metav {:mvn/version "1.2.2"}}
                       :main-opts ["-m" "metav.spit"
                                   "--output-dir" "src"
                                   "--namespace" "metav.meta"
@@ -77,7 +76,7 @@ Or using the clojars version `{metav {:mvn/version "1.2.0"}}`:
 
 One liner:
 ```
-clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "9c35207cef45dd13ee81b2f1e092a4fc81f43861"}}}' -m metav.display
+clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "951566e4d3fd0fa701029d2fc9f2e20609cae953"}}}' -m metav.display
 ```
 
 If you've installed Metav's dependency in `deps.edn` like in the above Installation section, just run:
