@@ -23,7 +23,7 @@
   commit, tag with the version (hence denoting a release),
   then push
   return [module-name next-version tag push-result]"
-  [{:keys [working-dir module-name version version-scheme spit output-dir namespace formats] :as invocation-context} level]
+  [{:keys [working-dir module-name version version-scheme without-push spit output-dir namespace formats] :as invocation-context} level]
   (when-not (accepted-levels level) (throw (Exception. (str "Incorrect level: "level". Accepted levels are:" (string/join accepted-levels ", ")))))
   (log/debug "execute!" invocation-context level)
   (assert-in-module? working-dir)
@@ -41,13 +41,15 @@
         (git/commit! working-dir (str "Bump to version " next-version " and spit related metadata in file(s)."))))
                                         ;then tag
     (git/tag! repo-dir tag (json/write-str (metadata-as-edn invocation-context next-version)))
-    (let [push-result (git/push! repo-dir)]
-      [module-name next-version tag push-result])))
+    (if without-push
+      [module-name next-version tag]
+      (let [push-result (git/push! repo-dir)]
+        [module-name next-version tag push-result]))))
 
 
 (defn -main [& args]
   (let [{:keys [level options exit-message ok?] :as vargs} (validate-args args)
-        {:keys [spit output-dir namespace formats module-name-override] :as invocation-context} (invocation-context options)]
+        {:keys [without-push spit output-dir namespace formats module-name-override] :as invocation-context} (invocation-context options)]
     (when exit-message
       (exit (if ok? 0 1) exit-message))
     (log/debug "Release level is " level ". Assert everything is committed, bump the version, tag and push.")
