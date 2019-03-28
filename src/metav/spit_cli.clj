@@ -22,6 +22,8 @@
    ["-f" "--formats FORMATS" "Comma-separated list of output formats (clj, cljc, cljs, edn, json)"
     :default (:formats default-options)
     :validate [#(empty? (set/difference (parse-formats %) accepted-formats)) "Formats must be in the following list: clj, cljc, cljs, edn, json"]]
+   ["-t" "--template TEMPLATE" "Template used for rendering (must follows mustache format, spitted data is available during template rendering)"]
+   ["-d" "--rendering-output RENDERING-OUTPUT" "File to render template in"]
    ["-r" "--module-name-override MODULE-NAME" "Module Name Override"
     :parse-fn str]
    ["-v" "--verbose" "Verbose, output the metadata as json in stdout if the option is present"

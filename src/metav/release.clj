@@ -23,7 +23,7 @@
   commit, tag with the version (hence denoting a release),
   then push
   return [module-name next-version tag push-result]"
-  [{:keys [working-dir module-name version version-scheme without-push spit output-dir namespace formats] :as invocation-context} level]
+  [{:keys [working-dir module-name version version-scheme without-push spit output-dir namespace formats template rendering-output] :as invocation-context} level]
   (when-not (accepted-levels level) (throw (Exception. (str "Incorrect level: "level". Accepted levels are:" (string/join accepted-levels ", ")))))
   (log/debug "execute!" invocation-context level)
   (assert-in-module? working-dir)
@@ -38,8 +38,12 @@
     (when spit
       (let [spitted (spit-files! invocation-context next-version)]
         (apply git/add! working-dir spitted)
-        (git/commit! working-dir (str "Bump to version " next-version " and spit related metadata in file(s)."))))
-                                        ;then tag
+        )) ;then tag
+    (when template
+      (let [rendered (render! invocation-context next-version)]
+        (apply git/add! working-dir rendered)))
+    (when (or spit template)
+      (git/commit! working-dir (str "Bump to version " next-version " and spit/render related metadata in file(s).")))
     (git/tag! repo-dir tag (json/write-str (metadata-as-edn invocation-context next-version)))
     (if without-push
       [module-name next-version tag]
