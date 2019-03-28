@@ -4,7 +4,7 @@
             [clojure.string :as string]
             [metav.git :as git]
             [metav.metadata :refer [tag invocation-context metadata-as-edn]]
-            [metav.spit :as spit :refer [spit-files!]]
+            [metav.spit :as spit :refer [spit-files! render!]]
             [metav.repo :refer [monorepo? dedicated-repo?]]
             [metav.version.protocols :refer [bump]]
             [metav.release-cli :refer [validate-args accepted-levels exit]]
@@ -37,10 +37,9 @@
     ;;spit meta file and commit
     (when spit
       (let [spitted (spit-files! invocation-context next-version)]
-        (apply git/add! working-dir spitted)
-        )) ;then tag
+        (apply git/add! working-dir spitted))) ;then tag
     (when template
-      (let [rendered (render! invocation-context next-version)]
+      (let [rendered (spit/render! invocation-context next-version)]
         (apply git/add! working-dir rendered)))
     (when (or spit template)
       (git/commit! working-dir (str "Bump to version " next-version " and spit/render related metadata in file(s).")))
