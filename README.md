@@ -14,7 +14,7 @@ Metav is a library that helps the release and versioning process of Clojure proj
 <li><a href="#usage">Usage</a><ul>
 <li><a href="#display-current-version">Display current version</a></li>
 <li><a href="#release">Release</a></li>
-<li><a href="#spit-current-version-in-a-file">Spit current version in a file</a></li>
+<li><a href="#spit-current-version-in-a-file">Spit or render current version in a file</a></li>
 </ul></li>
 <li><a href="#behavior">Behavior</a>
 <ul>
@@ -141,7 +141,7 @@ Options:
 
 ```
 
-## Spit current version in a file
+## Spit or render current version in a file
 
 The spit feature output the current state of the module in the repo in one or several files that can be directly Clojure source code (`clj`, `cljc` and `cljs` formats) or data literals structure like EDN or JSON (`edn` and `json` format).
 You can also render a mustache template with the `-t` and `-d` option (see options below) to output a file with the metadata used in the template (like the version). A typical use case would be to link to a specific version of an artefact (like a link to a JS bundle in a HTML file).
