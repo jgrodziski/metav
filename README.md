@@ -39,11 +39,11 @@ Metav is a library that helps the release and versioning process of Clojure proj
 
 # Installation
 
-Latest version: 1.3.0
+Latest version: 1.4.0
 
 [deps.edn](https://clojure.org/guides/deps_and_cli) dependency information:
 ```
-{metav {:mvn/version "1.3.0"}}
+{metav {:mvn/version "1.4.0"}}
 ```
 
 Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several alias in your `deps.edn` for each main task (display, spit, release) like this with git ref:
@@ -56,14 +56,14 @@ Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several ali
                      :main-opts ["-m" "metav.release"]}}}
 ```
 
-Or using the clojars version `{metav {:mvn/version "1.3.0"}}`:
+Or using the clojars version `{metav {:mvn/version "1.4.0"}}`:
 ```clojure
-{:aliases {:metav {:extra-deps {metav {:mvn/version "1.3.0"}}}
-           :artifact-name {:extra-deps {metav {:mvn/version "1.3.0"}}
+{:aliases {:metav {:extra-deps {metav {:mvn/version "1.4.0"}}}
+           :artifact-name {:extra-deps {metav {:mvn/version "1.4.0"}}
                            :main-opts ["-m" "metav.display"]}
-           :release {:extra-deps {metav {:mvn/version "1.3.0"}}
+           :release {:extra-deps {metav {:mvn/version "1.4.0"}}
                      :main-opts ["-m" "metav.release"]}
-           :spit     {:extra-deps {metav {:mvn/version "1.3.0"}}
+           :spit     {:extra-deps {metav {:mvn/version "1.4.0"}}
                       :main-opts ["-m" "metav.spit"
                                   "--output-dir" "src"
                                   "--namespace" "metav.meta"
@@ -130,18 +130,21 @@ with <level>: major, minor or patch
 
 Options:
   -s, --spit                             Indicates the release process should spit the metadata file as with the "spit" task, in that case the spit options must be provided
-  -o, --output-dir DIR_PATH  resources   Output Directory
-  -n, --namespace NS         meta        Namespace used in code output
-  -f, --formats FORMATS      edn         Comma-separated list of output formats (clj, cljc, cljs, edn, json)
-  -r, --module-name-override MODULE-NAME Module Name Override
-  -v, --verbose                          Verbose, output the metadata as json in stdout if the option is present
-  -h, --help                             Help
+  -o, --output-dir DIR_PATH  resources    Output Directory
+  -n, --namespace NS         meta         Namespace used in code output
+  -f, --formats FORMATS      edn          Comma-separated list of output formats (clj, cljc, cljs, edn, json)
+  -t, --template TEMPLATE                 Template used for rendering (must follows mustache format, spitted data is available during template rendering)
+  -d, --rendering-output RENDERING-OUTPUT File to render template in
+  -r, --module-name-override MODULE-NAME  Module Name Override
+  -v, --verbose                           Verbose, output the metadata as json in stdout if the option is present
+  -h, --help                              Help
 
 ```
 
 ## Spit current version in a file
 
 The spit feature output the current state of the module in the repo in one or several files that can be directly Clojure source code (`clj`, `cljc` and `cljs` formats) or data literals structure like EDN or JSON (`edn` and `json` format).
+You can also render a mustache template with the `-t` and `-d` option (see options below) to output a file with the metadata used in the template (like the version). A typical use case would be to link to a specific version of an artefact (like a link to a JS bundle in a HTML file).
 
 ```
 clj -A:metav -m metav.spit --output-dir src --namespace metav.meta -formats clj
@@ -160,12 +163,14 @@ The metadata is composed of: module-name, tag, version, path, timestamp
 Usage: metav.spit [options]
 
 Options:
-  -o, --output-dir DIR_PATH  resources   Output Directory
-  -n, --namespace NS         meta        Namespace used in code output
-  -f, --formats FORMATS      edn         Comma-separated list of output formats (clj, cljc, cljs, edn, json)
-  -r, --module-name-override MODULE-NAME Module Name Override
-  -v, --verbose                          Verbose, output the metadata as json in stdout if the option is present
-  -h, --help                             Help
+  -o, --output-dir DIR_PATH  resources    Output Directory
+  -n, --namespace NS         meta         Namespace used in code output
+  -f, --formats FORMATS      edn          Comma-separated list of output formats (clj, cljc, cljs, edn, json)
+  -t, --template TEMPLATE                 Template used for rendering (must follows mustache format, spitted data is available during template rendering)
+  -d, --rendering-output RENDERING-OUTPUT File to render template in
+  -r, --module-name-override MODULE-NAME  Module Name Override
+  -v, --verbose                           Verbose, output the metadata as json in stdout if the option is present
+  -h, --help                              Help
 ```
 
 # Behavior
