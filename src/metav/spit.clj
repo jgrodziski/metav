@@ -4,7 +4,7 @@
             [metav.spit-cli :refer [parse-formats validate-args exit]]
             [clojure.java.io :refer [file]]
             [clojure.data.json :as json]
-            [clostache.parser :refer [render-resource]]
+            [cljstache.core :refer [render-resource]]
             [me.raynes.fs :as fs]
             [clojure.string :as str]))
 
