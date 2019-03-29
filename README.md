@@ -14,7 +14,7 @@ Metav is a library that helps the release and versioning process of Clojure proj
 <li><a href="#usage">Usage</a><ul>
 <li><a href="#display-current-version">Display current version</a></li>
 <li><a href="#release">Release</a></li>
-<li><a href="#spit-current-version-in-a-file">Spit or render current version in a file</a></li>
+<li><a href="#spit-or-render-current-version-in-a-file">Spit or render current version in a file</a></li>
 </ul></li>
 <li><a href="#behavior">Behavior</a>
 <ul>
@@ -146,6 +146,20 @@ Options:
 The spit feature output the current state of the module in the repo in one or several files that can be directly Clojure source code (`clj`, `cljc` and `cljs` formats) or data literals structure like EDN or JSON (`edn` and `json` format).
 You can also render a mustache template with the `-t` and `-d` option (see options below) to output a file with the metadata used in the template (like the version). A typical use case would be to link to a specific version of an artefact (like a link to a JS bundle in a HTML file).
 
+### Example of _spitted_ output as source code
+
+```clojure
+(ns metav.meta)
+
+(def module-name "metav")
+(def path ".")
+(def version "1.1.2")
+(def tag "v1.1.2")
+(def generated-at "2019-02-02T22:57:54Z")
+```
+
+### Usage
+
 ```
 clj -A:metav -m metav.spit --output-dir src --namespace metav.meta -formats clj
 ;will output src/metav/meta.clj
@@ -154,7 +168,7 @@ clj -A:metav -m metav.spit --output-dir resources --namespace meta -formats edn,
 ;will output resources/meta.edn and resources.json
 ```
 
-The `spit` usage is (`clj -Ametav -m metav.spit --help`):
+The `spit` usage help is (`clj -Ametav -m metav.spit --help`):
 
 ```
 The spit function of Metav output module's metadata in files according the given formats among: clj, cljc, cljs, edn or json.
