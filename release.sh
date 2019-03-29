@@ -35,10 +35,9 @@ fi
 
 # mvn deploy 2>&1 > /dev/null
 
-ARTIFACT_NAME=$(clj -A:artifact-name)
+ARTIFACT_NAME=$(clj -m metav.display)
 ARTIFACT_ID=$(echo "$ARTIFACT_NAME" | cut -f1)
 ARTIFACT_VERSION=$(echo "$ARTIFACT_NAME" | cut -f2)
-JAR_FILENAME="$ARTIFACT_ID-$ARTIFACT_VERSION.jar"
 
 mvn deploy
 
