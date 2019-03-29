@@ -28,5 +28,4 @@
            :spit    {:main-opts ["-m" "metav.spit"
                                  "--output-dir" "src"
                                  "--namespace" "metav.meta"
-                                 "--formats" "clj"
-                                 "--module-name-override" "testover"]}}}
+                                 "--formats" "clj"]}}}
