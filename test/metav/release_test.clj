@@ -80,6 +80,7 @@
           _ (write-dummy-file-in! "sysB" "container3" "src" "dummy1")
           _ (add!)
           _ (commit!)
+          _ (Thread/sleep 500)
           [module-name bumped-version2 tag2 _] (release/execute! (invocation-context options moduleB3) :minor )
           ]
       (println monorepo)
