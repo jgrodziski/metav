@@ -93,12 +93,18 @@
                          (write-dummy-file-in! "sysB" "container2" "src")
                          (add!)
                          (commit!)
-                         (tag! "sysB-container2-1.5.7"))
+                         (tag! "sysB-container2-1.5.7")
+                         (write-dummy-deps-edn-in! "sysB" "container3")
+                         (write-dummy-file-in! "sysB" "container3" "src")
+                         (add!)
+                         (commit!)
+                         )
         moduleA1 (str monorepo "/sysA/container1")
         moduleA2 (str monorepo "/sysA/container2")
         moduleB1 (str monorepo "/sysB/container1")
-        moduleB2 (str monorepo "/sysB/container2")]
-    [monorepo remote moduleA1 moduleA2 moduleB1 moduleB2]))
+        moduleB2 (str monorepo "/sysB/container2")
+        moduleB3 (str monorepo "/sysB/container3")]
+    [monorepo remote moduleA1 moduleA2 moduleB1 moduleB2 moduleB3]))
 
 (deftest tag-name
   (testing "a monorepo should prefix the tag with the module-name"

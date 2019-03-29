@@ -10,7 +10,7 @@
 
 (deftest release-repo
   (testing "bump from a clean tagged repo, testing the spitted files"
-    (let [[monorepo remote moduleA1 moduleA2 moduleB1 moduleB2] (monorepo);module A1 latest tag is 1.3.4
+    (let [[monorepo remote moduleA1 moduleA2 moduleB1 moduleB2] (monorepo);module A1 latest tag is 1.3.4, moduleB3 should be 0.1.0 not tagged
           options {:spit true :output-dir "resources" :namespace "metav.meta" :formats "edn,clj,json"}
           [module-name bumped-version tag push-result] (release/execute! (invocation-context options moduleA1) :patch)
           [scm-base distance sha dirty?] (git/working-copy-description moduleA1 :prefix (prefix moduleA1 module-name))]
@@ -23,6 +23,7 @@
          (fs/exists? (str moduleA1 "/resources/metav/meta.json")) => true)
       (fs/delete monorepo)
       (fs/delete remote)))
+  
   (testing "bump from a clean tagged repo, two patch release, one minor, then one major"
     (let [[monorepo remote moduleA1 moduleA2 moduleB1 moduleB2] (monorepo);module A2 latest tag is 1.1.2
           options {:spit true :output-dir "resources" :namespace "meta" :formats "edn"}
@@ -71,5 +72,23 @@
       (fs/delete monorepo)
       (fs/delete remote))))
 
+(deftest release-test-two-times-with-same-level
+  (testing "release a repo two times with the same release level (minor)"
+    (let [[monorepo remote _ _ _ _ moduleB3] (monorepo)
+          options {:spit true :output-dir "resources" :namespace "meta" :formats "edn"}
+          [module-name bumped-version1 tag1 _] (release/execute! (invocation-context options moduleB3) :minor )
+          _ (write-dummy-file-in! "sysB" "container3" "src" "dummy1")
+          _ (add!)
+          _ (commit!)
+          [module-name bumped-version2 tag2 _] (release/execute! (invocation-context options moduleB3) :minor )
+          ]
+      (println monorepo)
+      (facts
+       (str bumped-version1) => "0.2.0"
+       (str bumped-version2) => "0.3.0"
+       )
+      (fs/delete monorepo)
+      (fs/delete remote)
+      )))
 ;; execute several release in different module with different level each time (major, minor, patch)
 ;; assert the bump function works correctly (bump the appropriate level)
