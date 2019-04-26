@@ -53,24 +53,24 @@ Latest version: 1.4.6
 Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several alias in your `deps.edn` for each main task (display, spit, release) like this with git ref:
 
 ```clojure
-{:aliases {:metav {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "951566e4d3fd0fa701029d2fc9f2e20609cae953"}}}
-           :artifact-name {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "951566e4d3fd0fa701029d2fc9f2e20609cae953"}}
+{:aliases {:metav {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "42ed18317ec843813e5084b4a4b616eb03e9679e"}}}
+           :artifact-name {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "42ed18317ec843813e5084b4a4b616eb03e9679e"}}
                            :main-opts ["-m" "metav.display"]}
-           :release {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "951566e4d3fd0fa701029d2fc9f2e20609cae953"}}
+           :release {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "42ed18317ec843813e5084b4a4b616eb03e9679e"}}
                      :main-opts ["-m" "metav.release"]}}}
 ```
 
-Or using the clojars version `{metav {:mvn/version "1.4.6"}}`:
+Or using the clojars version `{metav {:mvn/version "1.4.6"}}` or use `{metav {:mvn/version "LATEST"}}` to always living on the edge:
 ```clojure
-{:aliases {:metav {:extra-deps {metav {:mvn/version "1.4.6"}}}
-           :artifact-name {:extra-deps {metav {:mvn/version "1.4.6"}}
+{:aliases {:metav {:extra-deps {metav {:mvn/version "LATEST"}}}
+           :artifact-name {:extra-deps {metav {:mvn/version "LATEST"}}
                            :main-opts ["-m" "metav.display"]}
-           :release {:extra-deps {metav {:mvn/version "1.4.6"}}
+           :release {:extra-deps {metav {:mvn/version "LATEST"}}
                      :main-opts ["-m" "metav.release"]}
-           :spit     {:extra-deps {metav {:mvn/version "1.4.6"}}
+           :spit     {:extra-deps {metav {:mvn/version "LATEST"}}
                       :main-opts ["-m" "metav.spit"
                                   "--output-dir" "src"
-                                  "--namespace" "metav.meta"
+                                  "--namespace" "yournamespace.meta"
                                   "--formats" "clj"]}}}
 ```
 
@@ -80,7 +80,7 @@ Or using the clojars version `{metav {:mvn/version "1.4.6"}}`:
 
 One liner:
 ```
-clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "951566e4d3fd0fa701029d2fc9f2e20609cae953"}}}' -m metav.display
+clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "42ed18317ec843813e5084b4a4b616eb03e9679e"}}}' -m metav.display
 ```
 
 If you've installed Metav's dependency in `deps.edn` like in the above Installation section, just run:
@@ -98,8 +98,8 @@ The module name is deduced from the path: each directory name from the toplevel 
 The tab character between the module name and version makes it easy to use `cut -f1` and `cut -f2` to extract the data in shell script. 
 
 ## Release
-
-_Release_ is the process invoked by the developer when a code related to a change is ready for prime time, hence releasable. The release process does the following:
+TEST
+_Release_ is the process invoked by the developer when a code related to a change is ready for prime time, hence releasable. The release process does the following:TEST
 - **Check** everything is committed (no untracked or uncommitted file(s) otherwise the release process is aborted)
 - **Bump** the current version according to the release level of the change (major, minor or patch)
 - **[Optionaly: Spit and Commit metadata]**: Spit metadata in file(s) (version, tag, timestamp, module-name, etc.) with the `-s, --spit` option flag (presence means spitting metadata).
