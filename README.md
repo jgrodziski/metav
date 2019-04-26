@@ -98,7 +98,7 @@ The module name is deduced from the path: each directory name from the toplevel 
 The tab character between the module name and version makes it easy to use `cut -f1` and `cut -f2` to extract the data in shell script. 
 
 ## Release
-TEST
+
 _Release_ is the process invoked by the developer when a code related to a change is ready for prime time, hence releasable. The release process does the following:TEST
 - **Check** everything is committed (no untracked or uncommitted file(s) otherwise the release process is aborted)
 - **Bump** the current version according to the release level of the change (major, minor or patch)
@@ -108,7 +108,7 @@ _Release_ is the process invoked by the developer when a code related to a chang
 
 One liner:
 ```
-clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha ""}}}' -m metav.release
+clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "42ed18317ec843813e5084b4a4b616eb03e9679e"}}}' -m metav.release
 ```
 
 If you've installed Metav's dependency in `deps.edn` like in the above Installation section, just run:
