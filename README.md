@@ -97,6 +97,17 @@ The module name is deduced from the path: each directory name from the toplevel 
 ```
 The tab character between the module name and version makes it easy to use `cut -f1` and `cut -f2` to extract the data in shell script. 
 
+To avoid problem with logging libraries that can mess up the stdout and make it difficult to extract the module name and version, you can output the metadata in a file with the `spit` function and then extract the values to build the artifact name. Example:
+
+```shell
+clj -A:metav -m "metav.spit" "-o" "target" "-f" "json"
+ARTIFACT_ID=$(cat target/meta.json | jq '."module-name"')
+ARTIFACT_VERSION=$(cat target/meta.json | jq '."version"')
+ARTIFACT_TAG=$(cat target/meta.json | jq '."tag"')
+JAR_FILENAME="$ARTIFACT_TAG.jar"
+
+```
+
 ## Release
 
 _Release_ is the process invoked by the developer when a code related to a change is ready for prime time, hence releasable. The release process does the following:TEST
@@ -221,7 +232,7 @@ We believe repo layout should follows some convention regarding the system, cont
 
 - `Monorepo root`
     - `Internet_Banking` (_System_ in C4 model)
-        - `Web_Application`
+    - `Web_Application`
         - `Single_Page_Application`
         - `Mobile_App`
         - `API` (_Container_ in C4 model, actual project that delivers an artefact whose name is `Internet_Banking-API`)
