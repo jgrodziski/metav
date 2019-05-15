@@ -1,8 +1,8 @@
 (ns metav.release
-  (:require [clojure.tools.logging :as log]
+  (:require [clojure.tools.logging :as log :refer [debug]]
             [clojure.data.json :as json]
             [clojure.string :as string]
-            [metav.git :as git]
+            [metav.git :as git :refer [assert-committed?]]
             [metav.metadata :refer [tag invocation-context metadata-as-edn]]
             [metav.spit :as spit :refer [spit-files! render!]]
             [metav.repo :refer [monorepo? dedicated-repo?]]
@@ -17,6 +17,9 @@
   ;;TODO implement it :)
   true)
 
+(defn assert-accepted-level? [level]
+  (when-not (accepted-levels level) (throw (ex-info (str "Incorrect level: "level". Accepted levels are:" (string/join accepted-levels ", ")) {:accepted-levels accepted-levels :level level}))))
+
 (defn execute!
   "assert that nothing leaves uncommitted or untracked,
   then bump version to a releasable one (depending on the release level),
@@ -24,16 +27,16 @@
   then push
   return [module-name next-version tag push-result]"
   [{:keys [working-dir module-name version version-scheme without-push spit output-dir namespace formats template rendering-output] :as invocation-context} level]
-  (when-not (accepted-levels level) (throw (Exception. (str "Incorrect level: "level". Accepted levels are:" (string/join accepted-levels ", ")))))
-  (log/debug "execute!" invocation-context level)
+  (assert-accepted-level? level)
   (assert-in-module? working-dir)
-  (git/assert-committed? working-dir)
+  (assert-committed? working-dir)
+  (debug "execute!" invocation-context level)
+  (debug "Current version of module '" module-name "' is:" (str version))
   (let [repo-dir (git/toplevel working-dir)
         next-version (bump version level)
         tag (tag working-dir module-name next-version)]
-    (log/debug "Current version of module '" module-name "' is:" (str version))
-    (log/debug "Next version of module '" module-name "' is:" (str next-version))
-    (log/debug "Next tag is" tag)
+    (debug "Next version of module '" module-name "' is:" (str next-version))
+    (debug "Next tag is" tag)
     ;;spit meta file and commit
     (when spit
       (let [spitted (spit-files! invocation-context next-version)]
@@ -55,10 +58,9 @@
 (defn -main [& args]
   (let [{:keys [level options exit-message ok?] :as vargs} (validate-args args)
         {:keys [without-push spit output-dir namespace formats module-name-override] :as invocation-context} (invocation-context options)]
-    (when exit-message
-      (exit (if ok? 0 1) exit-message))
-    (log/debug "Release level is " level ". Assert everything is committed, bump the version, tag and push.")
-    (log/debug "Spitting metadata requested? " spit ". If true spit metadata (module-name, tag, version, sha, timestamp) in dir " output-dir " with namespace " namespace " and formats " formats)
+    (when exit-message (exit (if ok? 0 1) exit-message))
+    (debug "Release level is " level ". Assert everything is committed, bump the version, tag and push.")
+    (debug "Spitting metadata requested? " spit ". If true spit metadata (module-name, tag, version, sha, timestamp) in dir " output-dir " with namespace " namespace " and formats " formats)
     (let [[_ _ tag _] (execute! invocation-context level)]
       (if (:verbose options)
         (print (json/write-str (metadata-as-edn invocation-context (:version invocation-context))))
