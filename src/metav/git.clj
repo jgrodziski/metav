@@ -1,6 +1,6 @@
 (ns metav.git
-  (:require [clojure.string :as string]
-            [clojure.java.shell :as shell]
+  (:require [clojure.java.shell :as shell]
+            [clojure.string :as string]
             [clojure.tools.logging :as log]))
 
 (def ^:dynamic *prefix* "v")
@@ -145,6 +145,9 @@
 
 (defn tag-message [working-dir tag]
   (git-in-dir working-dir "tag" "-l" "--format" "%(contents:subject)" tag))
+
+(defn tag-verify [working-dir tag]
+  (git-in-dir working-dir "tag" "-v" tag))
 
 (defn last-sha [working-dir]
   (first (git-in-dir working-dir "rev-parse" "HEAD")))

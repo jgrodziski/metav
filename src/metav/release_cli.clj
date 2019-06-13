@@ -7,15 +7,16 @@
 (def accepted-levels #{:major :minor :patch})
 
 (def cli-options
-  (cons
-   ["-s" "--spit" "Indicates the release process should spit the metadata file as with the \"spit\" task, in that case the spit options must be provided"
+  (into [[nil "--without-sign" "Whether the released git tag should be signed with the current user's GPG key."
     :default false
     :default-desc "false"]
-   (cons 
-    ["-w" "--without-push" "Execute the release process but without pushing at the end, if you want to control the pushing instant yourself"
-     :default false
-     :default-desc "false"]
-    spit-cli/cli-options)))
+         ["-s" "--spit" "Indicates the release process should spit the metadata file as with the \"spit\" task, in that case the spit options must be provided"
+          :default false
+          :default-desc "false"]
+         ["-w" "--without-push" "Execute the release process but without pushing at the end, if you want to control the pushing instant yourself"
+          :default false
+          :default-desc "false"]]
+        spit-cli/cli-options))
 
 (defn usage [summary]
   (->> ["Metav's \"release\" function does the following:"

@@ -11,13 +11,15 @@
 (deftest release-repo
   (testing "bump from a clean tagged repo, testing the spitted files"
     (let [[monorepo remote moduleA1 moduleA2 moduleB1 moduleB2] (monorepo);module A1 latest tag is 1.3.4, moduleB3 should be 0.1.0 not tagged
-          options {:spit true :output-dir "resources" :namespace "metav.meta" :formats "edn,clj,json"}
+          options {:without-sign true :spit true :output-dir "resources" :namespace "metav.meta" :formats "edn,clj,json"}
           [module-name bumped-version tag push-result] (release/execute! (invocation-context options moduleA1) :patch)
-          [scm-base distance sha dirty?] (git/working-copy-description moduleA1 :prefix (prefix moduleA1 module-name))]
+          [scm-base distance sha dirty?] (git/working-copy-description moduleA1 :prefix (prefix moduleA1 module-name))
+          tag-verify (git/tag-verify monorepo tag)]
       (facts
          (str bumped-version) => "1.3.5"
          scm-base => "1.3.5"
          tag =>   "sysA-container1-1.3.5"
+         (:exit tag-verify) => 1
          (fs/exists? (str moduleA1 "/resources/metav/meta.edn")) => true
          (fs/exists? (str moduleA1 "/resources/metav/meta.clj")) => true
          (fs/exists? (str moduleA1 "/resources/metav/meta.json")) => true)
@@ -29,6 +31,7 @@
           options {:spit true :output-dir "resources" :namespace "meta" :formats "edn"}
           [module-name1 bumped-version1 tag1 _] (release/execute! (invocation-context options moduleA2) :patch )
           [scm-base1 _ _ _] (git/working-copy-description moduleA2 :prefix (prefix moduleA2 module-name1))
+          tag-verify (git/tag-verify monorepo tag1)
           metadata1 (git/tag-message monorepo tag1)
           _ (Thread/sleep 500);need to wait because the time resolution of the git describe command needs some time to elapse before asking whether a new tag is available
 
@@ -51,6 +54,7 @@
        (str bumped-version1) => "1.1.3"
        scm-base1 => "1.1.3"
        tag1 => "sysA-container2-1.1.3"
+       tag-verify => truthy
        metadata1 => truthy
        (fs/exists? (str moduleA2 "/resources/meta.edn")) => true
 
