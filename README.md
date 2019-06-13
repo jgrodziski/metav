@@ -110,7 +110,7 @@ JAR_FILENAME="$ARTIFACT_TAG.jar"
 
 ## Release
 
-_Release_ is the process invoked by the developer when a code related to a change is ready for prime time, hence releasable. The release process does the following:TEST
+_Release_ is the process invoked by the developer when a code related to a change is ready for prime time, hence releasable. The release process does the following:
 - **Check** everything is committed (no untracked or uncommitted file(s) otherwise the release process is aborted)
 - **Bump** the current version according to the release level of the change (major, minor or patch)
 - **[Optionaly: Spit and Commit metadata]**: Spit metadata in file(s) (version, tag, timestamp, module-name, etc.) with the `-s, --spit` option flag (presence means spitting metadata).
