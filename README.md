@@ -43,11 +43,11 @@ Metav is a library that helps the release and versioning process of Clojure proj
 
 # Installation
 
-Latest version: 1.4.6
+Latest version: 1.5.0
 
 [deps.edn](https://clojure.org/guides/deps_and_cli) dependency information:
 ```
-{metav {:mvn/version "1.4.6"}}
+{metav {:mvn/version "1.5.0"}}
 ```
 
 Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several alias in your `deps.edn` for each main task (display, spit, release) like this with git ref:
@@ -60,7 +60,7 @@ Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several ali
                      :main-opts ["-m" "metav.release"]}}}
 ```
 
-Or using the clojars version `{metav {:mvn/version "1.4.6"}}` or use `{metav {:mvn/version "LATEST"}}` to always living on the edge:
+Or using the clojars version `{metav {:mvn/version "1.5.0"}}` or use `{metav {:mvn/version "LATEST"}}` to always living on the edge:
 ```clojure
 {:aliases {:metav {:extra-deps {metav {:mvn/version "LATEST"}}}
            :artifact-name {:extra-deps {metav {:mvn/version "LATEST"}}
@@ -137,14 +137,15 @@ Metav's "release" function does the following:
   - assert everything is committed (no untracked or uncommitted files).
   - bump the version
   - [optional: spit and commit the version metadata (module-name, tag, version, sha, timestamp) in file(s)]
-  - tag the repo with the version prefixed by the module-name in cas of a monorepo
+  - tag the repo with the version prefixed by the module-name in cas of a monorepo (the git tag can be signed gith GPG or not, default behavior is to sign the tag)
   - push everything
 
 Usage: metav.release [options] <level>
 with <level>: major, minor or patch
 
 Options:
-  -s, --spit                             Indicates the release process should spit the metadata file as with the "spit" task, in that case the spit options must be provided
+      --without-sign                      Should the git tag used for release be signed with the current user's GPG key configured with git
+  -s, --spit                              Indicates the release process should spit the metadata file as with the "spit" task, in that case the spit options must be provided
   -o, --output-dir DIR_PATH  resources    Output Directory
   -n, --namespace NS         meta         Namespace used in code output
   -f, --formats FORMATS      edn          Comma-separated list of output formats (clj, cljc, cljs, edn, json)
