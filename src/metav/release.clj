@@ -1,15 +1,13 @@
 (ns metav.release
-  (:require [clojure.tools.logging :as log :refer [debug]]
-            [clojure.data.json :as json]
+  (:require [clojure.data.json :as json]
             [clojure.string :as string]
-            [metav.git :as git :refer [assert-committed?]]
-            [metav.metadata :refer [tag invocation-context metadata-as-edn]]
-            [metav.spit :as spit :refer [spit-files! render!]]
-            [metav.repo :refer [monorepo? dedicated-repo?]]
-            [metav.version.protocols :refer [bump]]
-            [metav.release-cli :refer [validate-args accepted-levels exit]]
-            [clojure.data.json :as json]
-            [clojure.set :as set]))
+            [clojure.tools.logging :as log :refer [debug]]
+            [metav
+             [git :as git :refer [assert-committed?]]
+             [metadata :refer [invocation-context metadata-as-edn tag]]
+             [release-cli :refer [accepted-levels exit validate-args]]
+             [spit :as spit :refer [spit-files!]]]
+            [metav.version.protocols :refer [bump]]))
 
 (defn assert-in-module?
   "assert whether the module-dir is really a module (that's to say with a deps.edn file in it)"
@@ -26,7 +24,7 @@
   commit, tag with the version (hence denoting a release),
   then push
   return [module-name next-version tag push-result]"
-  [{:keys [working-dir module-name version version-scheme without-push spit output-dir namespace formats template rendering-output] :as invocation-context} level]
+  [{:keys [working-dir module-name version version-scheme without-push spit output-dir namespace formats template rendering-output without-sign] :as invocation-context} level]
   (assert-accepted-level? level)
   (assert-in-module? working-dir)
   (assert-committed? working-dir)
@@ -46,7 +44,7 @@
         (apply git/add! working-dir rendered)))
     (when (or spit template)
       (git/commit! working-dir (str "Bump to version " next-version " and spit/render related metadata in file(s).")))
-    (let [tag-result (git/tag! repo-dir tag (json/write-str (metadata-as-edn invocation-context next-version)))]
+    (let [tag-result (apply git/tag! repo-dir tag (json/write-str (metadata-as-edn invocation-context next-version)) (when without-sign [:sign false]))]
       (if (int? (first tag-result));;error exit code if so return stderr
         (throw (Exception. (str "Error with git tag command:" (get tag-result 2))))))
     (if without-push
