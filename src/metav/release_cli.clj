@@ -7,7 +7,7 @@
 (def accepted-levels #{:major :minor :patch})
 
 (def cli-options
-  (into [["-t" "--without-sign" "Whether the released git tag should be signed with the current user's GPG key."
+  (into [[nil "--without-sign" "Whether the released git tag should be signed with the current user's GPG key."
     :default false
     :default-desc "false"]
          ["-s" "--spit" "Indicates the release process should spit the metadata file as with the \"spit\" task, in that case the spit options must be provided"
