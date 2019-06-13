@@ -114,7 +114,7 @@ _Release_ is the process invoked by the developer when a code related to a chang
 - **Check** everything is committed (no untracked or uncommitted file(s) otherwise the release process is aborted)
 - **Bump** the current version according to the release level of the change (major, minor or patch)
 - **[Optionaly: Spit and Commit metadata]**: Spit metadata in file(s) (version, tag, timestamp, module-name, etc.) with the `-s, --spit` option flag (presence means spitting metadata).
-- **Tag** the repo with that version. In case of monorepo, prefix the version with the module name (automatically deduced from the module's path or provided)
+- **Tag** the repo with that version. In case of monorepo, prefix the version with the module name (automatically deduced from the module's path or provided). The git tag can be signed gith GPG or not, default behavior is to sign the tag.
 - **Push** the tag
 
 One liner:
@@ -216,7 +216,7 @@ Set a git annotated tag with the current version with `git tag v1.7.5 -m "versio
 Version is deduced from the current state of the SCM working copy: 
 
 - is the source code on a tag? version is `1.5.2` 
-- on a commit made after the tag? (possibly several commits, compute the distance from last tag and use it as patch number) version is `1.5.2+f34b91` (use the commit hash in version number)
+- on a commit made after the tag? (possibly several commits, compute the distance from last tag and use it as patch number) version is `1.5.2-f34b91` (use the commit hash in version number)
 - with uncommitted change (DIRTY state)? `1.5.2-f34b91-DIRTY`
 
 The version is never persisted somewhere in source code to avoid any desynchronisation between SCM state and version number. _However_, the library can optionaly spit the metadata (module name and version) in file to be included in an artefact during the build process.
