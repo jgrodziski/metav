@@ -21,7 +21,7 @@
                                                      dirty? (conj "DIRTY")))
                          _ (log/debug "metadata" metadata)]
                      (cond-> be
-                       (not (string/blank? metadata)) (str "+" metadata))))
+                       (not (string/blank? metadata)) (str "-" metadata))))
   Comparable
   (compareTo [this that] (compare [(vec (.subversions this)) (.distance this) (.dirty? this)]
                                   [(vec (.subversions that)) (.distance that) (.dirty? that)]))

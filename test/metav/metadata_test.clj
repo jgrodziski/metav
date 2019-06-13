@@ -44,7 +44,7 @@
     (let [repo (shell! (init!) (write-dummy-deps-edn-in!)
                        (write-dummy-file-in! "1" "11" "111")
                        (add!) (commit!))]
-      (facts (str (version repo "dummy-module-name")) =in=> #"0.1.0+.*"
+      (facts (str (version repo "dummy-module-name")) =in=> #"0.1.0-.*"
              (dedicated-repo? repo) => true)
       (fs/delete-dir repo)))
   (testing "testing tagged"
@@ -60,11 +60,11 @@
                        (write-dummy-file-in! "1" "11" "111")
                        (add!) (commit!) (tag! "v1.3.0")
                        (write-dummy-file-in! "2" "22" "222") (add!))]
-      (facts (str (version repo "dummy-module-name")) => "1.3.0+DIRTY")
+      (facts (str (version repo "dummy-module-name")) => "1.3.0-DIRTY")
       (fs/delete-dir repo)))
   (testing "testing 2 commits should increase the patch number by 2"
     (let [repo (dedicated-repo-tagged-then-2-commits "1.3.0")]
-      (facts (str (version repo "dummy-module-name")) =in=> #"1.3.0+.*")
+      (facts (str (version repo "dummy-module-name")) =in=> #"1.3.0-.*")
       (fs/delete-dir repo)))
   (testing "testing tagged"
     (let [repo (dedicated-repo-tagged)]
