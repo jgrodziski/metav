@@ -114,7 +114,7 @@ _Release_ is the process invoked by the developer when a code related to a chang
 - **Check** everything is committed (no untracked or uncommitted file(s) otherwise the release process is aborted)
 - **Bump** the current version according to the release level of the change (major, minor or patch)
 - **[Optionaly: Spit and Commit metadata]**: Spit metadata in file(s) (version, tag, timestamp, module-name, etc.) with the `-s, --spit` option flag (presence means spitting metadata).
-- **Tag** the repo with that version. In case of monorepo, prefix the version with the module name (automatically deduced from the module's path or provided). The git tag can be signed gith GPG or not, default behavior is to sign the tag.
+- **Tag** the repo with that version. In case of monorepo, prefix the version with the module name (automatically deduced from the module's path or provided). The git tag can be signed with GPG or not, default behavior is to sign the tag.
 - **Push** the tag
 
 One liner:
@@ -137,7 +137,7 @@ Metav's "release" function does the following:
   - assert everything is committed (no untracked or uncommitted files).
   - bump the version
   - [optional: spit and commit the version metadata (module-name, tag, version, sha, timestamp) in file(s)]
-  - tag the repo with the version prefixed by the module-name in cas of a monorepo (the git tag can be signed gith GPG or not, default behavior is to sign the tag)
+  - tag the repo with the version prefixed by the module-name in cas of a monorepo (the git tag can be signed with GPG or not, default behavior is to sign the tag)
   - push everything
 
 Usage: metav.release [options] <level>
