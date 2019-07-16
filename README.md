@@ -43,11 +43,11 @@ Metav is a library that helps the release and versioning process of Clojure proj
 
 # Installation
 
-Latest version: 1.5.0
+Latest version: 1.5.2
 
 [deps.edn](https://clojure.org/guides/deps_and_cli) dependency information:
 ```
-{metav {:mvn/version "1.5.0"}}
+{metav {:mvn/version "1.5.2"}}
 ```
 
 Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several alias in your `deps.edn` for each main task (display, spit, release) like this with git ref:
@@ -60,7 +60,7 @@ Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several ali
                      :main-opts ["-m" "metav.release"]}}}
 ```
 
-Or using the clojars version `{metav {:mvn/version "1.5.0"}}` or use `{metav {:mvn/version "LATEST"}}` to always living on the edge:
+Or using the clojars version `{metav {:mvn/version "1.5.2"}}` or use `{metav {:mvn/version "LATEST"}}` to always living on the edge:
 ```clojure
 {:aliases {:metav {:extra-deps {metav {:mvn/version "LATEST"}}}
            :artifact-name {:extra-deps {metav {:mvn/version "LATEST"}}
@@ -101,9 +101,9 @@ To avoid problem with logging libraries that can mess up the stdout and make it 
 
 ```shell
 clj -A:metav -m "metav.spit" "-o" "target" "-f" "json"
-ARTIFACT_ID=$(cat target/meta.json | jq '."module-name"')
-ARTIFACT_VERSION=$(cat target/meta.json | jq '."version"')
-ARTIFACT_TAG=$(cat target/meta.json | jq '."tag"')
+ARTIFACT_ID=$(cat target/meta.json | jq -r '."module-name"')
+ARTIFACT_VERSION=$(cat target/meta.json | jq -r '."version"')
+ARTIFACT_TAG=$(cat target/meta.json | jq -r '."tag"')
 JAR_FILENAME="$ARTIFACT_TAG.jar"
 
 ```
