@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file. 
 This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
+# [1.5.2]
+Fix Issue: https://github.com/jgrodziski/metav/issues/4
+Take the first line of a multi line where.exe output to find git
+
+# [1.5.0, 1.5.1]
+Adding option to skip signing git tag
+Patch for doc of the previous feature in 1.5.1
+
 # [1.4.0]
 Add a template rendering option for spit and release task using the mustache templating format EADe )
 
