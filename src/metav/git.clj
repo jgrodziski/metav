@@ -26,13 +26,13 @@
 
 (def ^:private find-windows-git
   (memoize
-    (fn []
-      (let [{:keys [exit out err]} (shell/sh "where.exe" "git.exe")]
-        (if-not (zero? exit)
-          (abort (format (str "Can't determine location of git.exe: 'where git.exe' returned %d.\n"
-                                   "stdout: %s\n stderr: %s")
-                              exit out err))
-          (string/trim out))))))
+   (fn []
+     (let [{:keys [exit out err]} (shell/sh "where.exe" "git.exe")]
+       (if-not (zero? exit)
+         (abort (format (str "Can't determine location of git.exe: 'where git.exe' returned %d.\n"
+                             "stdout: %s\n stderr: %s")
+                        exit out err))
+         (first (string/split-lines (string/trim out))))))))
 
 (defn- git-exe []
   (if windows?
