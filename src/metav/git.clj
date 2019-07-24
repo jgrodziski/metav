@@ -75,6 +75,14 @@
   ([] (root-distance nil))
   ([repo-dir] (count (git-in-dir repo-dir "rev-list" "HEAD"))))
 
+(defn git-short-status
+  ([] (git-short-status nil))
+  ([repo-dir]
+   (let [status-args ["status" "--short"]]
+     (if (nil? repo-dir)
+       (apply git-in-dir repo-dir status-args)
+       (apply git-in-dir repo-dir (conj status-args repo-dir))))))
+
 (defn- git-status
   ([] (git-status nil))
   ([repo-dir]
@@ -83,11 +91,15 @@
        (apply git-in-dir repo-dir status-args)
        (apply git-in-dir repo-dir (conj status-args repo-dir))))))
 
+(def status-codes #{"M" "A" "D" "R" "C" "U"})
+
 (defn assert-committed?
   ([] (assert-committed? nil))
   ([repo-dir]
-   (when (re-find #"Changes (not staged for commit|to be committed)" (apply str (interpose " " (git-in-dir repo-dir "status"))))
-     (throw (Exception. (str "Untracked or uncommitted changes in " repo-dir " git directory (as stated by 'git status command'). Please add/commit your change to get a clean repo."))))))
+   (let [paths (git-short-status repo-dir)
+         uncommitted-pred #(re-find #"(M|A|D|R|C|U|\\?| )(M|A|D|R|C|U|\\?| ) .*" %)]
+     (when (some uncommitted-pred paths)
+       (throw (Exception. (str "Untracked or uncommitted changes in " repo-dir " git directory (as stated by 'git status command'). Please add/commit your change to get a clean repo.")))))))
 
 (defn latest-tag [repo-dir]
   (first (git-in-dir repo-dir "describe" "--abbrev=0")) )
