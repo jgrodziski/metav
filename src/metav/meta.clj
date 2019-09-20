@@ -3,6 +3,6 @@
 
 (def module-name "metav")
 (def path ".")
-(def version "1.5.3")
-(def tag "v1.5.3")
-(def generated-at "2019-07-24T16:57:10Z")
+(def version "1.5.4")
+(def tag "v1.5.4")
+(def generated-at "2019-09-20T17:36:57Z")
