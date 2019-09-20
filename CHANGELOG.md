@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file. 
 This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
+# [1.5.4] - 2019-09-20
+
+Bumping edge case when bumping a dirty version (see https://github.com/jgrodziski/metav/pull/7)
+
 # [1.5.3]
 Fix Issue : https://github.com/jgrodziski/metav/issues/6
 Fix sanity check of the repo state before release when language is different than english
