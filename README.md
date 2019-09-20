@@ -43,11 +43,11 @@ Metav is a library that helps the release and versioning process of Clojure proj
 
 # Installation
 
-Latest version: 1.5.3
+Latest version: 1.5.4
 
 [deps.edn](https://clojure.org/guides/deps_and_cli) dependency information:
 ```
-{metav {:mvn/version "1.5.3"}}
+{metav {:mvn/version "1.5.4"}}
 ```
 
 Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several alias in your `deps.edn` for each main task (display, spit, release) like this with git ref:
