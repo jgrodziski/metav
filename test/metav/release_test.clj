@@ -6,7 +6,10 @@
             [metav.git :as git]
             [metav.metadata-test :refer [monorepo]]
             [clojure.test :as t :refer :all]
-            [me.raynes.fs :as fs]))
+            [me.raynes.fs :as fs]
+            [clojure.java.io :as io]
+            [clojure.data.xml :as xml]
+            [clojure.data.zip.xml :as zxml]))
 
 (deftest release-repo
   (testing "bump from a clean tagged repo, testing the spitted files"
@@ -97,3 +100,24 @@
       )))
 ;; execute several release in different module with different level each time (major, minor, patch)
 ;; assert the bump function works correctly (bump the appropriate level)
+
+
+(deftest release-with-pom-generation
+  (testing "release a repo with pom generation"
+    (let [[monorepo remote moduleA1 moduleA2 moduleB1 moduleB2] (monorepo) ;module A1 latest tag is 1.3.4, moduleB3 should be 0.1.0 not tagged
+          options-generate-pom                                  {:without-sign true :spit true :pom true :output-dir "resources" :namespace "metav.meta" :formats "edn,clj,json"}
+          options-dont-generate-pom                             {:without-sign true :spit true :pom false :output-dir "resources" :namespace "metav.meta" :formats "edn,clj,json"}]
+      (release/execute! (invocation-context options-generate-pom moduleA1) :patch)
+      (release/execute! (invocation-context options-dont-generate-pom moduleA2) :patch)
+      (facts
+       (fs/exists? (str moduleA1 "/pom.xml")) => true
+       (fs/exists? (str moduleA2 "/pom.xml")) => false)
+      (let [parsed-pom (-> (str moduleA1 "/pom.xml")
+                           io/file
+                           io/input-stream
+                           xml/parse)
+            artifact-id (zxml/xml1-> (clojure.zip/xml-zip parsed-pom)
+                                     :xmlns.http%3A%2F%2Fmaven.apache.org%2FPOM%2F4.0.0/project
+                                     :xmlns.http%3A%2F%2Fmaven.apache.org%2FPOM%2F4.0.0/artifactId
+                                     zxml/text)]
+        (prn artifact-id)))))

@@ -18,7 +18,8 @@
   (testing "check that the git status command is correctly parsed"
     (let [repo (shell! (init!) (write-dummy-file-in!) (add!) (commit!))]
       (fact (git-short-status repo) => [""])
-      (fact (git/assert-committed? repo) => falsey)
+      (fact "?? machin.txt" =in=> git/uncommitted?-regex)
+      (fact (git/assert-committed? repo) => true)
       (shell-in-dir! repo (write-dummy-file-in!))
       (fact (first (git-short-status repo)) =in=> #"\\?\\? .*")
       (fact (git/assert-committed? repo) =throws=> Exception)
@@ -26,4 +27,4 @@
       (fact (first (git-short-status repo)) =in=> #"A  .*")
       (fact (git/assert-committed? repo) =throws=> Exception)
       (shell-in-dir! repo (commit!))
-      (fact (git/assert-committed? repo) => falsey))))
+      (fact (git/assert-committed? repo) => true))))

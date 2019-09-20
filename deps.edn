@@ -4,6 +4,11 @@
         org.clojure/tools.logging {:mvn/version "0.4.1"}
         org.clojure/data.json {:mvn/version "0.2.6"}
 
+        org.clojure/tools.deps.alpha      {:mvn/version "0.7.541"}
+        org.clojure/data.xml              {:mvn/version "0.2.0-alpha6"}
+
+        org.clojure/data.zip              {:mvn/version "0.1.2"}
+
         cljstache {:mvn/version "2.0.1"}
         clj-commons/fs {:mvn/version "1.5.0"}
         org.apache.maven/maven-artifact {:mvn/version "3.6.0"}}

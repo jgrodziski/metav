@@ -13,6 +13,10 @@
          ["-s" "--spit" "Indicates the release process should spit the metadata file as with the \"spit\" task, in that case the spit options must be provided"
           :default false
           :default-desc "false"]
+         ["-p" "--pom" "Indicates the release process should spit the pom file as with the \"pom\" task, in that case the pom options must be provided"
+          :default false
+          :default-desc "false"]
+         ["-su" "--scm-url SCM-URL" "SCM URL to put into Maven's pom.xml file"]
          ["-w" "--without-push" "Execute the release process but without pushing at the end, if you want to control the pushing instant yourself"
           :default false
           :default-desc "false"]]
@@ -23,7 +27,7 @@
         "  - assert the command is invoked with a deps.edn in the working directory"
         "  - assert everything is committed (no untracked or uncommitted files)."
         "  - bump the version"
-        "  - [optional: spit and commit the version metadata (module-name, tag, version, sha, timestamp) in file(s)]"
+        "  - [optional: spit and commit the version metadata (module-name, tag, version, sha, timestamp) in file(s), generate the pom file]"
         "  - tag the repo with the version prefixed by the module-name in cas of a monorepo"
         "  - push everything"
         ""

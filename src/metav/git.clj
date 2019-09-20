@@ -93,13 +93,16 @@
 
 (def status-codes #{"M" "A" "D" "R" "C" "U"})
 
+(def uncommitted?-regex #"(M|A|D|R|C|U|\\?| )(M|A|D|R|C|U|\\?| ) .*" )
+
 (defn assert-committed?
   ([] (assert-committed? nil))
   ([repo-dir]
    (let [paths (git-short-status repo-dir)
-         uncommitted-pred #(re-find #"(M|A|D|R|C|U|\\?| )(M|A|D|R|C|U|\\?| ) .*" %)]
-     (when (some uncommitted-pred paths)
-       (throw (Exception. (str "Untracked or uncommitted changes in " repo-dir " git directory (as stated by 'git status command'). Please add/commit your change to get a clean repo.")))))))
+         uncommitted? #(re-find uncommitted?-regex %)]
+     (if (some uncommitted? paths)
+       (throw (Exception. (str "Untracked or uncommitted changes in " repo-dir " git directory (as stated by 'git status command'). Please add/commit your change to get a clean repo.")))
+       true))))
 
 (defn latest-tag [repo-dir]
   (first (git-in-dir repo-dir "describe" "--abbrev=0")) )
@@ -182,6 +185,11 @@
            ;(prn "working copy description v" v " re-find re0 " (re-find re0 v) " re-f ind re1 " (re-find re1 v))
            (log/debug "working copy description: [" base distance sha (boolean dirty) "] {:prefix " prefix "}" )
            [base distance sha (boolean dirty)]))))))
+
+(defn remote-url
+  ([] (remote-url nil))
+  ([working-dir]
+   (first (git-in-dir working-dir "remote" "get-url" "origin"))))
 
 (defn working-copy-state
   "return the git working copy state with :status and :describe keys"

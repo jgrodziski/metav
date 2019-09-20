@@ -4,6 +4,7 @@
             [clojure.tools.logging :as log :refer [debug]]
             [metav
              [git :as git :refer [assert-committed?]]
+             [pom :as pom]
              [metadata :refer [invocation-context metadata-as-edn tag]]
              [release-cli :refer [accepted-levels exit validate-args]]
              [spit :as spit :refer [spit-files!]]]
@@ -24,7 +25,7 @@
   commit, tag with the version (hence denoting a release),
   then push
   return [module-name next-version tag push-result]"
-  [{:keys [working-dir module-name version version-scheme without-push spit output-dir namespace formats template rendering-output without-sign] :as invocation-context} level]
+  [{:keys [working-dir module-name version version-scheme without-push spit pom scm-url output-dir namespace formats template rendering-output without-sign] :as invocation-context} level]
   (assert-accepted-level? level)
   (assert-in-module? working-dir)
   (assert-committed? working-dir)
@@ -39,6 +40,9 @@
     (when spit
       (let [spitted (spit-files! invocation-context next-version)]
         (apply git/add! working-dir spitted))) ;then tag
+    (when pom
+      (let [pom-file (pom/generate! invocation-context next-version)]
+        (apply git/add! working-dir pom-file)))
     (when template
       (let [rendered (spit/render! invocation-context next-version)]
         (apply git/add! working-dir rendered)))
