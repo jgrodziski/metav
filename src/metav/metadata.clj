@@ -33,8 +33,8 @@
   [working-dir module-name]
   (if (monorepo? working-dir)
     (str module-name "-")
-    "v";in case of dedicated repo the prefix is just a "v"
-    ))
+    "v"));in case of dedicated repo the prefix is just a "v"
+
 
 (defn version
   "Determine the version for the project by dynamically interrogating the environment,

@@ -102,7 +102,7 @@
        (throw (Exception. (str "Untracked or uncommitted changes in " repo-dir " git directory (as stated by 'git status command'). Please add/commit your change to get a clean repo.")))))))
 
 (defn latest-tag [repo-dir]
-  (first (git-in-dir repo-dir "describe" "--abbrev=0")) )
+  (first (git-in-dir repo-dir "describe" "--abbrev=0")))
 
 (defn describe
   ([prefix min-sha-length] (describe nil prefix min-sha-length))
@@ -149,8 +149,8 @@
   ([] (any-commits? nil))
   ([repo-dir]
    (let [result (git-in-dir repo-dir "log")]
-     (not (map? result);maps means an error occurs  during the git command
-       ))))
+     (not (map? result)))));maps means an error occurs  during the git command
+
 
 (defn tag-timestamp [working-dir tag]
   (first (git-in-dir working-dir "log" "-1" "--format=%aI" tag)))
@@ -180,7 +180,7 @@
                distance (or (when distance (Integer/parseInt distance)) (root-distance repo-dir))]
            ;(prn "desc" desc)
            ;(prn "working copy description v" v " re-find re0 " (re-find re0 v) " re-f ind re1 " (re-find re1 v))
-           (log/debug "working copy description: [" base distance sha (boolean dirty) "] {:prefix " prefix "}" )
+           (log/debug "working copy description: [" base distance sha (boolean dirty) "] {:prefix " prefix "}")
            [base distance sha (boolean dirty)]))))))
 
 (defn working-copy-state
