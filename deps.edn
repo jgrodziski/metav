@@ -8,7 +8,8 @@
         clj-commons/fs {:mvn/version "1.5.0"}
         org.apache.maven/maven-artifact {:mvn/version "3.6.0"}}
  :jvm-opts ["-Djava.io.tmpdir=./tmp"]
- :aliases {:dev {}
+ :aliases {:dev {:extra-deps {org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version"2.12.1"}
+                              org.apache.logging.log4j/log4j-core {:mvn/version "2.12.1"}}}
            :test {:extra-paths ["test"]
                   :extra-deps {org.clojure/test.check {:mvn/version "RELEASE"}
                                lambdaisland/kaocha {:mvn/version "0.0-389"}
