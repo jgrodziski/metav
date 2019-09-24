@@ -68,7 +68,7 @@
       (fs/delete-dir repo)))
   (testing "testing tagged"
     (let [repo (dedicated-repo-tagged)]
-      (facts (str (version repo "dummy-module-name")) => "1.3.0" )
+      (facts (str (version repo "dummy-module-name")) => "1.3.0")
       (fs/delete-dir repo))))
 
 (defn monorepo []
@@ -97,8 +97,8 @@
                          (write-dummy-deps-edn-in! "sysB" "container3")
                          (write-dummy-file-in! "sysB" "container3" "src")
                          (add!)
-                         (commit!)
-                         )
+                         (commit!))
+
         moduleA1 (str monorepo "/sysA/container1")
         moduleA2 (str monorepo "/sysA/container2")
         moduleB1 (str monorepo "/sysB/container1")
@@ -127,8 +127,8 @@
        (artefact-name moduleA1 "sysA-container1" :scheme "semver") =in=> #"sysA-container1-1.3.4.*"
        (artefact-name moduleA2 "sysA-container2" :scheme "semver") =in=> #"sysA-container2-1.1.2.*"
        (artefact-name moduleB1 "sysB-container1" :scheme "semver") =in=> #"sysB-container1-1.2.0.*"
-       (artefact-name moduleB2 "sysB-container2" :scheme "semver") =in=> #"sysB-container2-1.5.7.*"
-       )
+       (artefact-name moduleB2 "sysB-container2" :scheme "semver") =in=> #"sysB-container2-1.5.7.*")
+
       (fs/delete-dir monorepo)))
   (testing "testing a monorepo with two systems of two containers"
     (let [[monorepo remote moduleA1 moduleA2 moduleB1 moduleB2] (monorepo)]
