@@ -26,6 +26,7 @@
   (compareTo [this that] (compare [(vec (.subversions this)) (.distance this) (.dirty? this)]
                                   [(vec (.subversions that)) (.distance that) (.dirty? that)]))
   SCMHosted
+  (subversions [this] subversions)
   (tag [this] (string/join "." (conj subversions distance)))
   (distance [this] distance)
   (sha [this] sha)

@@ -53,6 +53,7 @@
                    dirty? (.dirty? that)]
                (DefaultArtifactVersion. (to-string subversions qualifier distance nil dirty?)))))
   SCMHosted
+  (subversions [this] subversions)
   (tag [this] (to-string subversions qualifier))
   (distance [this] distance)
   (sha [this] sha)

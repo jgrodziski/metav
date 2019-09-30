@@ -2,6 +2,7 @@
   "Handle abstract versions as a set of malleable components")
 
 (defprotocol SCMHosted
+  (subversions [this])
   (tag [this])
   (distance [this])
   (sha [this])
