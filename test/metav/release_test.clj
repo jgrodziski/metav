@@ -29,7 +29,7 @@
   (testing "bump from a clean tagged repo, two patch release, one minor, then one major"
     (let [[monorepo remote moduleA1 moduleA2 moduleB1 moduleB2] (monorepo);module A2 latest tag is 1.1.2
           options {:spit true :output-dir "resources" :namespace "meta" :formats "edn"}
-          [module-name1 bumped-version1 tag1 _] (release/execute! (invocation-context options moduleA2) :patch )
+          [module-name1 bumped-version1 tag1 _] (release/execute! (invocation-context options moduleA2) :patch)
           [scm-base1 _ _ _] (git/working-copy-description moduleA2 :prefix (prefix moduleA2 module-name1))
           tag-verify (git/tag-verify monorepo tag1)
           metadata1 (git/tag-message monorepo tag1)
@@ -48,8 +48,8 @@
           [module-name4 bumped-version4 tag4 _] (release/execute! (invocation-context options moduleA2) :major)
           [scm-base4 _ _ _] (git/working-copy-description moduleA2 :prefix (prefix moduleA2 module-name4))
           metadata4 (git/tag-message monorepo tag4)
-          _ (Thread/sleep 500)
-          ]
+          _ (Thread/sleep 500)]
+
       (facts
        (str bumped-version1) => "1.1.3"
        scm-base1 => "1.1.3"
@@ -71,8 +71,8 @@
        (str bumped-version4) => "2.0.0"
        scm-base4 => "2.0.0"
        tag4 => "sysA-container2-2.0.0"
-       metadata4 => truthy
-       )
+       metadata4 => truthy)
+
       (fs/delete monorepo)
       (fs/delete remote))))
 
@@ -80,20 +80,21 @@
   (testing "release a repo two times with the same release level (minor)"
     (let [[monorepo remote _ _ _ _ moduleB3] (monorepo)
           options {:spit true :output-dir "resources" :namespace "meta" :formats "edn"}
-          [module-name bumped-version1 tag1 _] (release/execute! (invocation-context options moduleB3) :minor )
-          _ (write-dummy-file-in! "sysB" "container3" "src" "dummy1")
-          _ (add!)
-          _ (commit!)
+          [module-name bumped-version1 tag1 _] (release/execute! (invocation-context options moduleB3) :minor)
+          _ (shell-in-dir! monorepo
+              (write-dummy-file-in! "sysB" "container3" "src" "dummy1")
+              (add!)
+              (commit!))
           _ (Thread/sleep 500)
-          [module-name bumped-version2 tag2 _] (release/execute! (invocation-context options moduleB3) :minor )
-          ]
+          [module-name bumped-version2 tag2 _] (release/execute! (invocation-context options moduleB3) :minor)]
+
       (println monorepo)
       (facts
        (str bumped-version1) => "0.2.0"
-       (str bumped-version2) => "0.3.0"
-       )
+       (str bumped-version2) => "0.3.0")
+
       (fs/delete monorepo)
-      (fs/delete remote)
-      )))
+      (fs/delete remote))))
+
 ;; execute several release in different module with different level each time (major, minor, patch)
 ;; assert the bump function works correctly (bump the appropriate level)

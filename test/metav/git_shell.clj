@@ -40,9 +40,11 @@
 
 (def deps-edn (slurp (io/resource "dummy-deps.edn")))
 
-(defn sh [command] (let [result (shell/sh "/bin/bash" "-c" command)]
-                      (assert (->  result :exit zero?) (:err result))
-                      result))
+(defn sh [command]
+  (assert shell/*sh-dir* "Can't run commands without a specified directory.")
+  (let [result (shell/sh "/bin/bash" "-c" command)]
+     (assert (->  result :exit zero?) (:err result))
+     result))
 
 (defn init! [] (sh "git init"))
 (defn init-bare! [] (sh "git init --bare"))
