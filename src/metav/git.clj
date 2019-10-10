@@ -149,7 +149,7 @@
 
 (defn any-commits?
   "return whether the repo has any commits in it"
-  ([] (any-commits? nil))
+  ;([] (any-commits? nil))
   ([repo-dir]
    (let [result (git-in-dir repo-dir "log")]
      (not (map? result)))));maps means an error occurs  during the git command
