@@ -19,7 +19,8 @@
   (:import [java.lang Comparable]
            [org.apache.maven.artifact.versioning ComparableVersion DefaultArtifactVersion])
   (:require [clojure.string :as string]
-            [metav.version.protocols :refer :all]))
+            [metav.version.protocols :refer :all]
+            [metav.version.common :as common]))
 
 (defn- string->qualifier
   [qstring]
@@ -61,15 +62,16 @@
   Bumpable
   (bump [this level]
     (condp contains? level
-      #{:major :minor :patch} (let [l ({:major 0 :minor 1 :patch 2} level)
-                                    subversions (map-indexed (fn [i el] (cond (< i l) el
-                                                                             (= i l) (inc el)
-                                                                             (> i l) 0)) subversions)]
+      #{:major :minor :patch} (let [subversions (common/bump-subversions subversions level)]
                                 (MavenVersion. (vec subversions) nil 0 sha dirty?))
+
       #{:alpha :beta :rc} (MavenVersion. subversions (qualify* qualifier (name level)) 0 sha dirty?)
+
       #{:snapshot} (MavenVersion. subversions (qualify* qualifier "SNAPSHOT") 0 sha dirty?)
+
       #{:release} (do (assert qualifier "There is no pre-bump version pending")
                       (MavenVersion. subversions nil 0 sha dirty?))
+
       (throw (Exception. (str "Not a supported bump operation: " level))))))
 
 (defn- parse-tag [vstring]

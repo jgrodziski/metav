@@ -10,6 +10,7 @@
   "An implementation of version protocols that complies with Semantic Versioning 2.0.0"
   (:require [clojure.string :as string]
             [metav.version.protocols :refer [SCMHosted Bumpable]]
+            [metav.version.common :as common]
             [clojure.tools.logging :as log]))
 
 (deftype SemVer [subversions distance sha dirty?]
@@ -34,10 +35,7 @@
   Bumpable
   (bump [this level]
     (condp contains? level
-      #{:major :minor :patch} (let [l ({:major 0 :minor 1 :patch 2} level)
-                                    subversions (map-indexed (fn [i el] (cond (< i l) el
-                                                                             (= i l) (inc el)
-                                                                             (> i l) 0)) subversions)]
+      #{:major :minor :patch} (let [subversions (common/bump-subversions subversions level)]
                                 (SemVer. (vec subversions) 0 sha dirty?))
       ;#{:patch} (throw (Exception. "Patch bump are implicit by commit distance"))
       (throw (Exception. (str "Not a supported bump operation: " level))))))

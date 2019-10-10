@@ -169,14 +169,17 @@
        (make-static-context)
        (make-computed-context opts))))
 
-(defn bump [v level]
+(defn- bump [v level]
   (let [new-v (m-p/bump v level)]
     (m-v-common/assert-bump? v level new-v)
     new-v))
 
+(defn new-version [context level]
+  (bump* (:metav/version context) level))
 
-(defn tag [prefix version]
-  (str version-prefix version))
+
+(defn tag [context version]
+  (str (:metav/version-prefix context) version))
 
 
 (defn iso-now []

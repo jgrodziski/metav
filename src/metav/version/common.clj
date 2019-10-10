@@ -32,3 +32,4 @@
                             " would create version: " new-version " pointing to the same commit as version: " old-version "."))))
   (when (going-backwards? old-version new-version)
     (throw (Exception. (str "Can't bump version to an older one : " old-version " -> " new-version " isn't allowed.")))))
+
