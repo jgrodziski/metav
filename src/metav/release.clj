@@ -43,7 +43,7 @@
       (let [rendered (spit/render! invocation-context next-version)]
         (apply git/add! working-dir rendered)))
     (when (or spit template)
-      (git/commit! working-dir (str "Bump to version " next-version " and spit/render related metadata in file(s).")))
+      (git/commit! working-dir (format "Bump module %s to version %s and spit/render related metadata in file(s)." module-name next-version)))
     (let [tag-result (apply git/tag! repo-dir tag (json/write-str (metadata-as-edn invocation-context next-version)) (when without-sign [:sign false]))]
       (if (int? (first tag-result));;error exit code if so return stderr
         (throw (Exception. (str "Error with git tag command:" (get tag-result 2))))))
