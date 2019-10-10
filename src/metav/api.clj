@@ -12,18 +12,18 @@
 
     [metav.git :as m-git]
 
-    [metav.version.common :as m-v-common]))
+    [metav.version.common :as m-v-common])
+  (:import [java.util Date TimeZone]
+           [java.text SimpleDateFormat]))
 
 
-
+;; TODO make sure that in release, we actually release from repos, not the top level for instance.
 (defn pwd []
   (str (m-git/pwd)))
 
 
-(defn defaults-opts []
-  (merge #:metav{:use-full-name? false}
-
-         #:metav.display{:output-format nil}
+(def defaults-opts
+  (merge #:metav.display{:output-format nil}
 
          #:metav.spit{:output-dir "resources"
                       :namespace "meta"
@@ -47,51 +47,52 @@
 
 (defn base-context
   [working-dir]
-  #:metav{:working-dir working-dir
-          :top-level (m-git/toplevel working-dir)
-          :git-prefix (m-git/prefix working-dir)})
+  (let [top (m-git/toplevel working-dir)
+        prefix  (m-git/prefix working-dir)]
+    (when-not (string? top)
+      (let [e (Exception. "Probably not working inside a git repository.")]
+        (log/error e (str "git-top-level returned: " top " prefix returned:" (if (nil? prefix) "nil" prefix)))
+        (throw e)))
+    #:metav{:working-dir working-dir
+            :top-level top
+            :git-prefix  prefix}))
 
 
 (def module-build-file "deps.edn")
 
-(defn monorepo?
-  "Does a single repo contains several modules? (dir with a build config like deps.edn in it).
-  A monorepo is detected when the metav library is invoked correctly in a subdirectory of a git repo
-  (so a deps.edn file is present in a subdirectory) "
-  [context]
-  (let [{:metav/keys [working-dir top-level git-prefix]} context]
-    (boolean (or (and (= (fs/normalized (fs/file working-dir))
-                         (fs/normalized (fs/file top-level)))
-                      (> (count (fs/find-files working-dir #"deps.edn")) 1))
-                 (and (not (nil? git-prefix))
-                      (fs/file? (if working-dir
-                                  (str working-dir "/" module-build-file)
-                                  module-build-file)))))))
 
-(defn dedicated-repo?
-  "Does the current working directory contains a build system for a module (like deps.edn)"
-  ([context]
-    ;;assume the working dir contains a deps.edn
-   (let [{:metav/keys [working-dir git-prefix]} context]
-     (and (nil? git-prefix)
-          (fs/file? (str working-dir "/" module-build-file))))))
+(defn has-build-file? [working-dir]
+  (let [build-file (fs/file working-dir module-build-file)]
+    (fs/file? build-file)))
 
-(defn assoc-repo-tests [context]
-  (merge context
-         #:metav{:mono-repo? (monorepo? context)
-                 :dedicated-repo? (dedicated-repo? context)}))
+
+(defn assert-repo-in-order [context]
+  (let [working-dir (:metav/working-dir context)]
+    (when-not (m-git/any-commits? working-dir)
+      (let [msg "No commits  found."
+            e (Exception. msg)]
+        (log/fatal e msg)
+        (throw e)))
+    (when-not (has-build-file? working-dir)
+      (let [msg "No build file detected."
+            e (Exception. msg)]
+        (log/fatal e msg)
+        (throw e))))
+
+  context)
 
 
 (defn git-prefix->module-name [pre]
   (let [name (string/replace pre "/" "-")]
     (subs name 0 (dec (count name)))))
 
+
 (defn assoc-names [context]
-  (let [{:metav/keys [top-level git-prefix dedicated-repo?]} context
-        project-name (-> top-level fs/split last)
-        module-name (if dedicated-repo?
-                      project-name
-                      (git-prefix->module-name git-prefix))]
+  (let [{:metav/keys [top-level git-prefix]} context
+        project-name (fs/base-name top-level)
+        module-name (if git-prefix
+                      (git-prefix->module-name git-prefix)
+                      project-name)]
     (merge context
            #:metav{:project-name project-name
                    :module-name module-name})))
@@ -99,13 +100,14 @@
 
 (defn make-static-context [working-dir]
   (-> (base-context working-dir)
-      (assoc-repo-tests)
+      (assert-repo-in-order)
+
       (assoc-names)))
 
 
 (defn full-name [context]
-  (let [{:metav/keys [mono-repo? project-name module-name]} context]
-    (if mono-repo?
+  (let [{:metav/keys [git-prefix project-name module-name]} context]
+    (if git-prefix
       (str project-name "-" module-name)
       module-name)))
 
@@ -117,8 +119,8 @@
 
 
 (defn version-prefix [context]
-  (let [{:metav/keys [mono-repo? artefact-name]} context]
-    (if mono-repo?
+  (let [{:metav/keys [git-prefix artefact-name]} context]
+    (if git-prefix
       (str artefact-name "-")
       "v")))
 
@@ -167,13 +169,44 @@
        (make-static-context)
        (make-computed-context opts))))
 
-(defn next-version [context level]
-  (let [v (:metav/version context)
-        subversions (m-p/subversions v)
-        distance (m-p/distance v)]
-    (println "subversions:" subversions)
-    (println "distance:" distance))
-  (m-p/bump (:metav/version context) level))
+(defn bump [v level]
+  (let [new-v (m-p/bump v level)]
+    (m-v-common/assert-bump? v level new-v)
+    new-v))
+
+
+(defn tag [prefix version]
+  (str version-prefix version))
+
+
+(defn iso-now []
+  (let [tz (TimeZone/getTimeZone "UTC")
+        df (SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ss'Z'")]
+    (.setTimeZone df tz)
+    (.format df (Date.))))
+
+
+(defn metadata-as-edn [context]
+  (let [{:metav/keys [artefact-name tag version git-prefix]} context]
+    {:module-name artefact-name
+     :tag tag
+     :version (str version)
+     :generated-at (iso-now)
+     :path (if git-prefix git-prefix ".")}))
+
+(defn metadata-as-code
+  [context]
+  (let [{:metav.spit/keys [namespace]} context
+        {:keys [module-name path version tag generated-at]} (metadata-as-edn context)]
+    (string/join "\n" [";; This code was automatically generated by the 'metav' library."
+                       (str "(ns " namespace ")") ""
+                       (format "(def module-name \"%s\")" module-name)
+                       (format "(def path \"%s\")" path)
+                       (format "(def version \"%s\")" version)
+                       (format "(def tag \"%s\")" tag)
+                       (format "(def generated-at \"%s\")" generated-at)
+                       ""])))
+
 
 (comment
 
@@ -208,5 +241,5 @@
 
 
 
-  (make-context)
+  (metadata-as-code (make-context defaults-opts))
   (make-context {:metav/module-name "toto"}))
