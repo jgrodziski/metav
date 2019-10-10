@@ -1,7 +1,6 @@
 (ns metav.api-test
   (:require
     [clojure.test :as test :refer [deftest testing]]
-    [clojure.pprint :as pp]
     [testit.core :refer :all]
     [clojure.java.shell :as shell]
     [metav.git :as m-git]
