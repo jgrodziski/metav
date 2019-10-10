@@ -48,9 +48,9 @@
       (mapv #(Integer/parseInt %) [major minor patch]))))
 
 (defn version
-  ([] (SemVer. [0 1 0] 0 nil nil))
+  ([] (SemVer. common/default-initial-subversions 0 nil nil))
   ([base distance sha dirty?]
    (if base
      (let [subversions (parse-base base)]
        (SemVer. subversions distance sha dirty?))
-     (SemVer. [0 1 0] distance sha dirty?))))
+     (SemVer. common/default-initial-subversions distance sha dirty?))))

@@ -2,6 +2,9 @@
   (:require
     [metav.version.protocols :as m-p]))
 
+(def default-initial-subversions [0 1 0])
+
+
 (defn bump-subversions [subversions level]
   (let [[major minor patch] subversions]
     (case level

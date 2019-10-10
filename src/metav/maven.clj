@@ -81,9 +81,9 @@
     [subversions qualifier]))
 
 (defn version
-  ([] (MavenVersion. [0 0 0] nil nil 0 nil))
+  ([] (MavenVersion. common/default-initial-subversions nil nil 0 nil))
   ([tag distance sha dirty?]
    (if tag
      (let [[subversions qualifier] (parse-tag tag)]
        (MavenVersion. subversions qualifier distance sha dirty?))
-     (MavenVersion. [0 0 0] nil distance sha dirty?))))
+     (MavenVersion. common/default-initial-subversions nil distance sha dirty?))))
