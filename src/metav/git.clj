@@ -42,11 +42,15 @@
 (defn- git-command
   [& arguments]
   (let [cmd (conj arguments (git-exe))
-        _ (log/debug "Will execute in shell: " (apply str (interpose " " cmd)))
+        cmd-str (apply str (interpose " " cmd))
+        _ (log/debug "Will execute in shell: " cmd-str)
         {:keys [exit out err] :as result} (apply shell/sh cmd)]
     (if (zero? exit)
       (string/split-lines out)
-      (do (log/error err) result))))
+      (do
+        (log/error (str "executed:\n" cmd-str
+                        "\ngit error:\n" err))
+        result))))
 
 (defn git-in-dir [repo-dir & arguments]
   (if repo-dir
@@ -113,7 +117,6 @@
                                                 "--always")))
 
 (defn tag!
-  ([tag] (tag! nil tag))
   ([repo-dir tag metadata & {:keys [sign] :or {sign "--sign"}}]
    (apply git-in-dir repo-dir (filter identity ["tag" sign "--annotate"
                                                 "--message" metadata tag]))))
