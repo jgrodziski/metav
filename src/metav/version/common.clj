@@ -12,6 +12,7 @@
       :minor [major (inc minor) 0]
       :patch [major minor (inc patch)])))
 
+
 (defn duplicating-version? [v level]
   (let [[_ minor patch] (m-p/subversions v)
         distance (m-p/distance v)
@@ -26,8 +27,10 @@
              same-minor?
              same-major?))))
 
+
 (defn going-backwards? [old-version new-version]
   (pos? (compare old-version new-version)))
+
 
 (defn assert-bump? [old-version level new-version]
   (when (duplicating-version? old-version level)
