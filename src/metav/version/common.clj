@@ -39,3 +39,7 @@
   (when (going-backwards? old-version new-version)
     (throw (Exception. (str "Can't bump version to an older one : " old-version " -> " new-version " isn't allowed.")))))
 
+(defn bump [v level]
+  (let [new-v (m-p/bump v level)]
+    (assert-bump? v level new-v)
+    new-v))

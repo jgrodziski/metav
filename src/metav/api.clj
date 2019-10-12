@@ -5,7 +5,7 @@
     [clojure.tools.logging :as log]
     [me.raynes.fs :as fs]
 
-    [metav.version.protocols :as m-p]
+    [metav.version.common :as m-v-common]
 
     [metav.semver :as m-semver]
     [metav.maven :as m-maven]
@@ -144,6 +144,13 @@
     (apply make-version state)))
 
 
+(defn make-tag [context version]
+  (str (:metav/version-prefix context) version))
+
+
+(defn current-tag [context]
+  (make-tag context (:metav/version context)))
+
 (defn assoc-computed [context k f]
   (assoc context k (f context)))
 
@@ -154,7 +161,8 @@
       (assoc-computed :metav/full-name full-name)
       (assoc-computed :metav/artefact-name artefact-name)
       (assoc-computed :metav/version-prefix version-prefix)
-      (assoc-computed :metav/version version)))
+      (assoc-computed :metav/version version)
+      (assoc-computed :metav/tag current-tag)))
 
 
 (defn make-context
@@ -169,17 +177,9 @@
        (make-static-context)
        (make-computed-context opts))))
 
-(defn- bump [v level]
-  (let [new-v (m-p/bump v level)]
-    (m-v-common/assert-bump? v level new-v)
-    new-v))
 
 (defn new-version [context level]
-  (bump* (:metav/version context) level))
-
-
-(defn tag [context version]
-  (str (:metav/version-prefix context) version))
+  (m-v-common/bump (:metav/version context) level))
 
 
 (defn iso-now []
@@ -190,12 +190,13 @@
 
 
 (defn metadata-as-edn [context]
-  (let [{:metav/keys [artefact-name tag version git-prefix]} context]
+  (let [{:metav/keys [artefact-name version tag git-prefix]} context]
     {:module-name artefact-name
-     :tag tag
      :version (str version)
+     :tag tag
      :generated-at (iso-now)
      :path (if git-prefix git-prefix ".")}))
+
 
 (defn metadata-as-code
   [context]
@@ -209,40 +210,3 @@
                        (format "(def tag \"%s\")" tag)
                        (format "(def generated-at \"%s\")" generated-at)
                        ""])))
-
-
-(comment
-
-  (pwd)
-  (defn print-identity [x]
-    (println x)
-    x)
-
-  (def v1
-    (-> (m-maven/version)
-        (m-p/bump :minor)
-        (m-p/bump :patch)
-        (m-p/bump :alpha)
-        (m-p/bump :alpha)
-        (m-p/bump :alpha)
-        (m-p/bump :beta)
-        (m-p/bump :beta)))
-
-  (def v2
-    (-> (m-maven/version)
-        (m-p/bump :minor)
-        (m-p/bump :patch)
-        (m-p/bump :alpha)
-        (m-p/bump :alpha)
-        (m-p/bump :alpha)))
-
-
-  (neg? (compare v2 v1))
-
-  (m-v-common/going-backwards v1 v2)
-  (m-v-common/assert-bump? v1 :patch v2)
-
-
-
-  (metadata-as-code (make-context defaults-opts))
-  (make-context {:metav/module-name "toto"}))
