@@ -1,4 +1,4 @@
-{:paths ["resources" "src"]
+{:paths ["src"]
  :deps {org.clojure/clojure {:mvn/version "1.10.1"}
         org.clojure/tools.cli {:mvn/version "0.4.1"}
         org.clojure/tools.logging {:mvn/version "0.4.1"}
@@ -8,9 +8,10 @@
         clj-commons/fs {:mvn/version "1.5.0"}
         org.apache.maven/maven-artifact {:mvn/version "3.6.0"}}
  :jvm-opts ["-Djava.io.tmpdir=./tmp"]
- :aliases {:dev {:extra-deps {org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version"2.12.1"}
+ :aliases {:dev {:extra-paths ["logging"]
+                 :extra-deps {org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version"2.12.1"}
                               org.apache.logging.log4j/log4j-core {:mvn/version "2.12.1"}}}
-           :test {:extra-paths ["test"]
+           :test {:extra-paths ["test" "resources-test"]
                   :extra-deps {org.clojure/test.check {:mvn/version "RELEASE"}
                                lambdaisland/kaocha {:mvn/version "0.0-389"}
                                metosin/testit {:mvn/version "0.4.0"}
