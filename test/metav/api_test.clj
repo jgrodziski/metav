@@ -7,7 +7,7 @@
     [metav.git-shell :as gs]
     [metav.version.protocols :as m-p]
     [me.raynes.fs :as fs]
-    [metav.api :as m-api]))
+    [metav.context :as m-ctxt]))
 
 
 (defmacro with-repo [n & body]
@@ -18,7 +18,7 @@
          (fs/delete-dir ~n)))))
 
 (defn version [repo-path]
-  (let [ctxt (m-api/make-context repo-path)]
+  (let [ctxt (m-ctxt/make-context repo-path)]
     (-> ctxt :metav/version)))
 
 (defn version-str [repo-path]
@@ -36,14 +36,14 @@
 
     (testing "Metav won't work in a repo without any commits."
       (fact
-        (m-api/make-context repo) =throws=> java.lang.Exception))
+        (m-ctxt/make-context repo) =throws=> java.lang.Exception))
 
     (gs/shell-in-dir! repo
       (gs/commit!))
 
     (testing "Metav won't work in a dir without a build file."
       (fact
-        (m-api/make-context repo) =throws=> java.lang.Exception))
+        (m-ctxt/make-context repo) =throws=> java.lang.Exception))
 
 
     (gs/shell-in-dir! repo
@@ -107,7 +107,7 @@
       (gs/commit!))
 
     (testing "correct distance"
-      (let [ctxt (m-api/make-context repo)
+      (let [ctxt (m-ctxt/make-context repo)
             version (:metav/version ctxt)
             distance (m-p/distance version)]
         (facts
@@ -116,11 +116,11 @@
 
 
     (testing "Correct naming"
-      (let [ctxt (m-api/make-context repo)
-            ctxt-full-name (m-api/make-context repo {:metav/use-full-name? true})
-            ctxt-other-name (m-api/make-context repo {:metav/module-name "another-name"})
-            ctxt-other-full-name (m-api/make-context repo {:metav/use-full-name? true
-                                                           :metav/module-name "another-name"})]
+      (let [ctxt (m-ctxt/make-context repo)
+            ctxt-full-name (m-ctxt/make-context repo {:metav/use-full-name? true})
+            ctxt-other-name (m-ctxt/make-context repo {:metav/module-name "another-name"})
+            ctxt-other-full-name (m-ctxt/make-context repo {:metav/use-full-name? true
+                                                            :metav/module-name     "another-name"})]
         (facts
           ctxt                 =in=> {:metav/artefact-name (fs/base-name repo)}
           ctxt-full-name       =in=> {:metav/artefact-name (fs/base-name repo)}
@@ -225,7 +225,7 @@
            moduleB3 :B3} modules]
       (testing "The root of the monorepo doesn't have a build file. exception thrown."
         (facts
-          (m-api/make-context monorepo) =throws=> Exception))
+          (m-ctxt/make-context monorepo) =throws=> Exception))
 
       (testing "Versions are set correctly."
         (test-version project1 =in=> #"^0.0.0")
@@ -237,13 +237,13 @@
         (test-version moduleB3 =in=> #"^0.1.0"))
 
       (testing "Names are properly read."
-        (let [ctxt1 (m-api/make-context project1)
-              ctxt2 (m-api/make-context project2 {:metav/use-full-name? true})
-              ctxtA1 (m-api/make-context moduleA1)
-              ctxtA2 (m-api/make-context moduleA2)
-              ctxtB1 (m-api/make-context moduleB1)
-              ctxtB2 (m-api/make-context moduleB2)
-              ctxtB3 (m-api/make-context moduleB3)
+        (let [ctxt1 (m-ctxt/make-context project1)
+              ctxt2 (m-ctxt/make-context project2 {:metav/use-full-name? true})
+              ctxtA1 (m-ctxt/make-context moduleA1)
+              ctxtA2 (m-ctxt/make-context moduleA2)
+              ctxtB1 (m-ctxt/make-context moduleB1)
+              ctxtB2 (m-ctxt/make-context moduleB2)
+              ctxtB3 (m-ctxt/make-context moduleB3)
               expected-project2-name (str (fs/base-name monorepo) "-project2")]
           (facts
             (:metav/artefact-name ctxt2) => expected-project2-name
