@@ -1,4 +1,4 @@
-(ns metav.context
+(ns metav.api.context
   (:require
     [clojure.spec.alpha :as s]
     [clojure.string :as string]

@@ -7,7 +7,7 @@
     [metav.git-shell :as gs]
     [metav.version.protocols :as m-p]
     [me.raynes.fs :as fs]
-    [metav.context :as m-ctxt]))
+    [metav.api.context :as m-ctxt]))
 
 
 (defmacro with-repo [n & body]
