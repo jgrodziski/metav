@@ -46,6 +46,13 @@
      (assert (->  result :exit zero?) (:err result))
      result))
 
+
+(defn sh-p [cmd]
+  (println "-----------------")
+  (println cmd)
+  (println (:out (sh cmd))))
+
+
 (defn init! [] (sh "git init"))
 (defn init-bare! [] (sh "git init --bare"))
 

@@ -10,11 +10,6 @@
     [metav.api :as m-api]))
 
 
-(defn sh [cmd]
-  (println "-----------------")
-  (println cmd)
-  (println (:out (gs/sh cmd))))
-
 (defmacro with-repo [n & body]
   `(let [~n (gs/shell! (gs/init!))]
      (try
@@ -132,8 +127,6 @@
           ctxt-other-name      =in=> {:metav/artefact-name "another-name"}
           ctxt-other-full-name =in=> {:metav/artefact-name "another-name"})))))
 
-(comment
-  (dedicated-repo-test))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Testing Monorepo
@@ -273,81 +266,3 @@
 
             ctxtB3 =in=> #:metav{:artefact-name "sysB-container3"
                                  :metav/version-prefix "sysB-container3-"}))))))
-
-
-(comment
-  (monorepo-test))
-
-(comment
-  (defn make-inner-repo
-    ([name]
-     (make-inner-repo name "0.0.0"))
-    ([name version]
-     (gs/mkdir-p! name)
-     (gs/write-dummy-deps-edn-in! name)
-     (gs/add!)
-     (gs/commit!)
-     (gs/tag! (str name "-" version))))
-
-
-
-
-
-
-  (defn recover-decision-infos [rep path]
-    (let [f (str (fs/file rep path))
-          ctxt (m-api/make-context f)
-          v (:metav/version ctxt)]
-      {:version v
-       :distance (m-p/distance v)
-       :artifact-name (:metav/artefact-name ctxt)})))
-
-(comment
-  (with-repo repo
-    (gs/shell-in-dir! repo
-      (gs/init!))
-
-    (m-git/git-in-dir repo "log")
-
-    (gs/shell-in-dir! repo
-      (gs/commit!))
-
-    (m-git/git-in-dir repo "log"))
-
-  (with-repo rep
-    (let [print-infos #(let [info1 (recover-decision-infos rep "repo1")
-                             info2 (recover-decision-infos rep "repo2")]
-                         (println {:1 info1
-                                   :2 info2}))]
-      (gs/shell-in-dir! rep
-        (make-inner-repo "repo1" "0.0.1")
-        (make-inner-repo "repo2" "1.0.0")
-        (sh "git status")
-        (sh "git tag")
-        (println "-----------------------------------")
-        (println "repos are clean")
-        (print-infos)
-
-        (gs/write-dummy-file-in! "repo1" "1" "11")
-        (gs/add!)
-        (println "-----------------------------------")
-        (println "repo1 is dirty")
-        (print-infos)
-
-
-        (gs/commit!)
-        (println "-----------------------------------")
-        (println "repo1 commited")
-        (print-infos)
-
-        (println "-----------------------------------")
-        (sh "git status"))))
-
-  (with-repo repo
-    (gs/shell-in-dir! repo
-      (gs/write-dummy-deps-edn-in!)
-      (gs/add!)
-      (gs/commit!)
-      (sh "git status")
-      (sh "git describe --long --match v*.* --abbrev=4 --dirty=-DIRTY --always")
-      (println (m-api/make-context repo)))))
