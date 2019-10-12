@@ -1,5 +1,5 @@
 (ns metav.display-cli
-  (:require [clojure.tools.cli :refer [parse-opts]]
+  (:require [clojure.tools.cli :as cli]
             [clojure.string :as string]))
 
 (defn usage [summary]
@@ -40,7 +40,7 @@
   should exit (with an error message, and optional ok status), or a map
   indicating the action the program should take and the options provided."
   [args]
-  (let [{:keys [options arguments errors summary] :as opts} (parse-opts args cli-options)]
+  (let [{:keys [options arguments errors summary] :as opts} (cli/parse-opts args cli-options)]
     (cond
       (:help options) ; help => exit OK with usage summary
       {:exit-message (usage summary) :ok? true}
