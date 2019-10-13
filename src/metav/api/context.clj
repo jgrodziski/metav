@@ -23,11 +23,7 @@
 
 
 (def defaults-opts
-  (merge #:metav.spit{:output-dir "resources"
-                      :namespace "meta"
-                      :formats "edn"}
-
-         #:metav.release{:level :patch
+  (merge #:metav.release{:level :patch
                          :without-sign false
                          :spit false
                          :without-push false}))
@@ -186,6 +182,12 @@
 
 (defn new-version [context level]
   (m-v-common/bump (:metav/version context) level))
+
+
+(defn bump-context [context level]
+  (-> context
+    (assoc-computed :metav/version #(new-version % level))
+    (assoc-computed :metav/tag current-tag)))
 
 
 (defn iso-now []
