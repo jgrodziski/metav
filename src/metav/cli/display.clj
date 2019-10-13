@@ -1,7 +1,6 @@
 (ns metav.cli.display
   (:require
     [clojure.tools.logging :as log]
-    [clojure.tools.cli :as cli]
     [clojure.string :as string]
     [metav.cli.common :as m-cli-common]
     [metav.api.display :as m-display]))
