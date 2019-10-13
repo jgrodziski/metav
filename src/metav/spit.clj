@@ -6,55 +6,28 @@
             [clojure.data.json :as json]
             [cljstache.core :refer [render-resource]]
             [me.raynes.fs :as fs]
-            [clojure.string :as str]))
+            [clojure.string :as str]
 
-(defn metafile! [output-dir namespace format]
-  (fs/with-cwd output-dir
-    (let [ns-file (fs/ns-path namespace)
-          parent (fs/parent ns-file)
-          name (fs/name ns-file)
-          _ (fs/extension ns-file)]
-      (fs/mkdirs parent)
-      (file parent (str name "." format)))))
+            [metav.cli.spit :as m-spit-cli]))
+(comment
 
-(defmulti spit-file! (fn [invocation-context _] (:format invocation-context)))
+  (defn render! [{:keys [template rendering-output] :as invocation-context} version]
+    (let [metadata (metadata-as-edn invocation-context version)]
+      (spit rendering-output (render-resource template metadata))
+      (str rendering-output)))
 
-(defmethod spit-file! "edn" [{:keys [working-dir output-dir namespace format] :as invocation-context} version]
-  (let [metafile (metafile! (str working-dir "/" output-dir) namespace format)]
-    (spit metafile (pr-str (metadata-as-edn invocation-context version)))
-    (str metafile)))
+  (defn -main
+    [& args]
+    (let [{:keys [options exit-message ok?]} (validate-args args)
+          {:keys [version] :as invocation-context} (invocation-context options)
+          metadata (metadata-as-edn invocation-context version)]
+      (when exit-message
+        (exit (if ok? 0 1) exit-message))
+      (spit-files! invocation-context version);spit files invoked from CLI deduce the current version from git state
+      (if (:template options)
+        (render! invocation-context version))
+      (if (:verbose options)
+        (print (json/write-str metadata)))
+      (shutdown-agents))))
 
-(defmethod spit-file! "json" [{:keys [working-dir output-dir namespace format] :as invocation-context} version]
-  (let [metafile (metafile! (str working-dir "/" output-dir) namespace format)]
-    (spit metafile (json/write-str (metadata-as-edn invocation-context version)))
-    (str metafile)))
-
-(defmethod spit-file! :default [{:keys [working-dir output-dir namespace format] :as invocation-context} version];default are cljs,clj and cljc
-  (let [metafile (metafile! (str working-dir "/" output-dir) namespace format)]
-    (spit metafile (metadata-as-code invocation-context version))
-    (str metafile)))
-
-(defn spit-files!
-  [{:keys [namespace formats module-name-override working-dir] :as invocation-context} version];invocation from release, the next version is given as arguments
-  (vec (map (fn [format]
-              (spit-file! (merge invocation-context {:format format}) version))
-            (parse-formats formats))))
-
-(defn render! [{:keys [template rendering-output] :as invocation-context} version]
-  (let [metadata (metadata-as-edn invocation-context version)]
-    (spit rendering-output (render-resource template metadata))
-    (str rendering-output)))
-
-(defn -main
-  [& args]
-  (let [{:keys [options exit-message ok?]} (validate-args args)
-        {:keys [version] :as invocation-context} (invocation-context options)
-        metadata (metadata-as-edn invocation-context version)]
-    (when exit-message
-      (exit (if ok? 0 1) exit-message))
-    (spit-files! invocation-context version);spit files invoked from CLI deduce the current version from git state
-    (if (:template options)
-      (render! invocation-context version))
-    (if (:verbose options)
-      (print (json/write-str metadata)))
-    (shutdown-agents)))
+(def -main m-spit-cli/main)
