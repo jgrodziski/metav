@@ -23,27 +23,26 @@
 
 
 (def defaults-opts
-  (merge #:metav.display{:output-format nil}
-
-         #:metav.spit{:output-dir "resources"
+  (merge #:metav.spit{:output-dir "resources"
                       :namespace "meta"
                       :formats "edn"}
 
          #:metav.release{:level :patch
                          :without-sign false
                          :spit false
-                         :without-push false}
-
-         #:metav.cli{:verbose false}))
+                         :without-push false}))
 
 (s/def :metav/version-scheme #{:semver :maven})
 (s/def :metav/min-sha-length integer?)
 (s/def :metav/use-full-name? boolean?)
+(s/def :metav/module-name-override #(or (nil? %) (string? %)))
+
 
 (def default-metav-opts
   #:metav{:version-scheme :semver
           :min-sha-length 4
-          :use-full-name? false})
+          :use-full-name? false
+          :module-name-override nil})
 
 (defn base-context
   [working-dir]
@@ -101,21 +100,27 @@
 (defn make-static-context [working-dir]
   (-> (base-context working-dir)
       (assert-repo-in-order)
-
       (assoc-names)))
 
 
-(defn full-name [context]
-  (let [{:metav/keys [git-prefix project-name module-name]} context]
-    (if git-prefix
-      (str project-name "-" module-name)
+(defn definitive-module-name [context]
+  (let [{:metav/keys [module-name-override module-name]} context]
+    (if module-name-override
+      module-name-override
       module-name)))
+
+
+(defn full-name [context]
+  (let [{:metav/keys [git-prefix project-name definitive-module-name]} context]
+    (if git-prefix
+      (str project-name "-" definitive-module-name)
+      definitive-module-name)))
 
 
 (defn artefact-name [context]
   (if (get context :metav/use-full-name?)
     (:metav/full-name context)
-    (:metav/module-name context)))
+    (:metav/definitive-module-name context)))
 
 
 (defn version-prefix [context]
@@ -158,6 +163,7 @@
 (defn make-computed-context [context opts]
   (-> context
       (merge default-metav-opts opts)
+      (assoc-computed :metav/definitive-module-name definitive-module-name)
       (assoc-computed :metav/full-name full-name)
       (assoc-computed :metav/artefact-name artefact-name)
       (assoc-computed :metav/version-prefix version-prefix)
