@@ -6,7 +6,8 @@
     [me.raynes.fs :as fs]))
 
 
-(def cwd (str (fs/normalized ".")))
+(defn pwd []
+  (str fs/*cwd*))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Spec functions
@@ -27,5 +28,4 @@
 (defn inside-cwd? [p]
   (string/starts-with?
     (str (fs/normalized p))
-    cwd))
-
+    (pwd)))

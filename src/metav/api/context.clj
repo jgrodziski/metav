@@ -163,11 +163,11 @@
 
 (defn make-context
   ([]
-   (make-context u/cwd))
+   (make-context (u/pwd)))
   ([working-dir-or-opts]
    (if (string? working-dir-or-opts)
      (make-context working-dir-or-opts {})
-     (make-context u/cwd working-dir-or-opts)))
+     (make-context (u/pwd) working-dir-or-opts)))
   ([working-dir opts]
    (-> working-dir
        (make-static-context)
