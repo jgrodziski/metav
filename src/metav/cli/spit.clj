@@ -1,7 +1,5 @@
 (ns metav.cli.spit
   (:require
-    [clojure.tools.logging :as log]
-    [clojure.tools.cli :as cli]
     [clojure.string :as string]
     [metav.cli.common :as m-cli-common]
     [metav.api.spit :as m-spit]))
@@ -45,13 +43,15 @@
 
         ["-t" "--template TEMPLATE" "Template used for rendering (must follows mustache format, spitted data is available during template rendering)"
          :id :metav.spit/template
-         :default (:metav.spit/template default-options)
-         :parse-fn str]
+         :parse-fn str
+         :validate [(partial m-cli-common/validate-option :metav.spit/template)
+                    "Template must be a valid path to a java resource."]]
 
         ["-d" "--rendering-output RENDERING-OUTPUT" "File to render template in"
          :id :metav.spit/rendering-output
-         :default (:metav.spit/rendering-output default-options)
-         :parse-fn str]))
+         :parse-fn str
+         :validate [(partial m-cli-common/validate-option :metav.spit/rendering-output)
+                    "Rendering output must be a path to an existing directory in the project."]]))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Assembling spit main
@@ -74,8 +74,7 @@
                                    m-cli-common/basic-custom-args-validation))
 
 (defn perform! [context]
-  (let [{:metav/keys [module-name-override artefact-name]} context]
-    (m-spit/spit-files! context)))
+  (m-spit/perform! context))
 
 
 (def main* (m-cli-common/make-main
@@ -85,6 +84,8 @@
 
 (comment
   (main* "-f" "cljc, json,edn"
-         "-n" "metav.meta"))
+         "-n" "metav.meta"
+         "-t" "mustache-template.txt"
+         "-d" "resources-test/rendered.txt"))
 
 (def main (m-cli-common/wrap-exit main*))

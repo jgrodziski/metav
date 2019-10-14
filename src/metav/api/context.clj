@@ -6,21 +6,15 @@
     [me.raynes.fs :as fs]
 
     [metav.version.common :as m-v-common]
-
     [metav.semver :as m-semver]
     [metav.maven :as m-maven]
-
     [metav.git :as m-git]
-
-    [metav.version.common :as m-v-common])
+    [metav.utils :as u])
   (:import [java.util Date TimeZone]
            [java.text SimpleDateFormat]))
 
 
 ;; TODO make sure that in release, we actually release from repos, not the top level for instance.
-(defn pwd []
-  (str (m-git/pwd)))
-
 
 (def defaults-opts
   (merge #:metav.release{:level :patch
@@ -31,7 +25,7 @@
 (s/def :metav/version-scheme #{:semver :maven})
 (s/def :metav/min-sha-length integer?)
 (s/def :metav/use-full-name? boolean?)
-(s/def :metav/module-name-override #(or (nil? %) (string? %)))
+(s/def :metav/module-name-override ::u/non-empty-str)
 
 
 (def default-metav-opts
@@ -169,11 +163,11 @@
 
 (defn make-context
   ([]
-   (make-context (pwd)))
+   (make-context u/cwd))
   ([working-dir-or-opts]
    (if (string? working-dir-or-opts)
      (make-context working-dir-or-opts {})
-     (make-context (pwd) working-dir-or-opts)))
+     (make-context u/cwd working-dir-or-opts)))
   ([working-dir opts]
    (-> working-dir
        (make-static-context)

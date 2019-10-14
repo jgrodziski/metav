@@ -1,0 +1,5 @@
+The module's name is: {{module-name}}
+The version is: {{version}}
+The tag is: {{tag}}
+Generated at: {{generated-at}}
+At the path: {{path}}

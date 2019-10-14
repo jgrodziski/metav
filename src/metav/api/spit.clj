@@ -3,7 +3,10 @@
     [clojure.spec.alpha :as s]
     [clojure.data.json :as json]
     [me.raynes.fs :as fs]
-    [metav.api.context :as m-ctxt]))
+    [cljstache.core :as cs]
+    [metav.api.context :as m-ctxt]
+    [metav.utils :as u]))
+
 
 
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -12,15 +15,16 @@
 (def defaults-spit-opts
   #:metav.spit{:output-dir "resources"
                :namespace "meta"
-               :formats #{:edn}
-               :template nil
-               :rendering-output nil})
+               :formats #{:edn}})
 
 (s/def :metav.spit/output-dir string?)
 (s/def :metav.spit/namespace string?)
 (s/def :metav.spit/formats (s/and set? #(every? #{:clj :cljc :cljs :edn :json} %)))
-(s/def :metav.spit/template #(or (nil? %) (string? %)))
-(s/def :metav.spit/output-dir #(or (nil? %) (string? %)))
+(s/def :metav.spit/template ::u/resource-path)
+(s/def :metav.spit/rendering-output (s/and ::u/non-empty-str
+                                           (complement fs/directory?)
+                                           u/parent-exists?
+                                           u/inside-cwd?))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Spit functionality
@@ -32,7 +36,6 @@
                      name (fs/name ns-file)]
                  (fs/mkdirs parent)
                  (fs/file parent (str name "." format)))))
-
 
 (defmulti spit-file! (fn [context] (::format context)))
 
@@ -62,6 +65,18 @@
           formats)))
 
 
-;; TODO: Implements the following!
-(defn render! [])
-(defn perform! [])
+(defn render! [context]
+  (let [{:metav.spit/keys [template rendering-output]} context
+        metadata (m-ctxt/metadata-as-edn context)]
+    (spit rendering-output (cs/render-resource template metadata))
+    (str rendering-output)))
+
+
+(defn perform! [context]
+  (let [{:metav.cli/keys [verbose?]
+         :metav.spit/keys [template rendering-output]} context]
+    (spit-files! context)
+    (when (and template rendering-output)
+      (render! context))
+    (when verbose?
+      (-> context m-ctxt/metadata-as-edn json/write-str print))))
