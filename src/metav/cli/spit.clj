@@ -1,5 +1,6 @@
 (ns metav.cli.spit
   (:require
+    [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [metav.cli.common :as m-cli-common]
     [metav.api.spit :as m-spit]))
@@ -38,19 +39,19 @@
          :id :metav.spit/formats
          :default (:metav.spit/formats default-options)
          :parse-fn parse-formats
-         :validate [(partial m-cli-common/validate-option :metav.spit/formats)
+         :validate [(partial s/valid? :metav.spit/formats)
                     "Formats must be in the following list: clj, cljc, cljs, edn, json"]]
 
         ["-t" "--template TEMPLATE" "Template used for rendering (must follows mustache format, spitted data is available during template rendering)"
          :id :metav.spit/template
          :parse-fn str
-         :validate [(partial m-cli-common/validate-option :metav.spit/template)
+         :validate [(partial s/valid? :metav.spit/template)
                     "Template must be a valid path to a java resource."]]
 
         ["-d" "--rendering-output RENDERING-OUTPUT" "File to render template in"
          :id :metav.spit/rendering-output
          :parse-fn str
-         :validate [(partial m-cli-common/validate-option :metav.spit/rendering-output)
+         :validate [(partial s/valid? :metav.spit/rendering-output)
                     "Rendering output must be a path to an existing directory in the project."]]))
 
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -73,6 +74,7 @@
                                    usage
                                    m-cli-common/basic-custom-args-validation))
 
+
 (defn perform! [context]
   (m-spit/perform! context))
 
@@ -87,5 +89,6 @@
          "-n" "metav.meta"
          "-t" "mustache-template.txt"
          "-d" "resources-test/rendered.txt"))
+
 
 (def main (m-cli-common/wrap-exit main*))

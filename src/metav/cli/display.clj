@@ -1,5 +1,6 @@
 (ns metav.cli.display
   (:require
+    [clojure.spec.alpha :as s]
     [clojure.tools.logging :as log]
     [clojure.string :as string]
     [metav.cli.common :as m-cli-common]
@@ -17,7 +18,7 @@
          :id :metav.display/output-format
          :default (:metav.display/output-format default-options)
          :parse-fn keyword
-         :validate [(partial m-cli-common/validate-option :metav.display/output-format)
+         :validate [(partial s/valid? :metav.display/output-format)
                     "Format must be among: edn, json, tab"]]))
 
 
@@ -52,6 +53,7 @@
              m-cli-common/basic-args->context
              perform!))
 
+(comment (main*))
 
 (def main (m-cli-common/wrap-exit main*))
 

@@ -19,10 +19,6 @@
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Common cli opts
 ;;----------------------------------------------------------------------------------------------------------------------
-(defn validate-option [spec value]
-  (->> (s/conform spec value) s/invalid? not))
-
-
 (def cli-options
   [["-h" "--help" "Help"]
 
@@ -37,13 +33,13 @@
    ["-r" "--module-name-override MODULE-NAME" "Module Name Override"
     :id :metav/module-name-override
     :default (:metav/module-name-override default-options)
-    :validate [(partial validate-option :metav/module-name-override)]]
+    :validate [(partial s/valid? :metav/module-name-override)]]
 
    ["-s" "--version-scheme SCHEME" "Version Scheme ('maven' or 'semver')"
     :id :metav/version-scheme
     :default (:metav/version-scheme default-options)
     :parse-fn keyword
-    :validate [(partial validate-option :metav/version-scheme)
+    :validate [(partial s/valid? :metav/version-scheme)
                "The -s or --version-scheme option only accepts the values: 'maven' or 'semver'"]]])
 
 
