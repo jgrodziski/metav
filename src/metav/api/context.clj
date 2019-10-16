@@ -160,9 +160,8 @@
               :metav.context/param
               :metav.context/options)
             opts)
-  (->> opts
-       (merge default-options)
-       assoc-git-basics
-       assert-repo-in-order
-       assoc-names
-       assoc-computed-keys))
+  (-> opts
+      assoc-git-basics
+      assert-repo-in-order
+      assoc-names
+      assoc-computed-keys))

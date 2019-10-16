@@ -35,4 +35,5 @@
 
 
 (defn perform! [context]
-  (perform*! (merge default-options context)))
+  (s/assert :metav.display/options context)
+  (perform*! context))

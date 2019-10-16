@@ -3,16 +3,15 @@
     [clojure.java.shell :as shell]
     [me.raynes.fs :as fs]
     [metav.git-shell :as gs]
-
-    [metav.api.context :as m-ctxt]))
+    [metav.api :as m-api]))
 
 
 (defn make-context
   ([path]
-   (m-ctxt/make-context {:metav/working-dir path}))
+   (m-api/make-context {:metav/working-dir path}))
   ([path opts]
-   (m-ctxt/make-context (assoc opts
-                          :metav/working-dir path))))
+   (m-api/make-context (assoc opts
+                         :metav/working-dir path))))
 
 (defmacro with-repo [n & body]
   `(let [~n (gs/shell! (gs/init!))]

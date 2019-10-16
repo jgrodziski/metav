@@ -66,10 +66,8 @@
         (fs/mkdir (fs/file moduleB2 "resources"))
         (test-spits moduleB2)
 
-        (test-spits moduleB3) ; actually no need to create resources dir, spit! creates it.
+        (test-spits moduleB3))))) ; actually no need to create resources dir, spit! creates it.
 
-        (gs/shell-in-dir! monorepo
-          (gs/sh-p "ls project1"))))))
 
 (deftest corner-cases
   (testing "With en empty formats set and no render config, nothing is rendered."

@@ -88,8 +88,7 @@
 ;;TODO: move verbose handlig in the cli part.
 (defn perform! [context]
   (s/assert :metav.spit/options context)
-  (let [context (merge defaults-options context)
-        {:metav.cli/keys [verbose?]
+  (let [{:metav.cli/keys [verbose?]
          :metav.spit/keys [template rendering-output]} context]
     (when verbose?
       (-> context m-a-c/metadata-as-edn json/write-str print))

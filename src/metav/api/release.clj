@@ -28,8 +28,8 @@
          level :metav.release/level} context
         spec (if (= :semver scheme)
                ::m-semver/accepted-bumps
-               ::m-maven/accepted-bumps)
-        (s/valid? spec level)]))
+               ::m-maven/accepted-bumps)]
+    (s/valid? spec level)))
 
 (s/def :metav.release/options
   (s/and
@@ -96,4 +96,4 @@
   (s/assert (s/and :metav.release/param
                    :metav.release/options)
             context)
-  (perform*! (merge default-options context)))
+  (perform*! context))

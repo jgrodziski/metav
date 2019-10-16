@@ -31,7 +31,9 @@
   ([]
    (make-context {:metav/working-dir (u/pwd)}))
   ([opts]
-   (m-ctxt/make-context (s/assert* :metav/options opts))))
+   (m-ctxt/make-context
+     (s/assert* :metav/options
+                (merge default-options opts)))))
 
 
 (defn display [context]

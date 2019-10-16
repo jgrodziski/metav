@@ -184,4 +184,3 @@
 
           ctxtB3 =in=> #:metav{:artefact-name        "sysB-container3"
                                :metav/version-prefix "sysB-container3-"})))))
-(test/run-tests)
