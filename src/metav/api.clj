@@ -15,7 +15,7 @@
   (merge m-ctxt/default-options
          m-display/default-options
          m-spit/defaults-options
-         m-release/defaults-options))
+         m-release/default-options))
 
 (s/def :metav/options (s/and :metav.context/options
                              :metav.display/options
@@ -33,3 +33,12 @@
   ([opts]
    (m-ctxt/make-context (s/assert* :metav/options opts))))
 
+
+(defn display [context]
+  (m-display/perform! context))
+
+(defn spit! [context]
+  (m-spit/perform! context))
+
+(defn release! [context]
+  (m-release/perform! context))

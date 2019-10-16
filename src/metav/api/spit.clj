@@ -85,7 +85,7 @@
     (spit rendering-output (cs/render-resource template metadata))
     (str rendering-output)))
 
-
+;;TODO: move verbose handlig in the cli part.
 (defn perform! [context]
   (let [context (merge defaults-options context)
         {:metav.cli/keys [verbose?]

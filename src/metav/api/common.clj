@@ -8,13 +8,15 @@
            [java.text SimpleDateFormat]))
 
 
-(defn new-version [context level]
-  (m-v-common/bump (:metav/version context) level))
+(defn new-version [context]
+  (let [{current-version :metav/version
+         level :metav.release/level} context]
+    (m-v-common/bump current-version level)))
 
 
-(defn bump-context [context level]
+(defn bump-context [context]
   (-> context
-      (u/assoc-computed :metav/version #(new-version % level))
+      (u/assoc-computed :metav/version new-version)
       (u/assoc-computed :metav/tag m-ctxt/tag)))
 
 
