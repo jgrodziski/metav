@@ -4,7 +4,7 @@
     [clojure.data.json :as json]
     [me.raynes.fs :as fs]
     [cljstache.core :as cs]
-    [metav.api.context :as m-ctxt]
+    [metav.api.common :as m-a-c]
     [metav.utils :as u]))
 
 
@@ -12,7 +12,7 @@
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Spit conf
 ;;----------------------------------------------------------------------------------------------------------------------
-(def defaults-spit-opts
+(def defaults-options
   #:metav.spit{:output-dir "resources"
                :namespace "meta"
                :formats #{:edn}})
@@ -26,6 +26,13 @@
                                            u/parent-exists?
                                            u/inside-cwd?))
 
+(s/def :metav.spit/options
+  (s/keys :opt [:metav.spit/output-dir
+                :metav.spit/namespace
+                :metav.spit/formats
+                :metav.spit/template
+                :metav.spit/rendering-output]))
+
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Spit functionality
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -37,19 +44,24 @@
                  (fs/mkdirs parent)
                  (fs/file parent (str name "." format)))))
 
+
 (defmulti spit-file! (fn [context] (::format context)))
+
 
 (defmethod spit-file! :edn [context]
   (spit (::dest context)
-        (pr-str (m-ctxt/metadata-as-edn context))))
+        (pr-str (m-a-c/metadata-as-edn context))))
+
 
 (defmethod spit-file! :json [context]
   (spit (::dest context)
-        (json/write-str (m-ctxt/metadata-as-edn context))))
+        (json/write-str (m-a-c/metadata-as-edn context))))
+
 
 (defmethod spit-file! :default [context];default are cljs,clj and cljc
   (spit (::dest context)
-        (m-ctxt/metadata-as-code context)))
+        (m-a-c/metadata-as-code context)))
+
 
 (defn spit-files! [context]
   (let [{:metav/keys [working-dir]
@@ -66,17 +78,19 @@
 
 
 (defn render! [context]
-  (let [{:metav.spit/keys [template rendering-output]} context
-        metadata (m-ctxt/metadata-as-edn context)]
+  (let [{:metav/keys [working-dir]
+         :metav.spit/keys [template rendering-output]} context
+        metadata (m-a-c/metadata-as-edn context)
+        rendering-output (fs/with-cwd working-dir (fs/normalized rendering-output))]
     (spit rendering-output (cs/render-resource template metadata))
     (str rendering-output)))
 
 
 (defn perform! [context]
-  (let [{:metav.cli/keys [verbose?]
+  (let [context (merge defaults-options context)
+        {:metav.cli/keys [verbose?]
          :metav.spit/keys [template rendering-output]} context]
-    (spit-files! context)
-    (when (and template rendering-output)
-      (render! context))
     (when verbose?
-      (-> context m-ctxt/metadata-as-edn json/write-str print))))
+      (-> context m-a-c/metadata-as-edn json/write-str print))
+    (cond-> (spit-files! context)
+            (and template rendering-output) (conj (render! context)))))

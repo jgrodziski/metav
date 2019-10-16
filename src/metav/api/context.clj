@@ -5,46 +5,48 @@
     [clojure.tools.logging :as log]
     [me.raynes.fs :as fs]
 
-    [metav.version.common :as m-v-common]
     [metav.semver :as m-semver]
     [metav.maven :as m-maven]
     [metav.git :as m-git]
-    [metav.utils :as u])
-  (:import [java.util Date TimeZone]
-           [java.text SimpleDateFormat]))
+    [metav.utils :as u]))
+
 
 
 ;; TODO make sure that in release, we actually release from repos, not the top level for instance.
+(def default-options
+  #:metav{:version-scheme :semver
+          :min-sha-length 4
+          :use-full-name? false})
 
-(def defaults-opts
-  (merge #:metav.release{:level :patch
-                         :without-sign false
-                         :spit false
-                         :without-push false}))
-
+(s/def :metav/working-dir fs/exists?)
 (s/def :metav/version-scheme #{:semver :maven})
 (s/def :metav/min-sha-length integer?)
 (s/def :metav/use-full-name? boolean?)
 (s/def :metav/module-name-override ::u/non-empty-str)
 
 
-(def default-metav-opts
-  #:metav{:version-scheme :semver
-          :min-sha-length 4
-          :use-full-name? false
-          :module-name-override nil})
+(s/def :metav.context/options
+  (s/keys
+    :opt [:metav/working-dir
+          :metav/version-scheme
+          :metav/min-sha-length
+          :metav/use-full-name?
+          :metav/module-name-override]))
 
-(defn base-context
-  [working-dir]
-  (let [top (m-git/toplevel working-dir)
+
+(defn assoc-git-basics
+  [opts]
+  (let [working-dir (-> opts :metav/working-dir fs/normalized str)
+        top (m-git/toplevel working-dir)
         prefix  (m-git/prefix working-dir)]
     (when-not (string? top)
       (let [e (Exception. "Probably not working inside a git repository.")]
         (log/error e (str "git-top-level returned: " top " prefix returned:" (if (nil? prefix) "nil" prefix)))
         (throw e)))
-    #:metav{:working-dir working-dir
-            :top-level top
-            :git-prefix  prefix}))
+    (assoc opts
+      :metav/working-dir working-dir
+      :metav/top-level top
+      :metav/git-prefix  prefix)))
 
 
 (def module-build-file "deps.edn")
@@ -87,17 +89,9 @@
                    :module-name module-name})))
 
 
-(defn make-static-context [working-dir]
-  (-> (base-context working-dir)
-      (assert-repo-in-order)
-      (assoc-names)))
-
-
 (defn definitive-module-name [context]
   (let [{:metav/keys [module-name-override module-name]} context]
-    (if module-name-override
-      module-name-override
-      module-name)))
+    (or module-name-override module-name)))
 
 
 (defn full-name [context]
@@ -143,72 +137,34 @@
   (str (:metav/version-prefix context) version))
 
 
-(defn current-tag [context]
+(defn tag [context]
   (make-tag context (:metav/version context)))
 
-(defn assoc-computed [context k f]
-  (assoc context k (f context)))
 
-
-(defn make-computed-context [context opts]
+(defn assoc-computed-keys [context]
   (-> context
-      (merge default-metav-opts opts)
-      (assoc-computed :metav/definitive-module-name definitive-module-name)
-      (assoc-computed :metav/full-name full-name)
-      (assoc-computed :metav/artefact-name artefact-name)
-      (assoc-computed :metav/version-prefix version-prefix)
-      (assoc-computed :metav/version version)
-      (assoc-computed :metav/tag current-tag)))
+      (u/assoc-computed :metav/definitive-module-name definitive-module-name)
+      (u/assoc-computed :metav/full-name full-name)
+      (u/assoc-computed :metav/artefact-name artefact-name)
+      (u/assoc-computed :metav/version-prefix version-prefix)
+      (u/assoc-computed :metav/version version)
+      (u/assoc-computed :metav/tag tag)))
 
 
-(defn make-context
-  ([]
-   (make-context (u/pwd)))
-  ([working-dir-or-opts]
-   (if (string? working-dir-or-opts)
-     (make-context working-dir-or-opts {})
-     (make-context (u/pwd) working-dir-or-opts)))
-  ([working-dir opts]
-   (-> working-dir
-       (make-static-context)
-       (make-computed-context opts))))
+(s/check-asserts true)
 
 
-(defn new-version [context level]
-  (m-v-common/bump (:metav/version context) level))
+(s/def :metav.context/param
+  (s/keys :req [:metav/working-dir]))
 
 
-(defn bump-context [context level]
-  (-> context
-    (assoc-computed :metav/version #(new-version % level))
-    (assoc-computed :metav/tag current-tag)))
-
-
-(defn iso-now []
-  (let [tz (TimeZone/getTimeZone "UTC")
-        df (SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ss'Z'")]
-    (.setTimeZone df tz)
-    (.format df (Date.))))
-
-
-(defn metadata-as-edn [context]
-  (let [{:metav/keys [artefact-name version tag git-prefix]} context]
-    {:module-name artefact-name
-     :version (str version)
-     :tag tag
-     :generated-at (iso-now)
-     :path (if git-prefix git-prefix ".")}))
-
-
-(defn metadata-as-code
-  [context]
-  (let [{:metav.spit/keys [namespace]} context
-        {:keys [module-name path version tag generated-at]} (metadata-as-edn context)]
-    (string/join "\n" [";; This code was automatically generated by the 'metav' library."
-                       (str "(ns " namespace ")") ""
-                       (format "(def module-name \"%s\")" module-name)
-                       (format "(def path \"%s\")" path)
-                       (format "(def version \"%s\")" version)
-                       (format "(def tag \"%s\")" tag)
-                       (format "(def generated-at \"%s\")" generated-at)
-                       ""])))
+(defn make-context [opts]
+  (s/assert (s/and
+              :metav.context/param
+              :metav.context/options) opts)
+  (->> opts
+       (merge default-options)
+       assoc-git-basics
+       assert-repo-in-order
+       assoc-names
+       assoc-computed-keys))

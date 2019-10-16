@@ -3,14 +3,14 @@
     [clojure.spec.alpha :as s]
     [clojure.tools.cli :as cli]
     [clojure.string :as string]
-    [metav.api.context :as m-ctxt]))
+    [metav.api :as m-api]))
 
 ;; TODO: add the option to load all config from an edn file.
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Common conf
 ;;----------------------------------------------------------------------------------------------------------------------
 (def default-options
-  (merge m-ctxt/default-metav-opts
+  (merge m-api/default-options
          #:metav.cli{:verbose? false}))
 
 (s/def :metav.cli/verbose? boolean?)
@@ -32,7 +32,6 @@
 
    ["-r" "--module-name-override MODULE-NAME" "Module Name Override"
     :id :metav/module-name-override
-    :default (:metav/module-name-override default-options)
     :validate [(partial s/valid? :metav/module-name-override)]]
 
    ["-s" "--version-scheme SCHEME" "Version Scheme ('maven' or 'semver')"
@@ -72,6 +71,7 @@
   (fn wrapped-main [& args]
     (let [res (apply f args)]
       (exit res))))
+
 
 (defn make-validate-args
   "Makes a function that validates command line arguments. This function
@@ -149,5 +149,5 @@
 (defn basic-args->context [validated-args]
   "Function intended to be used as a default for the `args->context-fn` parameter of
   the `make-main` function."
-  (m-ctxt/make-context (:options validated-args)))
+  (m-api/make-context (:options validated-args)))
 

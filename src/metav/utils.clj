@@ -9,6 +9,9 @@
 (defn pwd []
   (str fs/*cwd*))
 
+(defn assoc-computed [context k f]
+  (assoc context k (f context)))
+
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Spec functions
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -26,6 +29,5 @@
 
 
 (defn inside-cwd? [p]
-  (string/starts-with?
-    (str (fs/normalized p))
-    (pwd)))
+  (string/starts-with? (str (fs/normalized p))
+                       (str (fs/normalized (pwd)))))
