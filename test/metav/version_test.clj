@@ -1,11 +1,11 @@
 (ns metav.version-test
   (:require
-    [clojure.test :refer [deftest testing]]
+    [clojure.test :as test :refer [deftest testing]]
     [testit.core :refer :all]
     [metav.version.protocols :as m-p]
     [metav.version.common :as m-v-common]
-    [metav.maven :as m-maven]
-    [metav.semver :as m-semver]))
+    [metav.version.maven :as m-maven]
+    [metav.version.semver :as m-semver]))
 
 
 (defn unsafe-bump [v & bumps]

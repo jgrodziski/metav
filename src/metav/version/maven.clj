@@ -14,7 +14,7 @@
 ;;; 1.2.3-rc4 => major 1, minor 2, patch 3, qualifier rc incremented to 4
 ;;; NB: java -jar ~/.m2/repository/org/apache/maven/maven-artifact/3.2.5/maven-artifact-3.2.5.jar <v1> <v2> ...<vn>
 
-(ns metav.maven
+(ns metav.version.maven
   "An implementation of version protocols that complies with Maven v3"
   (:import [java.lang Comparable]
            [org.apache.maven.artifact.versioning ComparableVersion DefaultArtifactVersion])

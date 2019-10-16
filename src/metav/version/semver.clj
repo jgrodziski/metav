@@ -6,7 +6,7 @@
 ;;; appropriate.  There is no support for Semantic Version's pre-releases!  The ordering/
 ;;; precedence rules cannot be reconciled with the automatic assignment of patch releases.
 ;;; http://semver.org/spec/v2.0.0.html
-(ns metav.semver
+(ns metav.version.semver
   "An implementation of version protocols that complies with Semantic Versioning 2.0.0"
   (:require [clojure.string :as string]
             [metav.version.protocols :refer [SCMHosted Bumpable]]

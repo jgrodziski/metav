@@ -5,8 +5,8 @@
     [clojure.tools.logging :as log]
     [me.raynes.fs :as fs]
 
-    [metav.semver :as m-semver]
-    [metav.maven :as m-maven]
+    [metav.version.semver :as m-semver]
+    [metav.version.maven :as m-maven]
     [metav.git :as m-git]
     [metav.utils :as u]))
 
