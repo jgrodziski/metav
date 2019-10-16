@@ -18,9 +18,12 @@
   "An implementation of version protocols that complies with Maven v3"
   (:import [java.lang Comparable]
            [org.apache.maven.artifact.versioning ComparableVersion DefaultArtifactVersion])
-  (:require [clojure.string :as string]
+  (:require [clojure.spec.alpha :as s]
+            [clojure.string :as string]
             [metav.version.protocols :refer :all]
             [metav.version.common :as common]))
+
+(s/def ::accepted-bumps #{:major :minor :patch :alpha :beta :rc})
 
 (defn- string->qualifier
   [qstring]

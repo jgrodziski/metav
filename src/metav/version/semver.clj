@@ -8,10 +8,13 @@
 ;;; http://semver.org/spec/v2.0.0.html
 (ns metav.version.semver
   "An implementation of version protocols that complies with Semantic Versioning 2.0.0"
-  (:require [clojure.string :as string]
+  (:require [clojure.spec.alpha :as s]
+            [clojure.string :as string]
             [metav.version.protocols :refer [SCMHosted Bumpable]]
             [metav.version.common :as common]
             [clojure.tools.logging :as log]))
+
+(s/def ::accepted-bumps #{:major :minor :patch})
 
 (deftype SemVer [subversions distance sha dirty?]
   Object

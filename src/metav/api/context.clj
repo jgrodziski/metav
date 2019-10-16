@@ -151,9 +151,6 @@
       (u/assoc-computed :metav/tag tag)))
 
 
-(s/check-asserts true)
-
-
 (s/def :metav.context/param
   (s/keys :req [:metav/working-dir]))
 
@@ -161,7 +158,8 @@
 (defn make-context [opts]
   (s/assert (s/and
               :metav.context/param
-              :metav.context/options) opts)
+              :metav.context/options)
+            opts)
   (->> opts
        (merge default-options)
        assoc-git-basics

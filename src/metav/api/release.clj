@@ -5,7 +5,9 @@
     [clojure.data.json :as json]
     [metav.git :as m-git]
     [metav.api.common :as m-a-c]
-    [metav.api.spit :as m-spit]))
+    [metav.api.spit :as m-spit]
+    [metav.version.semver :as m-semver]
+    [metav.version.maven :as m-maven]))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Release conf
@@ -21,11 +23,21 @@
 (s/def :metav.release/spit boolean?)
 (s/def :metav.release/without-push boolean?)
 
+(defn bump-level-valid? [context]
+  (let [{scheme :metav/version-scheme
+         level :metav.release/level} context
+        spec (if (= :semver scheme)
+               ::m-semver/accepted-bumps
+               ::m-maven/accepted-bumps)
+        (s/valid? spec level)]))
+
 (s/def :metav.release/options
-  (s/keys :opt [:metav.release/level
-                :metav.release/without-sign
-                :metav.release/spit
-                :metav.release/without-push]))
+  (s/and
+    bump-level-valid?
+    (s/keys :opt [:metav.release/level
+                  :metav.release/without-sign
+                  :metav.release/spit
+                  :metav.release/without-push])))
 
 
 
@@ -46,6 +58,7 @@
     (if (int? (first tag-result)) ;;error exit code if so return stderr
       (throw (Exception. (str "Error with git tag command:" (get tag-result 2)))))))
 
+
 (defn perform*!
   "assert that nothing leaves uncommitted or untracked,
   then bump version to a releasable one (depending on the release level),
@@ -54,7 +67,7 @@
   return [module-name next-version tag push-result]"
   [context]
   (let [{:metav/keys [working-dir artefact-name version top-level]
-         :metav.release/keys [level spit without-push without-sign]} context]
+         :metav.release/keys [level spit without-push]} context]
     (m-git/assert-committed? working-dir)
     (log/debug "execute!" context level)
     (log/debug "Current version of module '" artefact-name "' is:" (str version))
@@ -76,7 +89,11 @@
               (not without-push) (conj (m-git/push! top-level))))))
 
 
+(s/def :metav.release/param (s/keys :req [:metav.release/level]))
 
 
 (defn perform! [context]
+  (s/assert (s/and :metav.release/param
+                   :metav.release/options)
+            context)
   (perform*! (merge default-options context)))
