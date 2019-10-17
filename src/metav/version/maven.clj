@@ -23,7 +23,8 @@
             [metav.version.protocols :refer :all]
             [metav.version.common :as common]))
 
-(s/def ::accepted-bumps #{:major :minor :patch :alpha :beta :rc})
+;; not allowing snapshots, they might duplicate git tag names.
+(s/def ::accepted-bumps #{:major :minor :patch :alpha :beta :rc :release})
 
 (defn- string->qualifier
   [qstring]
