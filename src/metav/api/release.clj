@@ -36,7 +36,8 @@
         spitted (m-spit/perform! bumped-context)]
     (apply m-git/add! working-dir spitted)
     (m-git/commit! working-dir
-                   (format "Bump module %s to version %s and spit/render related metadata in file(s)." artefact-name version))))
+                   (format "Bump module %s to version %s and spit/render related metadata in file(s)." artefact-name version))
+    spitted))
 
 (defn tag-repo! [bumped-context]
   (let [{:metav/keys  [top-level tag]
@@ -70,13 +71,16 @@
       (log/debug "Next tag is" bumped-tag)
 
       ;;spit meta file and commit
-      (when spit
-        (do-spits-and-commit! bumped-context))
+      (let [spitted (when spit
+                      (do-spits-and-commit! bumped-context))]
 
-      (tag-repo! bumped-context)
 
-      (cond-> bumped-context
-              (not without-push) (assoc :metav.release/push-result (m-git/push! top-level))))))
+        (tag-repo! bumped-context)
+
+        (-> bumped-context
+            (assoc :metav.release/spitted spitted)
+            (cond-> (not without-push)
+                    (assoc :metav.release/push-result (m-git/push! top-level))))))))
 
 
 (defn bump-level-valid? [context]
