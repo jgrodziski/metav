@@ -3,6 +3,8 @@
     [clojure.spec.alpha :as s]
     [clojure.tools.cli :as cli]
     [clojure.string :as string]
+    [clojure.edn :as edn]
+    [me.raynes.fs :as fs]
     [metav.api :as m-api]))
 
 ;; TODO: add the option to load all config from an edn file.
@@ -15,7 +17,6 @@
 
 (s/def :metav.cli/verbose? boolean?)
 
-
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Common cli opts
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -23,24 +24,24 @@
   [["-h" "--help" "Help"]
 
    ["-v" "--verbose" "Verbose, output the metadata as json in stdout if the option is present"
-    :id :metav.cli/verbose?
-    :default (:metav.cli/verbose? default-options)]
+    :id :metav.cli/verbose?]
+
+   ["-c" "--config-file PATH" "Edn file containing a map of metav config."
+    :id :metav.cli/config
+    :validate [fs/exists? "Config file invalid."]]
 
    [nil "--full-name" "Use full name format for the artefact-name, prefixing the module name with the name of the top level dir of the project."
-    :id :metav/use-full-name?
-    :default (:metav/use-full-name? default-options)]
+    :id :metav/use-full-name?]
 
    ["-r" "--module-name-override MODULE-NAME" "Module Name Override"
     :id :metav/module-name-override
-    :validate [(partial s/valid? :metav/module-name-override)]]
+    :validate [(partial s/valid? :metav/module-name-override) "Modudle name override must be a non empty string."]]
 
    ["-s" "--version-scheme SCHEME" "Version Scheme ('maven' or 'semver')"
     :id :metav/version-scheme
-    :default (:metav/version-scheme default-options)
     :parse-fn keyword
     :validate [(partial s/valid? :metav/version-scheme)
                "The -s or --version-scheme option only accepts the values: 'maven' or 'semver'"]]])
-
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Common handling of cli args
@@ -73,6 +74,17 @@
       (exit res))))
 
 
+(defn process-parsed-opts [parsed]
+  (let [{:keys [options]} parsed
+        file-config (:metav.cli/config options)
+        definitive-options (if file-config
+                             (merge (-> file-config slurp edn/read-string)
+                                    (dissoc options :metav.cli/config))
+                             options)]
+    (if (s/valid? :metav/options definitive-options)
+      (assoc parsed :custom-opts definitive-options)
+      (assoc parsed :exit-message (s/explain-str :metav/options definitive-options)))))
+
 (defn make-validate-args
   "Makes a function that validates command line arguments. This function
   either return a map indicating the program should exit
@@ -85,31 +97,38 @@
   - `args->opts`: Function taking the result of clojure.tools.cli/parse-opts
   (parsed program arguments) and returning either a map containing the customarily verified
   arguments to be used by the program."
-  [option-spec usage-fn args->opts]
-  (fn
-    [args]
-    (let [{:keys [options errors summary] :as opts} (cli/parse-opts args option-spec)]
-      (cond
-        (:help options) ; help => exit OK with usage summary
-        {:exit? true
-         :exit-message (usage-fn summary)
-         :ok? true}
+  ([option-spec usage-fn]
+   (make-validate-args option-spec usage-fn identity))
+  ([option-spec usage-fn cli-arguments->opts]
+   (fn
+     [args]
+     (let [{:keys [options errors summary] :as cli-parse-result} (cli/parse-opts args option-spec)]
+       (cond
+         (:help options) ; help => exit OK with usage summary
+         {:exit? true
+          :exit-message (usage-fn summary)
+          :ok? true}
 
-        errors ; errors => exit with description of errors
-        {:exit? true
-         :exit-message (error-msg errors)
-         :ok? false}
+         errors ; errors => exit with description of errors
+         {:exit? true
+          :exit-message (error-msg errors)
+          :ok? false}
 
-        ;; custom validation on arguments
-        :else
-        (if-let [ret (args->opts opts)]
-          {:custom-opts ret
-           :exit? false
-           :ok? true}
-
-          {:exit? true
-           :exit-message (usage-fn summary)
-           :ok? false}))))); failed custom validation => exit with usage summary
+         ;; custom validation on arguments
+         :else
+         (let [processed (process-parsed-opts cli-parse-result)]
+           (if-let [exit-msg (:exit-message processed)]
+             {:exit? true
+              :ok? false
+              :exit-message exit-msg}
+             (let [custom-processed (cli-arguments->opts processed)]
+               (if-let [exit-msg (:exit-message custom-processed)]
+                 {:exit? true
+                  :ok? false
+                  :exit-message exit-msg} ; failed custom validation))
+                 {:exit?     false
+                  :ok?       true
+                  :ctxt-opts (:custom-opts custom-processed)})))))))))
 
 
 (defn make-main
@@ -119,35 +138,12 @@
   - `validate-args-fn`: takes program arguments, parses and validates them.
   - `args->context-fn`: turn the parsed arguments into a metav context
   - `perform-command-fn`: function perfoming a metav command, takes a context as parameter."
-  [validate-args-fn
-   args->context-fn
-   perform-command-fn]
+  [validate-args-fn perform-command-fn]
   (fn [& args]
-    (let [{:keys [exit? custom-opts] :as parsed-and-validated} (validate-args-fn args)]
+    (let [{:keys [exit? ctxt-opts] :as parsed-and-validated} (validate-args-fn args)]
       (if exit?
         parsed-and-validated
-        (let [res (-> custom-opts
-                      args->context-fn
-                      perform-command-fn)]
+        (let [res (-> ctxt-opts m-api/make-context perform-command-fn)]
           (assoc parsed-and-validated
             :ret res
-            :exit? true))))))
-
-
-;;----------------------------------------------------------------------------------------------------------------------
-;; Helpers
-;;----------------------------------------------------------------------------------------------------------------------
-(defn basic-custom-args-validation
-  "Function intended to be used as a default for the `args->opts` parameter of
-  the `make-validate-args` function."
-  [parsed-args]
-  (let [options (:options parsed-args)]
-    (when (> (count options) 1)
-      {:options options})))
-
-
-(defn basic-args->context [validated-args]
-  "Function intended to be used as a default for the `args->context-fn` parameter of
-  the `make-main` function."
-  (m-api/make-context (:options validated-args)))
-
+            :ok? true))))))

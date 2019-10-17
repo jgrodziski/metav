@@ -2,18 +2,14 @@
   (:require
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
+    [clojure.data.json :as json]
     [metav.cli.common :as m-cli-common]
-    [metav.api.spit :as m-spit]))
+    [metav.api :as m-api]))
 
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Spit conf
 ;;----------------------------------------------------------------------------------------------------------------------
-(def default-options
-  (merge m-cli-common/default-options
-         m-spit/defaults-spit-opts))
-
-
 (defn parse-formats [s]
   (into #{}
         (comp
@@ -27,17 +23,13 @@
 
         ["-o" "--output-dir DIR_PATH" "Output Directory"
          :id :metav.spit/output-dir
-         :default (:metav.spit/output-dir default-options)
-         :default-desc (:metav.spit/output-dir default-options)
          :parse-fn str]
 
         ["-n" "--namespace NS" "Namespace used in code output"
-         :id :metav.spit/namespace
-         :default (:metav.spit/namespace default-options)]
+         :id :metav.spit/namespace]
 
         ["-f" "--formats FORMATS" "Comma-separated list of output formats (clj, cljc, cljs, edn, json)"
          :id :metav.spit/formats
-         :default (:metav.spit/formats default-options)
          :parse-fn parse-formats
          :validate [(partial s/valid? :metav.spit/formats)
                     "Formats must be in the following list: clj, cljc, cljs, edn, json"]]
@@ -71,24 +63,25 @@
 
 (def validate-args
   (m-cli-common/make-validate-args cli-options
-                                   usage
-                                   m-cli-common/basic-custom-args-validation))
+                                   usage))
 
 
 (defn perform! [context]
-  (m-spit/perform! context))
+  (when (:metav.cli/verbose? context)
+    (-> context m-api/metadata-as-edn json/write-str print))
+  (m-api/spit! context))
 
 
 (def main* (m-cli-common/make-main
              validate-args
-             m-cli-common/basic-args->context
              perform!))
 
 (comment
-  (main* "-f" "cljc, json,edn"
+  (main* "-c" "resources-test/example-conf.edn"
+         "-f" "cljc, json, edn"
          "-n" "metav.meta"
-         "-t" "mustache-template.txt"
-         "-d" "resources-test/rendered.txt"))
+         "-t" "mustache-template.txt"))
+
 
 
 (def main (m-cli-common/wrap-exit main*))

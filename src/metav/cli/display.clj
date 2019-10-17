@@ -4,19 +4,13 @@
     [clojure.tools.logging :as log]
     [clojure.string :as string]
     [metav.cli.common :as m-cli-common]
-    [metav.api.display :as m-display]))
-
-
-(def default-options
-  (merge m-cli-common/default-options
-         m-display/default-display-opts))
+    [metav.api :as m-api]))
 
 
 (def cli-options
   (conj m-cli-common/cli-options
         ["-f" "--output-format FORMAT" "Output format (edn, json, tab)"
          :id :metav.display/output-format
-         :default (:metav.display/output-format default-options)
          :parse-fn keyword
          :validate [(partial s/valid? :metav.display/output-format)
                     "Format must be among: edn, json, tab"]]))
@@ -34,9 +28,7 @@
 
 
 (def validate-args
-  (m-cli-common/make-validate-args cli-options
-                                   usage
-                                   m-cli-common/basic-custom-args-validation))
+  (m-cli-common/make-validate-args cli-options usage))
 
 
 (defn perform! [context]
@@ -45,15 +37,18 @@
     (log/debug "Display artifact name and version in format " output-format
                ". Module-name override? " module-name-override
                ", hence artefact-name is" artefact-name)
-    (m-display/perform! context)))
+    (m-api/display! context)))
 
 
 (def main* (m-cli-common/make-main
              validate-args
-             m-cli-common/basic-args->context
              perform!))
 
-(comment (main*))
+
+
+(comment
+  (validate-args ["-c" "resources-test/example-conf.edn"])
+  (main* "-c" "resources-test/example-conf.edn" ))
 
 (def main (m-cli-common/wrap-exit main*))
 

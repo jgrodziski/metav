@@ -1,0 +1,17 @@
+{:metav/use-full-name? true
+ :metav/min-sha-length 4
+ :metav/version-scheme :semver
+
+ :metav.display/output-format :edn
+
+
+ :metav.spit/output-dir "resources"
+ :metav.spit/namespace "meta.vfile"
+ :metav.spit/formats #{:json}
+ :metav.spit/template "mustache-template.txt"
+ :metav.spit/rendering-output "resources/rendered-conf.txt"
+
+ :metav.release/spit false
+ :metav.release/level :patch
+ :metav.release/without-sign false
+ :metav.release/without-push false}

@@ -2,8 +2,11 @@
   (:require
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
+    [clojure.tools.logging :as log]
+    [clojure.data.json :as json]
     [metav.cli.common :as m-c-c]
-    [metav.cli.spit :as m-spit-cli]))
+    [metav.cli.spit :as m-spit-cli]
+    [metav.api :as m-api]))
 
 
 (def cli-options
@@ -11,14 +14,16 @@
         [nil "--without-sign" "Should the git tag used for release be signed with the current user's GPG key configured with git"
          :default false
          :default-desc "false"]
-        ["-s" "--spit" "Indicates the release process should spit the metadata file as with the \"spit\" task, in that case the spit options must be provided"
+        [nil "--spit" "Indicates the release process should spit the metadata file as with the \"spit\" task, in that case the spit options must be provided"
          :default false
          :default-desc "false"]
         ["-w" "--without-push" "Execute the release process but without pushing at the end, if you want to control the pushing instant yourself"
          :default false
          :default-desc "false"]))
 
-
+;;----------------------------------------------------------------------------------------------------------------------
+;; Assembling Release main
+;;----------------------------------------------------------------------------------------------------------------------
 (defn usage [summary]
   (->> ["Metav's \"release\" function does the following:"
         "  - assert the command is invoked with a deps.edn in the working directory"
@@ -56,4 +61,27 @@
       (assoc processed-cli-opts
         :exit-message "Release level not properly specified."))))
 
-(def validate-cli-args (m-c-c/make-validate-args cli-options identity handle-cli-arguments))
+(def validate-cli-args (m-c-c/make-validate-args cli-options usage handle-cli-arguments))
+
+
+(defn perform! [context]
+  (let [{:metav.cli/keys [verbose?]
+         :metav.release/keys [spit level output-dir]} context]
+    (log/debug "Release level is " level ". Assert everything is committed, bump the version, tag and push.")
+    (log/debug (str "Spitting metadata requested? " spit ". "
+                    (if spit
+                      (let [{:metav.spit/keys [output-dir namespace formats]} context]
+                        "Spitting metadata (module-name, tag, version, sha, timestamp) in dir " output-dir
+                        " with namespace " namespace
+                        " and formats " formats)
+                      "")))
+    (let [{:keys [bumped-tag]} (m-api/release! context)]
+      (if verbose?
+        (print (json/write-str (m-api/metadata-as-edn context)))
+        (print bumped-tag)))))
+
+
+(def main* (m-c-c/make-main validate-cli-args perform!))
+
+
+(def main (m-c-c/wrap-exit main*))
