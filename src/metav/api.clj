@@ -17,30 +17,29 @@
          m-spit/defaults-options
          m-release/default-options))
 
+
 (s/def :metav/options (s/and :metav.context/options
                              :metav.display/options
                              :metav.spit/options
                              :metav.release/options))
 
 
-(defn options-valid? [opts]
-  (s/valid? :metav/options opts))
-
-
 (defn make-context
   ([]
-   (make-context {:metav/working-dir (u/pwd)}))
+   (make-context {}))
   ([opts]
-   (m-ctxt/make-context
-     (s/assert* :metav/options
-                (merge default-options opts)))))
+   (let [working-dir (:metav/working-dir opts)
+         opts (cond-> opts
+                      (not working-dir) (assoc :metav/working-dir (u/pwd)))]
+     (m-ctxt/make-context
+       (s/assert* :metav/options
+                  (merge default-options opts))))))
 
 
-(defn display [context]
-  (m-display/perform! context))
+(def metadata-as-edn m-a-c/metadata-as-edn)
 
-(defn spit! [context]
-  (m-spit/perform! context))
+(def display! m-display/perform!)
 
-(defn release! [context]
-  (m-release/perform! context))
+(def spit! m-spit/perform!)
+
+(def release! m-release/perform!)
