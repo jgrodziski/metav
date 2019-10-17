@@ -23,22 +23,12 @@
 (s/def :metav.release/spit boolean?)
 (s/def :metav.release/without-push boolean?)
 
-(defn bump-level-valid? [context]
-  (let [{scheme :metav/version-scheme
-         level :metav.release/level} context
-        spec (if (= :semver scheme)
-               ::m-semver/accepted-bumps
-               ::m-maven/accepted-bumps)]
-    (s/valid? spec level)))
 
 (s/def :metav.release/options
-  (s/and
-    bump-level-valid?
-    (s/keys :opt [:metav.release/level
-                  :metav.release/without-sign
-                  :metav.release/spit
-                  :metav.release/without-push])))
-
+  (s/keys :opt [:metav.release/level
+                :metav.release/without-sign
+                :metav.release/spit
+                :metav.release/without-push]))
 
 
 (defn do-spits-and-commit! [bumped-context]
@@ -85,15 +75,26 @@
 
       (tag-repo! bumped-context)
 
-      (cond-> [artefact-name bumped-version bumped-tag]
-              (not without-push) (conj (m-git/push! top-level))))))
+      (cond-> {:artefact-name artefact-name
+               :bumped-version bumped-version
+               :bumped-tag bumped-tag}
+              (not without-push) (assoc :push-result (m-git/push! top-level))))))
 
+
+(defn bump-level-valid? [context]
+  (let [{scheme :metav/version-scheme
+         level :metav.release/level} context
+        spec (if (= :semver scheme)
+               ::m-semver/accepted-bumps
+               ::m-maven/accepted-bumps)]
+    (s/valid? spec level)))
 
 (s/def :metav.release/param (s/keys :req [:metav.release/level]))
 
 
 (defn perform! [context]
   (s/assert (s/and :metav.release/param
-                   :metav.release/options)
+                   :metav.release/options
+                   bump-level-valid?)
             context)
   (perform*! context))

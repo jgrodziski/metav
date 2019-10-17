@@ -17,14 +17,11 @@
                :namespace "meta"
                :formats #{:edn}})
 
-(s/def :metav.spit/output-dir string?)
+(s/def :metav.spit/output-dir ::u/non-empty-str)
 (s/def :metav.spit/namespace string?)
 (s/def :metav.spit/formats (s/and set? #(every? #{:clj :cljc :cljs :edn :json} %)))
 (s/def :metav.spit/template ::u/resource-path)
-(s/def :metav.spit/rendering-output (s/and ::u/non-empty-str
-                                           (complement fs/directory?)
-                                           u/parent-exists?
-                                           u/inside-cwd?))
+(s/def :metav.spit/rendering-output ::u/non-empty-str)
 
 (s/def :metav.spit/options
   (s/keys :opt [:metav.spit/output-dir
@@ -65,11 +62,14 @@
 
 (defn spit-files! [context]
   (let [{:metav/keys [working-dir]
-         :metav.spit/keys [formats output-dir namespace]} context]
+         :metav.spit/keys [formats output-dir namespace]} context
+        output-dir (str (fs/file working-dir output-dir))]
+
+    (assert (u/ancestor? working-dir output-dir)
+            "Spitted files must be inside the repo.")
+
     (mapv (fn [format]
-            (let [dest (metafile! (str (fs/file working-dir output-dir))
-                                  namespace
-                                  (name format))]
+            (let [dest (metafile! output-dir namespace (name format))]
               (spit-file! (assoc context
                            ::format format
                            ::dest dest))
@@ -82,15 +82,16 @@
          :metav.spit/keys [template rendering-output]} context
         metadata (m-a-c/metadata-as-edn context)
         rendering-output (fs/with-cwd working-dir (fs/normalized rendering-output))]
+
+    (assert (u/ancestor? working-dir rendering-output)
+            "Rendered file must be inside the repo.")
+
     (spit rendering-output (cs/render-resource template metadata))
     (str rendering-output)))
 
-;;TODO: move verbose handlig in the cli part.
+
 (defn perform! [context]
   (s/assert :metav.spit/options context)
-  (let [{:metav.cli/keys [verbose?]
-         :metav.spit/keys [template rendering-output]} context]
-    (when verbose?
-      (-> context m-a-c/metadata-as-edn json/write-str print))
+  (let [{:metav.spit/keys [template rendering-output]} context]
     (cond-> (spit-files! context)
             (and template rendering-output) (conj (render! context)))))
