@@ -28,6 +28,6 @@
   (-> p fs/parent fs/exists?))
 
 
-(defn inside-cwd? [p]
-  (string/starts-with? (str (fs/normalized p))
-                       (str (fs/normalized (pwd)))))
+(defn ancestor? [path possible-descendant]
+  (string/starts-with? (str (fs/normalized possible-descendant))
+                       (str (fs/normalized path))))

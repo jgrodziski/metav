@@ -6,11 +6,11 @@
     [clojure.edn :as edn]
     [me.raynes.fs :as fs]
 
-    [metav.git-shell :as gs]
-    [metav.utils-test :as ut]
-
     [metav.api.spit :as m-spit]
+    [metav.utils-test :as ut]
     [metav.utils :as u]))
+
+
 
 
 (defn parse-rendered [text]
@@ -29,13 +29,12 @@
         [edn-file rendered-file] (m-spit/perform! context)]
 
     (testing "Files have been created."
-      (fs/with-cwd repo
-        (facts
-          (fs/exists? edn-file)      => truthy
-          (fs/exists? rendered-file) => truthy
+      (facts
+        (fs/exists? edn-file)      => truthy
+        (fs/exists? rendered-file) => truthy
 
-          (u/inside-cwd? edn-file)       => truthy
-          (u/inside-cwd? rendered-file)  => truthy)))
+        (u/ancestor? repo edn-file)       => truthy
+        (u/ancestor? repo rendered-file)  => truthy))
 
     (testing "files content are equivalent"
       (let [edn-produced (-> edn-file slurp edn/read-string)
@@ -49,6 +48,7 @@
     (ut/with-repo repo
       (ut/prepare-base-repo! repo)
       (test-spits repo)))
+
 
   (testing "In monorepo"
     (ut/with-example-monorepo m
@@ -66,7 +66,7 @@
         (fs/mkdir (fs/file moduleB2 "resources"))
         (test-spits moduleB2)
 
-        (test-spits moduleB3))))) ; actually no need to create resources dir, spit! creates it.
+        (test-spits moduleB3)))))
 
 
 (deftest corner-cases
