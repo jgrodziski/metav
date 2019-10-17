@@ -75,10 +75,8 @@
 
       (tag-repo! bumped-context)
 
-      (cond-> {:artefact-name artefact-name
-               :bumped-version bumped-version
-               :bumped-tag bumped-tag}
-              (not without-push) (assoc :push-result (m-git/push! top-level))))))
+      (cond-> bumped-context
+              (not without-push) (assoc :metav.release/push-result (m-git/push! top-level))))))
 
 
 (defn bump-level-valid? [context]

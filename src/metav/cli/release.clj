@@ -66,7 +66,7 @@
 
 (defn perform! [context]
   (let [{:metav.cli/keys [verbose?]
-         :metav.release/keys [spit level output-dir]} context]
+         :metav.release/keys [spit level]} context]
     (log/debug "Release level is " level ". Assert everything is committed, bump the version, tag and push.")
     (log/debug (str "Spitting metadata requested? " spit ". "
                     (if spit
@@ -75,7 +75,7 @@
                         " with namespace " namespace
                         " and formats " formats)
                       "")))
-    (let [{:keys [bumped-tag]} (m-api/release! context)]
+    (let [{bumped-tag :metav/tag} (m-api/release! context)]
       (if verbose?
         (print (json/write-str (m-api/metadata-as-edn context)))
         (print bumped-tag)))))
