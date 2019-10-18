@@ -7,10 +7,6 @@
 (def ^:dynamic *min-sha-length* 4)
 (def ^:dynamic *dirty-mark* "DIRTY")
 
-(defn pwd
-  "return working dir of the JVM (cannot be changed once JVM is started)"
-  []
-  (.getCanonicalFile (clojure.java.io/file ".")))
 
 (def unix-git-command "git")
 
