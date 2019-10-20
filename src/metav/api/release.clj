@@ -3,6 +3,7 @@
     [clojure.spec.alpha :as s]
     [clojure.tools.logging :as log]
     [clojure.data.json :as json]
+    [clojure.set :refer [union]]
     [metav.git :as m-git]
     [metav.api.common :as m-a-c]
     [metav.api.spit :as m-spit]
@@ -18,7 +19,7 @@
                   :spit false
                   :without-push false})
 
-(s/def :metav.release/level #{:major :minor :patch :alpha :beta :rc})
+(s/def :metav.release/level (union m-semver/allowed-bumps m-maven/allowed-bumps))
 (s/def :metav.release/without-sign boolean?)
 (s/def :metav.release/spit boolean?)
 (s/def :metav.release/without-push boolean?)

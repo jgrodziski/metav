@@ -14,7 +14,9 @@
             [metav.version.common :as common]
             [clojure.tools.logging :as log]))
 
-(s/def ::accepted-bumps #{:major :minor :patch})
+(def allowed-bumps #{:major :minor :patch})
+
+(s/def ::accepted-bumps allowed-bumps)
 
 (deftype SemVer [subversions distance sha dirty?]
   Object
