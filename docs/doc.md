@@ -6,9 +6,9 @@ Metav basically provides 3 operation:
 - release: creates a new release of the project/module bumping 
   the project version and tagging the repo with the new version.
 
-To do so Metav rests on a central api in the namespace `metav.api`.
+To do so Metav rests on a central api found in the namespace `metav.api`.
 
-Each operation take a context as parameter and runs its programm based 
+Each operation takes a context as parameter and runs its program based 
 of the informations found there. A context is created with the function 
 `metav.api/make-context`, the operations are found in:
 - `metav.api/display!`
@@ -17,7 +17,7 @@ of the informations found there. A context is created with the function
 
 
 ### Context
-The context from which operations derives its behaviour revolves mainly 
+The context from which operations derives their behaviour revolves mainly 
 around two things. A working directory (WD) that must contain a deps.edn
 file and the git state of the repo relative to that WD. From this WD 
 metav  generates in the context an artefact name, recovers the current 
@@ -46,33 +46,43 @@ override, optionnaly prefixed by the git root dir name in the case of
 `:metav/use-full-name?` being true. 
 
 ### Display
-Operation that prints the current state of the project to stdout.
+Operation that prints the current versioning state of the project to stdout.
 
 ### Spit
-Operation that spit the informations of a context into files.
+Operation that spit the informations of a context into files. The 
+versioning data is presented as follow in a clojurein edn format:
+
+```clojure
+{:module-name artefact-name ;; the artefact name ase discussed above
+ :version (str version)
+ :tag tag ;; (str artefact-name "-" version)
+ :generated-at (iso-now)
+ :path (if git-prefix git-prefix ".")}
+```
 
 ### Release
 Operation that will create a new version of a project/module. To 
-do so it tkae a context repesenting the current state of the project, 
-bumps, creates the context we will find after the bump operation, tags 
+do so it takes a context representing the current state of the project, 
+creates the context we will find after the bump operation, tags 
 the last commit with the new version and pushes the result. Optionally 
 uses the spit operation, commits the spitted files then tags this commit
 with the new version.
 
 ### CLI
-Metav can be used with a CLI. The 3 commands have each a separated main
+Metav can be used from the command line. The 3 commands have each a separated main
 ns to call them with the help of clojure. 
 
-- `metav.display`
-- `metav.spit`
-- `metav.release`
+With metav in the classpath in a terminal:
+- `clojure -m metav.display`
+- `clojure -m metav.spit`
+- `clojure -m metav.release`
 
 ### API example
 ```clojure
 (require '[metav.api :as m-api])
 
 ;; Defines some option for metav
-(def options {:metav/working-dir "my/projects/dir"     ;; dir from wich metav bases its execution context
+(def options {:metav/working-dir "my/projects/dir"     ;; dir from which metav bases its execution context
               :metav.release/without-sign true         ;; we're not signing git tags
               :metav.release/spit true                 ;; we want to spit project data before releasing
               :metav.spit/output-dir "resources"       ;; location where the spitted files go
@@ -85,11 +95,12 @@ ns to call them with the help of clojure.
 ```
 
 ## Options description
-The full ranges of options that can be passed to metav operations.
+The full range of options that can be passed to metav operations.
 
 ### Context
-- `:metav/working-dir` : directory from which the exectution context will be made. 
-  When unspecified will be set to the current working directory of the running jvm.
+- `:metav/working-dir` : directory from which the execution context will
+  be made. When unspecified will be set to the current working directory
+  of the running jvm.
 - `:metav/version-scheme`: `#{:semver :maven}`, defaults to `:semver`.
 - `:metav/min-sha-length`: `integer?`, the minimum size the commit hash 
   used in dirty versions. Defaults to `4`.
@@ -121,8 +132,8 @@ The full ranges of options that can be passed to metav operations.
   the bump levels available, must be correlated with `:metav/version-scheme`.
   Defaults to `:patch`.
 - `:metav.release/without-sign`: `boolean?`, whether version git tags 
-  will be signed with gpg. Defaults to `false`.
-- `:metav.release/without-push`: `boolean?`, whether we want to push 
+  won't be signed with gpg. Defaults to `false`.
+- `:metav.release/without-push`: `boolean?`, whether we don't want to push 
   after tagging a new version.  Defaults to `false`.
 - `:metav.release/spit`: `boolean?`, whether we want to spit versioning 
   data before releasing.  Defaults to `false`.
