@@ -12,13 +12,13 @@
 (def cli-options
   (conj m-spit-cli/cli-options
         [nil "--without-sign" "Should the git tag used for release be signed with the current user's GPG key configured with git"
-         :default false
+         :id :metav.release/without-sign
          :default-desc "false"]
         [nil "--spit" "Indicates the release process should spit the metadata file as with the \"spit\" task, in that case the spit options must be provided"
-         :default false
+         :id :metav.release/spit
          :default-desc "false"]
         ["-w" "--without-push" "Execute the release process but without pushing at the end, if you want to control the pushing instant yourself"
-         :default false
+         :id :metav.release/without-push
          :default-desc "false"]))
 
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -42,18 +42,10 @@
        (string/join \newline)))
 
 
-(defn make-level
-  "return the correct level in the accepted ones (major, minor, patch) or nil otherwise"
-  [arg]
-  (if (clojure.string/starts-with? arg ":")
-    (keyword (subs arg 1 (count arg)))
-    (keyword arg)))
-
-
 (defn handle-cli-arguments [processed-cli-opts]
   (let [{:keys [arguments]} processed-cli-opts]
     (if-let [potential-level (first arguments)]
-      (let [level (make-level potential-level)]
+      (let [level (m-c-c/parse-potential-keyword potential-level)]
         (if (s/valid? :metav.release/level level)
           (update processed-cli-opts :custom-opts assoc :metav.release/level level)
           (assoc processed-cli-opts
@@ -75,10 +67,11 @@
                         " with namespace " namespace
                         " and formats " formats)
                       "")))
-    (let [{bumped-tag :metav/tag} (m-api/release! context)]
-      (if verbose?
+    (let [{bumped-tag :metav/tag :as bumped-context} (m-api/release! context)]
+      (when verbose?
         (print (json/write-str (m-api/metadata-as-edn context)))
-        (print bumped-tag)))))
+        (print bumped-tag))
+      bumped-context)))
 
 
 (def main* (m-c-c/make-main validate-cli-args perform!))

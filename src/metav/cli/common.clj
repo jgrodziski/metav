@@ -9,6 +9,16 @@
 
 
 ;;----------------------------------------------------------------------------------------------------------------------
+;; Helper
+;;----------------------------------------------------------------------------------------------------------------------
+(defn parse-potential-keyword
+  "return the correct level in the accepted ones (major, minor, patch) or nil otherwise"
+  [arg]
+  (if (clojure.string/starts-with? arg ":")
+    (keyword (subs arg 1 (count arg)))
+    (keyword arg)))
+
+;;----------------------------------------------------------------------------------------------------------------------
 ;; Common conf
 ;;----------------------------------------------------------------------------------------------------------------------
 (def default-options
@@ -39,7 +49,7 @@
 
    ["-s" "--version-scheme SCHEME" "Version Scheme ('maven' or 'semver')"
     :id :metav/version-scheme
-    :parse-fn keyword
+    :parse-fn parse-potential-keyword
     :validate [(partial s/valid? :metav/version-scheme)
                "The -s or --version-scheme option only accepts the values: 'maven' or 'semver'"]]])
 
@@ -146,4 +156,5 @@
         (let [res (-> ctxt-opts m-api/make-context perform-command-fn)]
           (assoc parsed-and-validated
             :ret res
+            :exit? true
             :ok? true))))))
