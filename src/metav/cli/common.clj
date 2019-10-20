@@ -26,6 +26,7 @@
          #:metav.cli{:verbose? false}))
 
 (s/def :metav.cli/verbose? boolean?)
+(s/def :metav.cli/config fs/exists?)
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Common cli opts
@@ -38,7 +39,7 @@
 
    ["-c" "--config-file PATH" "Edn file containing a map of metav config."
     :id :metav.cli/config
-    :validate [fs/exists? "Config file invalid."]]
+    :validate [(partial s/valid? :metav.cli/config) "Config file invalid."]]
 
    [nil "--full-name" "Use full name format for the artefact-name, prefixing the module name with the name of the top level dir of the project."
     :id :metav/use-full-name?]
