@@ -13,5 +13,5 @@
 
  :metav.release/spit false
  :metav.release/level :patch
- :metav.release/without-sign false
+ :metav.release/without-sign true
  :metav.release/without-push false}
