@@ -19,7 +19,7 @@
 
 (s/def :metav.spit/output-dir ::u/non-empty-str)
 (s/def :metav.spit/namespace string?)
-(s/def :metav.spit/formats (s/and set? #(every? #{:clj :cljc :cljs :edn :json} %)))
+(s/def :metav.spit/formats (s/coll-of #{:clj :cljc :cljs :edn :json} :kind set?))
 (s/def :metav.spit/template ::u/resource-path)
 (s/def :metav.spit/rendering-output ::u/non-empty-str)
 
