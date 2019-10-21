@@ -205,7 +205,7 @@ Options:
 
 ## Init an existing codebase with a specific version
 
-Set a git annotated tag with the current version with `git tag v1.7.5 -m "version 1.7.5"` (the `-m` flag is important to set the tag as an annotated one, otherwise metav would not see it), then you can release it as usual with the `release` feature, the next version will be set starting from the specific setted version.
+Set a git annotated tag with the current version with `git tag -a v1.7.5 -m "version 1.7.5"` (the `-a` flag is important to set the tag as an annotated one, otherwise metav would not see it), then you can release it as usual with the `release` feature, the next version will be set starting from the specific setted version.
 
 # Behavior
 
