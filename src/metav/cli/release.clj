@@ -68,7 +68,7 @@
                         " and formats " formats)
                       "")))
     (let [{bumped-tag :metav/tag :as bumped-context} (m-api/release! context)]
-      (when verbose?
+      (if verbose?
         (print (json/write-str (m-api/metadata-as-edn context)))
         (print bumped-tag))
       bumped-context)))
