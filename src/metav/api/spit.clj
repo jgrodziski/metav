@@ -5,7 +5,9 @@
     [me.raynes.fs :as fs]
     [cljstache.core :as cs]
     [metav.api.common :as m-a-c]
-    [metav.utils :as u]))
+    [metav.utils :as u]
+
+    [clojure.pprint :as pp]))
 
 
 
@@ -33,13 +35,34 @@
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Spit functionality
 ;;----------------------------------------------------------------------------------------------------------------------
+(defn ensure-dir! [path]
+  (let [parent (-> path fs/normalized fs/parent)]
+    (fs/mkdirs parent)
+    path))
+
+
+(defn ensure-dest! [context]
+  (ensure-dir! (::dest context)))
+
+
+(defn side-effect-from-ctxt [f!]
+  (fn [c]
+    (f! c)
+    c))
+
+
+(defn add-extention [path ext]
+  (let [path (fs/normalized path)]
+    (fs/file (fs/parent path)
+             (str (fs/name path) "." ext))))
+
+
 (defn metafile! [output-dir namespace format]
   (fs/with-cwd output-dir
-               (let [ns-file (fs/ns-path namespace)
-                     parent (fs/parent ns-file)
-                     name (fs/name ns-file)]
-                 (fs/mkdirs parent)
-                 (fs/file parent (str name "." format)))))
+    (-> namespace
+        (fs/ns-path)
+        (fs/normalized)
+        (add-extention (name format)))))
 
 
 (defmulti spit-file! (fn [context] (::format context)))
@@ -55,43 +78,59 @@
         (json/write-str (m-a-c/metadata-as-edn context))))
 
 
+(defmethod spit-file! :template [context]
+  (spit (::dest context)
+        (cs/render-resource (:metav.spit/template context)
+                            (m-a-c/metadata-as-edn context))))
+
+
 (defmethod spit-file! :default [context];default are cljs,clj and cljc
   (spit (::dest context)
         (m-a-c/metadata-as-code context)))
 
 
-(defn spit-files! [context]
+(defn standard-spits [context]
   (let [{:metav/keys [working-dir]
          :metav.spit/keys [formats output-dir namespace]} context
-        output-dir (str (fs/file working-dir output-dir))]
+        output-dir (fs/file working-dir output-dir)]
 
     (assert (u/ancestor? working-dir output-dir)
             "Spitted files must be inside the repo.")
 
     (mapv (fn [format]
-            (let [dest (metafile! output-dir namespace (name format))]
-              (spit-file! (assoc context
-                           ::format format
-                           ::dest dest))
-              (str dest)))
+            (assoc context
+              ::dest (metafile! output-dir namespace format)
+              ::format format))
           formats)))
 
-
-(defn render! [context]
+(defn add-template-spit [spits context]
   (let [{:metav/keys [working-dir]
-         :metav.spit/keys [template rendering-output]} context
-        metadata (m-a-c/metadata-as-edn context)
-        rendering-output (fs/with-cwd working-dir (fs/normalized rendering-output))]
+         :metav.spit/keys [template rendering-output]} context]
 
-    (assert (u/ancestor? working-dir rendering-output)
-            "Rendered file must be inside the repo.")
+    (if-not (and template rendering-output)
+      spits
+      (let [rendering-output (fs/with-cwd working-dir
+                               (fs/normalized rendering-output))]
 
-    (spit rendering-output (cs/render-resource template metadata))
-    (str rendering-output)))
+        (assert (u/ancestor? working-dir rendering-output)
+                "Rendered file must be inside the repo.")
+
+        (conj spits (assoc context
+                      ::dest rendering-output
+                      ::format :template))))))
+
+
+(defn spit-files! [ctxts]
+  (into []
+        (comp (map (side-effect-from-ctxt ensure-dest!))
+              (map (side-effect-from-ctxt spit-file!))
+              (map ::dest)
+              (map str))
+        ctxts))
 
 
 (defn perform! [context]
   (s/assert :metav.spit/options context)
-  (let [{:metav.spit/keys [template rendering-output]} context]
-    (cond-> (spit-files! context)
-            (and template rendering-output) (conj (render! context)))))
+  (let [spits (-> context standard-spits (add-template-spit context))]
+    (assoc context
+      :metav.spit/spitted (spit-files! spits))))

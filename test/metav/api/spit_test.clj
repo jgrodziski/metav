@@ -26,7 +26,8 @@
                                        :metav.spit/template "mustache-template.txt"
                                        :metav.spit/rendering-output "resources/rendered.txt"
                                        :metav.spit/formats #{:edn}})
-        [edn-file rendered-file] (m-spit/perform! context)]
+        new-ctxt (m-spit/perform! context)
+        [edn-file rendered-file] (:metav.spit/spitted new-ctxt)]
 
     (testing "Files have been created."
       (facts
@@ -74,6 +75,7 @@
     (ut/with-repo repo
       (ut/prepare-base-repo! repo)
       (let [ctxt (ut/make-context repo {:metav.spit/formats #{}})
-            spitted (m-spit/perform! ctxt)]
+            new-ctxt (m-spit/perform! ctxt)
+            spitted (:metav.spit/spitted new-ctxt)]
         (fact
           (empty? spitted) => truthy)))))

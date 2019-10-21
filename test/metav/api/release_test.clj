@@ -8,9 +8,7 @@
     [metav.git-shell :as gs]
     [metav.utils-test :as ut]
     [metav.git :as m-git]
-    [metav.api.release :as m-release]
-
-    [clojure.pprint :as pp]))
+    [metav.api.release :as m-release]))
 
 
 ;; TODO: can't sign tags in tests for now -> need to setup the environment so that gpg can be found by the java procees spawned with Runtime.exec
@@ -107,5 +105,3 @@
             (:scm-base release4)  => "2.0.0"
             (:bumped-tag release4) => "sysA-container2-2.0.0"
             (:metadata release4)   => truthy))))))
-
-(test/run-tests)
