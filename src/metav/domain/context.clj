@@ -1,15 +1,14 @@
-(ns metav.api.context
+(ns metav.domain.context
   (:require
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [clojure.tools.logging :as log]
     [me.raynes.fs :as fs]
-
-    [metav.version.semver :as m-semver]
-    [metav.version.maven :as m-maven]
-    [metav.git :as m-git]
-    [metav.utils :as u]))
-
+    [metav.utils :as utils]
+    [metav.domain.version.semver :as semver]
+    [metav.domain.version.maven :as maven]
+    [metav.domain.git :as git]
+    ))
 
 
 ;; TODO make sure that in release, we actually release from repos, not the top level for instance.
@@ -18,11 +17,12 @@
           :min-sha-length 4
           :use-full-name? false})
 
+
 (s/def :metav/working-dir fs/exists?)
 (s/def :metav/version-scheme #{:semver :maven})
 (s/def :metav/min-sha-length integer?)
 (s/def :metav/use-full-name? boolean?)
-(s/def :metav/module-name-override ::u/non-empty-str)
+(s/def :metav/module-name-override ::utils/non-empty-str)
 
 
 (s/def :metav.context/options
@@ -37,8 +37,8 @@
 (defn assoc-git-basics
   [opts]
   (let [working-dir (-> opts :metav/working-dir fs/normalized str)
-        top (m-git/toplevel working-dir)
-        prefix  (m-git/prefix working-dir)]
+        top (git/toplevel working-dir)
+        prefix  (git/prefix working-dir)]
     (when-not (string? top)
       (let [e (Exception. "Probably not working inside a git repository.")]
         (log/error e (str "git-top-level returned: " top " prefix returned:" (if (nil? prefix) "nil" prefix)))
@@ -59,7 +59,7 @@
 
 (defn assert-repo-in-order [context]
   (let [working-dir (:metav/working-dir context)]
-    (when-not (m-git/any-commits? working-dir)
+    (when-not (git/any-commits? working-dir)
       (let [msg "No commits  found."
             e (Exception. msg)]
         (log/fatal e msg)
@@ -84,9 +84,8 @@
         module-name (if git-prefix
                       (git-prefix->module-name git-prefix)
                       project-name)]
-    (merge context
-           #:metav{:project-name project-name
-                   :module-name module-name})))
+    (merge context #:metav{:project-name project-name
+                           :module-name module-name})))
 
 
 (defn definitive-module-name [context]
@@ -115,14 +114,14 @@
 
 
 (def version-scheme->builder
-  {:semver m-semver/version
-   :maven m-maven/version})
+  {:semver semver/version
+   :maven maven/version})
 
 
 (defn version [context]
   (let [{:metav/keys [working-dir version-scheme version-prefix min-sha-length]} context
         make-version (get version-scheme->builder version-scheme)
-        state (m-git/working-copy-description working-dir
+        state (git/working-copy-description working-dir
                                               :prefix version-prefix
                                               :min-sha-length min-sha-length)]
     (when-not make-version
@@ -143,12 +142,12 @@
 
 (defn assoc-computed-keys [context]
   (-> context
-      (u/assoc-computed :metav/definitive-module-name definitive-module-name)
-      (u/assoc-computed :metav/full-name full-name)
-      (u/assoc-computed :metav/artefact-name artefact-name)
-      (u/assoc-computed :metav/version-prefix version-prefix)
-      (u/assoc-computed :metav/version version)
-      (u/assoc-computed :metav/tag tag)))
+      (utils/assoc-computed :metav/definitive-module-name definitive-module-name)
+      (utils/assoc-computed :metav/full-name full-name)
+      (utils/assoc-computed :metav/artefact-name artefact-name)
+      (utils/assoc-computed :metav/version-prefix version-prefix)
+      (utils/assoc-computed :metav/version version)
+      (utils/assoc-computed :metav/tag tag)))
 
 
 (s/def :metav.context/param

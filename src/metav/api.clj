@@ -1,20 +1,19 @@
 (ns metav.api
   (:require
     [clojure.spec.alpha :as s]
-    [metav.api.context :as m-ctxt]
-    [metav.api.display :as m-display]
-    [metav.api.spit :as m-spit]
-    [metav.api.release :as m-release]
+    [clojure.data.json    :as json]
+    [metav.domain.context :as m-ctxt]
+    [metav.domain.display :as display]
+    [metav.domain.spit    :as spit]
+    [metav.domain.release :as release]
     [metav.utils :as u]
-    [metav.api.common :as m-a-c]))
-
+    [metav.domain.common :as m-a-c]))
 
 (def default-options
   (merge m-ctxt/default-options
-         m-display/default-options
-         m-spit/defaults-options
-         m-release/default-options))
-
+         display/default-options
+         spit/defaults-options
+         release/default-options))
 
 (s/def :metav/options (s/and :metav.context/options
                              :metav.display/options
@@ -36,8 +35,42 @@
 
 (def metadata-as-edn m-a-c/metadata-as-edn)
 
-(def display! m-display/perform!)
+;;----------------------------------------------------------------------------------------------------------------------
+;; Display
+;;----------------------------------------------------------------------------------------------------------------------
 
-(def spit! m-spit/perform!)
+(defmulti display* :metav.display/output-format)
 
-(def release! m-release/perform!)
+
+(defmethod display* :edn [context]
+  (print (m-a-c/metadata-as-edn context)))
+
+
+(defmethod display* :json [context]
+  (print (json/write-str (m-a-c/metadata-as-edn context))))
+
+
+(defmethod display* :tab [{:metav/keys [artefact-name version]}];default is tab separated module-name and version
+  (print (str artefact-name "\t" (str version))))
+
+
+(defn display
+  ([] (display (make-context)))
+  ([context]
+   (s/assert :metav.display/options context)
+   (display* context)
+   context))
+
+;;----------------------------------------------------------------------------------------------------------------------
+;; Spit!
+;;----------------------------------------------------------------------------------------------------------------------
+
+(defn spit!
+  ([] (spit! (make-context)))
+  ([context] (spit/spit! context)))
+
+;;----------------------------------------------------------------------------------------------------------------------
+;; Release!
+;;----------------------------------------------------------------------------------------------------------------------
+
+(def release! release/release!)

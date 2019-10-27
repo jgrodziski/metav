@@ -6,9 +6,10 @@
     [clojure.edn :as edn]
     [me.raynes.fs :as fs]
 
-    [metav.api.spit :as m-spit]
-    [metav.utils-test :as ut]
-    [metav.utils :as u]))
+    [metav.api :as spit]
+    [metav.utils :as utils]
+    [metav.utils-test :as utils-test]
+    ))
 
 
 
@@ -22,11 +23,11 @@
 
 
 (defn test-spits [repo]
-  (let [context (ut/make-context repo {:metav.spit/namespace "metav.vfile"
+  (let [context (utils-test/make-context repo {:metav.spit/namespace "metav.vfile"
                                        :metav.spit/template "mustache-template.txt"
                                        :metav.spit/rendering-output "resources/rendered.txt"
                                        :metav.spit/formats #{:edn}})
-        new-ctxt (m-spit/perform! context)
+        new-ctxt (spit/spit! context)
         [edn-file rendered-file] (:metav.spit/spitted new-ctxt)]
 
     (testing "Files have been created."
@@ -34,8 +35,8 @@
         (fs/exists? edn-file)      => truthy
         (fs/exists? rendered-file) => truthy
 
-        (u/ancestor? repo edn-file)       => truthy
-        (u/ancestor? repo rendered-file)  => truthy))
+        (utils/ancestor? repo edn-file)       => truthy
+        (utils/ancestor? repo rendered-file)  => truthy))
 
     (testing "files content are equivalent"
       (let [edn-produced (-> edn-file slurp edn/read-string)
@@ -46,13 +47,13 @@
 
 (deftest spiting-test
   (testing "In dedicated repo."
-    (ut/with-repo repo
-      (ut/prepare-base-repo! repo)
+    (utils-test/with-repo repo
+      (utils-test/prepare-base-repo! repo)
       (test-spits repo)))
 
 
   (testing "In monorepo"
-    (ut/with-example-monorepo m
+    (utils-test/with-example-monorepo m
       (let [{:keys [remote monorepo modules] :as mono} m
             {project1 :p1
              project2 :p2
@@ -72,10 +73,10 @@
 
 (deftest corner-cases
   (testing "With en empty formats set and no render config, nothing is rendered."
-    (ut/with-repo repo
-      (ut/prepare-base-repo! repo)
-      (let [ctxt (ut/make-context repo {:metav.spit/formats #{}})
-            new-ctxt (m-spit/perform! ctxt)
+    (utils-test/with-repo repo
+      (utils-test/prepare-base-repo! repo)
+      (let [ctxt (utils-test/make-context repo {:metav.spit/formats #{}})
+            new-ctxt (spit/spit! ctxt)
             spitted (:metav.spit/spitted new-ctxt)]
         (fact
           (empty? spitted) => truthy)))))

@@ -14,14 +14,14 @@
 ;;; 1.2.3-rc4 => major 1, minor 2, patch 3, qualifier rc incremented to 4
 ;;; NB: java -jar ~/.m2/repository/org/apache/maven/maven-artifact/3.2.5/maven-artifact-3.2.5.jar <v1> <v2> ...<vn>
 
-(ns metav.version.maven
+(ns metav.domain.version.maven
   "An implementation of version protocols that complies with Maven v3"
-  (:import [java.lang Comparable]
-           [org.apache.maven.artifact.versioning ComparableVersion DefaultArtifactVersion])
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as string]
-            [metav.version.protocols :refer :all]
-            [metav.version.common :as common]))
+            [metav.domain.version.protocols :refer :all]
+            [metav.domain.version.common :as common])
+  (:import [java.lang Comparable]
+           [org.apache.maven.artifact.versioning ComparableVersion DefaultArtifactVersion]))
 
 ;; not allowing snapshots, they might duplicate git tag names.
 (def allowed-bumps #{:major :minor :patch :alpha :beta :rc :release})
@@ -36,19 +36,23 @@
         i (or (and i (Integer/parseUnsignedInt i)) 1)] ; => max revisions = 9
     [base i]))
 
+
 (defn- qualifier->string
   [[qs qn]]
   (str qs (when (> qn 1) qn)))
 
+
 (defn- qualify*
   [[qs qn] qualifier]
   (if (and (= qs qualifier) (not= qs "SNAPSHOT")) [qs (inc qn)] [qualifier 1]))
+
 
 (defn- to-string [subversions qualifier & [distance sha dirty?]]
   (cond-> (string/join "." subversions)
     qualifier (str "-" (qualifier->string qualifier))
     (and distance (pos? distance)) (str "-" distance "-0x" sha)
     dirty? (str "-DIRTY")))
+
 
 (deftype MavenVersion [subversions qualifier distance sha dirty?]
   Object
@@ -82,11 +86,13 @@
 
       (throw (Exception. (str "Not a supported bump operation: " level))))))
 
+
 (defn- parse-tag [vstring]
   (let [[sstr qstr & _] (string/split vstring #"-")
         subversions (into [] (map #(Integer/parseInt %)) (string/split sstr #"\."))
         qualifier (and qstr (string->qualifier qstr))]
     [subversions qualifier]))
+
 
 (defn version
   ([] (MavenVersion. common/default-initial-subversions nil nil 0 nil))

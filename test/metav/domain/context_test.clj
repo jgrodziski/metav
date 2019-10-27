@@ -2,17 +2,15 @@
   (:require
     [clojure.test :as test :refer [deftest testing]]
     [testit.core :refer :all]
-    [metav.utils-test :as ut]
-    [metav.git-shell :as gs]
-    [metav.domain.version.protocols :as m-p]
-    [metav.utils-test :as ut]
-    [me.raynes.fs :as fs]))
-
-
+    [me.raynes.fs :as fs]
+    [metav.domain.version.protocols :as version]
+    [metav.git-shell :as git-shell]
+    [metav.utils-test :as utils-test]
+    ))
 
 
 (defn version [repo-path]
-  (let [ctxt (ut/make-context repo-path)]
+  (let [ctxt (utils-test/make-context repo-path)]
     (-> ctxt :metav/version)))
 
 (defn version-str [repo-path]
@@ -27,94 +25,94 @@
   `(fact (version-str ~repo) ~arrow ~test))
 
 (deftest dedicated-repo-test
-  (ut/with-repo repo
+  (utils-test/with-repo repo
 
     (testing "Metav won't work in a repo without any commits."
       (fact
-        (ut/make-context repo) =throws=> java.lang.Exception))
+        (utils-test/make-context repo) =throws=> java.lang.Exception))
 
-    (gs/shell-in-dir! repo
-      (gs/commit!))
+    (git-shell/shell-in-dir! repo
+      (git-shell/commit!))
 
     (testing "Metav won't work in a dir without a build file."
       (fact
-        (ut/make-context repo) =throws=> java.lang.Exception))
+        (utils-test/make-context repo) =throws=> java.lang.Exception))
 
 
-    (gs/shell-in-dir! repo
-      (gs/write-dummy-deps-edn-in!))
+    (git-shell/shell-in-dir! repo
+      (git-shell/write-dummy-deps-edn-in!))
 
     (testing "testing initialized repo should return 0.1.0-xxxx and be non dirty"
       (let [v (version repo)]
         (facts
           (str v) =in=> #"0.1.0-*"
-          (m-p/dirty? v) => falsey)))
+          (version/dirty? v) => falsey)))
 
 
-    (gs/shell-in-dir! repo
-      (gs/write-dummy-file-in! "src")
-      (gs/write-dummy-file-in! "src"))
+    (git-shell/shell-in-dir! repo
+      (git-shell/write-dummy-file-in! "src")
+      (git-shell/write-dummy-file-in! "src"))
 
     (testing "Untracked files in an initialized repo should not impact the version, the repo should be clean"
       (let [v (version repo)]
         (facts
           (str v) =in=> #"0.1.0-*"
-          (m-p/dirty? v) => falsey)))
+          (version/dirty? v) => falsey)))
 
 
-    (gs/shell-in-dir! repo
-      (gs/add!))
+    (git-shell/shell-in-dir! repo
+      (git-shell/add!))
 
     (testing "When untracked files are added the repo should be dirty"
       (let [v (version repo)]
         (facts
-          (m-p/dirty? v) => truthy)))
+          (version/dirty? v) => truthy)))
 
 
-    (gs/shell-in-dir! repo
-      (gs/commit!))
+    (git-shell/shell-in-dir! repo
+      (git-shell/commit!))
 
     (testing "When commited repo should be clean again."
       (let [v (version repo)]
         (facts
-          (m-p/dirty? v) => falsey)))
+          (version/dirty? v) => falsey)))
 
 
-    (gs/shell-in-dir! repo
-      (gs/tag! "v1.2.0"))
+    (git-shell/shell-in-dir! repo
+      (git-shell/tag! "v1.2.0"))
 
     (testing "Version after tagging."
       (test-version repo => "1.2.0"))
 
 
-    (gs/shell-in-dir! repo
-      (gs/write-dummy-file-in! "src")
-      (gs/add!))
+    (git-shell/shell-in-dir! repo
+      (git-shell/write-dummy-file-in! "src")
+      (git-shell/add!))
 
     (testing "testing a file add should give dirty"
       (test-version repo => "1.2.0-DIRTY"))
 
 
-    (gs/shell-in-dir! repo
-      (gs/commit!)
-      (gs/write-dummy-file-in! "src")
-      (gs/add!)
-      (gs/commit!))
+    (git-shell/shell-in-dir! repo
+      (git-shell/commit!)
+      (git-shell/write-dummy-file-in! "src")
+      (git-shell/add!)
+      (git-shell/commit!))
 
     (testing "correct distance"
-      (let [ctxt (ut/make-context repo)
+      (let [ctxt (utils-test/make-context repo)
             version (:metav/version ctxt)
-            distance (m-p/distance version)]
+            distance (version/distance version)]
         (facts
           (str version) =in=> #"1.2.0-*"
           distance => 2)))
 
 
     (testing "Correct naming"
-      (let [ctxt (ut/make-context repo)
-            ctxt-full-name (ut/make-context repo {:metav/use-full-name? true})
-            ctxt-other-name (ut/make-context repo {:metav/module-name-override "another-name"})
-            ctxt-other-full-name (ut/make-context repo {:metav/use-full-name? true
+      (let [ctxt (utils-test/make-context repo)
+            ctxt-full-name (utils-test/make-context repo {:metav/use-full-name? true})
+            ctxt-other-name (utils-test/make-context repo {:metav/module-name-override "another-name"})
+            ctxt-other-full-name (utils-test/make-context repo {:metav/use-full-name? true
                                                         :metav/module-name-override    "another-name"})]
         (facts
           ctxt =in=> {:metav/artefact-name (fs/base-name repo)}
@@ -130,7 +128,7 @@
 (def str->v-regex #(->> % (str "^") re-pattern))
 
 (deftest monorepo-test
-  (ut/with-example-monorepo m
+  (utils-test/with-example-monorepo m
     (let [{:keys [remote monorepo modules] :as mono} m
           {project1 :p1
            project2 :p2
@@ -140,27 +138,27 @@
            moduleB2 :B2
            moduleB3 :B3} modules
 
-          ctxt1 (ut/make-context project1)
-          ctxt2 (ut/make-context project2 {:metav/use-full-name? true})
-          ctxtA1 (ut/make-context moduleA1)
-          ctxtA2 (ut/make-context moduleA2)
-          ctxtB1 (ut/make-context moduleB1)
-          ctxtB2 (ut/make-context moduleB2)
-          ctxtB3 (ut/make-context moduleB3)
+          ctxt1 (utils-test/make-context project1)
+          ctxt2 (utils-test/make-context project2 {:metav/use-full-name? true})
+          ctxtA1 (utils-test/make-context moduleA1)
+          ctxtA2 (utils-test/make-context moduleA2)
+          ctxtB1 (utils-test/make-context moduleB1)
+          ctxtB2 (utils-test/make-context moduleB2)
+          ctxtB3 (utils-test/make-context moduleB3)
           expected-project2-name (str (fs/base-name monorepo) "-project2")]
       (testing "The root of the monorepo doesn't have a build file. Exception thrown."
         (facts
-          (ut/make-context monorepo) =throws=> Exception))
+          (utils-test/make-context monorepo) =throws=> Exception))
 
       (testing "Versions are set correctly."
         (facts
-          (v-str ctxt1) =in=> (str->v-regex ut/project1-version)
-          (v-str ctxt2) =in=> (str->v-regex ut/project2-version)
-          (v-str ctxtA1) =in=> (str->v-regex ut/sysA-c1-version)
-          (v-str ctxtA2) =in=> (str->v-regex ut/sysA-c2-version)
-          (v-str ctxtB1) =in=> (str->v-regex ut/sysB-c1-version)
-          (v-str ctxtB2) =in=> (str->v-regex ut/sysB-c2-version)
-          (v-str ctxtB3) =in=> (str->v-regex ut/sysB-c3-version)))
+          (v-str ctxt1) =in=> (str->v-regex utils-test/project1-version)
+          (v-str ctxt2) =in=> (str->v-regex utils-test/project2-version)
+          (v-str ctxtA1) =in=> (str->v-regex utils-test/sysA-c1-version)
+          (v-str ctxtA2) =in=> (str->v-regex utils-test/sysA-c2-version)
+          (v-str ctxtB1) =in=> (str->v-regex utils-test/sysB-c1-version)
+          (v-str ctxtB2) =in=> (str->v-regex utils-test/sysB-c2-version)
+          (v-str ctxtB3) =in=> (str->v-regex utils-test/sysB-c3-version)))
 
       (testing "Names are properly read."
         (facts

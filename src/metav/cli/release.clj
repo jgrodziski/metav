@@ -4,13 +4,13 @@
     [clojure.string :as string]
     [clojure.tools.logging :as log]
     [clojure.data.json :as json]
-    [metav.cli.common :as m-c-c]
-    [metav.cli.spit :as m-spit-cli]
-    [metav.api :as m-api]))
+    [metav.cli.common :as cli-common]
+    [metav.cli.spit :as cli-spit]
+    [metav.api :as api]))
 
 
 (def cli-options
-  (conj m-spit-cli/cli-options
+  (conj cli-spit/cli-options
         [nil "--without-sign" "Should the git tag used for release be signed with the current user's GPG key configured with git"
          :id :metav.release/without-sign
          :default-desc "false"]
@@ -45,7 +45,7 @@
 (defn handle-cli-arguments [processed-cli-opts]
   (let [{:keys [arguments]} processed-cli-opts]
     (if-let [potential-level (first arguments)]
-      (let [level (m-c-c/parse-potential-keyword potential-level)]
+      (let [level (cli-common/parse-potential-keyword potential-level)]
         (if (s/valid? :metav.release/level level)
           (update processed-cli-opts :custom-opts assoc :metav.release/level level)
           (assoc processed-cli-opts
@@ -53,7 +53,7 @@
       (assoc processed-cli-opts
         :exit-message "Release level not properly specified."))))
 
-(def validate-cli-args (m-c-c/make-validate-args cli-options usage handle-cli-arguments))
+(def validate-cli-args (cli-common/make-validate-args cli-options usage handle-cli-arguments))
 
 
 (defn perform! [context]
@@ -67,14 +67,14 @@
                         " with namespace " namespace
                         " and formats " formats)
                       "")))
-    (let [{bumped-tag :metav/tag :as bumped-context} (m-api/release! context)]
+    (let [{bumped-tag :metav/tag :as bumped-context} (api/release! context)]
       (if verbose?
-        (print (json/write-str (m-api/metadata-as-edn context)))
+        (print (json/write-str (api/metadata-as-edn context)))
         (print bumped-tag))
       bumped-context)))
 
 
-(def main* (m-c-c/make-main validate-cli-args perform!))
+(def main* (cli-common/make-main validate-cli-args perform!))
 
 
-(def main (m-c-c/wrap-exit main*))
+(def main (cli-common/wrap-exit main*))

@@ -1,9 +1,9 @@
-(ns metav.api.common
+(ns metav.domain.common
   (:require
-    [clojure.string :as string]
-    [metav.api.context :as m-ctxt]
-    [metav.version.common :as m-v-common]
-    [metav.utils :as u])
+   [clojure.string :as string]
+   [metav.utils :as utils]
+   [metav.domain.context :as context]
+   [metav.domain.version.common :as version])
   (:import [java.util Date TimeZone]
            [java.text SimpleDateFormat]))
 
@@ -11,13 +11,13 @@
 (defn new-version [context]
   (let [{current-version :metav/version
          level :metav.release/level} context]
-    (m-v-common/bump current-version level)))
+    (version/bump current-version level)))
 
 
 (defn bump-context [context]
   (-> context
-      (u/assoc-computed :metav/version new-version)
-      (u/assoc-computed :metav/tag m-ctxt/tag)))
+      (utils/assoc-computed :metav/version new-version)
+      (utils/assoc-computed :metav/tag context/tag)))
 
 
 (defn iso-now []

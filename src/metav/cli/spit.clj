@@ -3,8 +3,8 @@
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [clojure.data.json :as json]
-    [metav.cli.common :as m-cli-common]
-    [metav.api :as m-api]))
+    [metav.cli.common :as cli-common]
+    [metav.api :as api]))
 
 
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -19,7 +19,7 @@
 
 
 (def cli-options
-  (conj m-cli-common/cli-options
+  (conj cli-common/cli-options
 
         ["-o" "--output-dir DIR_PATH" "Output Directory"
          :id :metav.spit/output-dir
@@ -62,17 +62,16 @@
 
 
 (def validate-args
-  (m-cli-common/make-validate-args cli-options
+  (cli-common/make-validate-args cli-options
                                    usage))
-
 
 (defn perform! [context]
   (when (:metav.cli/verbose? context)
-    (-> context m-api/metadata-as-edn json/write-str print))
-  (m-api/spit! context))
+    (-> context api/metadata-as-edn json/write-str print))
+  (api/spit! context))
 
 
-(def main* (m-cli-common/make-main
+(def main* (cli-common/make-main
              validate-args
              perform!))
 
@@ -84,4 +83,4 @@
 
 
 
-(def main (m-cli-common/wrap-exit main*))
+(def main (cli-common/wrap-exit main*))

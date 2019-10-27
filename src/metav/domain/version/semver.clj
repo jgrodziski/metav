@@ -6,17 +6,22 @@
 ;;; appropriate.  There is no support for Semantic Version's pre-releases!  The ordering/
 ;;; precedence rules cannot be reconciled with the automatic assignment of patch releases.
 ;;; http://semver.org/spec/v2.0.0.html
-(ns metav.version.semver
+(ns metav.domain.version.semver
   "An implementation of version protocols that complies with Semantic Versioning 2.0.0"
-  (:require [clojure.spec.alpha :as s]
-            [clojure.string :as string]
-            [metav.version.protocols :refer [SCMHosted Bumpable]]
-            [metav.version.common :as common]
-            [clojure.tools.logging :as log]))
+  (:require
+   [clojure.string :as string]
+   [clojure.spec.alpha :as s]
+   [clojure.tools.logging :as log]
+   [metav.domain.version.protocols :refer [SCMHosted Bumpable]]
+   [metav.domain.version.common :as common]
+   ))
+
 
 (def allowed-bumps #{:major :minor :patch})
 
+
 (s/def ::accepted-bumps allowed-bumps)
+
 
 (deftype SemVer [subversions distance sha dirty?]
   Object
@@ -45,12 +50,14 @@
       ;#{:patch} (throw (Exception. "Patch bump are implicit by commit distance"))
       (throw (Exception. (str "Not a supported bump operation: " level))))))
 
+
 (let [re #"(\d+)\.(\d+)\.(\d+)"]
   (defn- parse-base [base]
     (log/debug "parse-base(" base ")")
     (let [[_ major minor patch] (re-find re base)]
       ;(assert (= "0" patch) (str "Non-zero patch level (" patch ") found in SCM base"))
       (mapv #(Integer/parseInt %) [major minor patch]))))
+
 
 (defn version
   ([] (SemVer. common/default-initial-subversions 0 nil nil))

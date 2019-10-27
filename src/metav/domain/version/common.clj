@@ -1,6 +1,6 @@
-(ns metav.version.common
+(ns metav.domain.version.common
   (:require
-    [metav.version.protocols :as m-p]))
+    [metav.domain.version.protocols :as protocols]))
 
 (def default-initial-subversions [0 1 0])
 
@@ -14,8 +14,8 @@
 
 
 (defn duplicating-version? [v level]
-  (let [[_ minor patch] (m-p/subversions v)
-        distance (m-p/distance v)
+  (let [[_ minor patch] (protocols/subversions v)
+        distance (protocols/distance v)
         same-patch? (= level :patch)
         same-minor? (and (= level :minor)
                          (= patch 0))
@@ -40,6 +40,6 @@
     (throw (Exception. (str "Can't bump version to an older one : " old-version " -> " new-version " isn't allowed.")))))
 
 (defn bump [v level]
-  (let [new-v (m-p/bump v level)]
+  (let [new-v (protocols/bump v level)]
     (assert-bump? v level new-v)
     new-v))
