@@ -4,14 +4,14 @@
     [testit.core :refer :all]
     [metav.git-shell :as gs]
     [me.raynes.fs :as fs]
-    [metav.utils-test :as ut]
-    [metav.git :as m-git]
-    [metav.cli.release :as m-c-release]))
+    [metav.utils-test :as utils-test]
+    [metav.domain.git :as git]
+    [metav.cli.release :as cli-release]))
 
 
 (deftest release-with-cli
   (testing "Major release with cli."
-    (ut/with-example-monorepo m
+    (utils-test/with-example-monorepo m
       (let [{:keys [modules monorepo]} m
             {:keys [p2]} modules]
 
@@ -21,7 +21,7 @@
           (gs/commit!))
 
         (fs/with-cwd p2
-          (let [release-res (m-c-release/main* "--full-name"
+          (let [release-res (cli-release/main* "--full-name"
                                                "--spit"
                                                "--without-sign"
                                                "-f" "edn"
@@ -33,9 +33,9 @@
                  prefix         :metav/version-prefix} (:ret release-res)
 
 
-                [scm-base] (m-git/working-copy-description p2 :prefix prefix)
-                tag-verify (m-git/tag-verify monorepo bumped-tag)
-                metadata (m-git/tag-message monorepo bumped-tag)]
+                [scm-base] (git/working-copy-description p2 :prefix prefix)
+                tag-verify (git/tag-verify monorepo bumped-tag)
+                metadata (git/tag-message monorepo bumped-tag)]
 
             (facts
               (str bumped-version) => "2.0.0"

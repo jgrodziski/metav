@@ -3,14 +3,14 @@
     [clojure.test :as test :refer [deftest testing]]
     [clojure.edn :as edn]
     [testit.core :refer :all]
-    [metav.cli.common :as m-c-c]))
+    [metav.cli.common :as cli-common]))
 
 ;; TODO
 
 (def common-validate
-  (m-c-c/make-validate-args m-c-c/cli-options
-                            (fn [text]
-                              (str "usage summary \n" text))))
+  (cli-common/make-validate-args cli-common/cli-options
+                                 (fn [text]
+                                   (str "usage summary \n" text))))
 
 (deftest common-validation-parsing
   (testing "Bad options raises an error:"

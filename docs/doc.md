@@ -2,8 +2,8 @@
 ## Overview
 Metav basically provides 3 operation:
 - display : display the current version of the project/module.
-- spit: spit project version info into files a specified locations.
-- release: creates a new release of the project/module bumping 
+- spit: spit project version info into files at specified locations.
+- release: creates a new release of the project/module that means bumping 
   the project version and tagging the repo with the new version.
 
 To do so Metav rests on a central api found in the namespace `metav.api`.
@@ -20,15 +20,15 @@ of the informations found there. A context is created with the function
 The context from which operations derives their behaviour revolves mainly 
 around two things. A working directory (WD) that must contain a deps.edn
 file and the git state of the repo relative to that WD. From this WD 
-metav  generates in the context an artefact name, recovers the current 
+metav generates in the context an artefact name, recovers the current 
 version of the project by parsing git tags that have that artefact name 
-as prefix.   
+as prefix.
 
 The result of creating a context for a directory is a map, containing 
 all the information metav needs to work. That data is found under keys 
 namespaced `metav` in the context.
 
-Options used in the operations are also merge in the context under
+Options used in the operations are also merged in the context under
 namespaced keys. For instance, release option are namespaced with 
 `metav.release`.
 
@@ -50,7 +50,7 @@ Operation that prints the current versioning state of the project to stdout.
 
 ### Spit
 Operation that spit the informations of a context into files. The 
-versioning data is presented as follow in a clojurein edn format:
+versioning data is presented as follow in clojure edn format:
 
 ```clojure
 {:module-name artefact-name ;; the artefact name ase discussed above
@@ -114,16 +114,16 @@ The full range of options that can be passed to metav operations.
   to display the project's versioning data. Defaults to `:tab`.
 
 ### Spit
-- `:metav.spit/output-dir`: `::u/non-empty-str`, the directory into 
+- `:metav.spit/output-dir`: `:metav.utils/non-empty-str`, the directory into 
   which files will be spitted. Defaults to `"resources"`.
 - `:metav.spit/namespace`: `string?`, the namespace for the spitted 
   files. Defaults to `"meta"`.
 - `:metav.spit/formats`: `(s/coll-of #{:clj :cljc :cljs :edn :json} :kind set?))`,
   the formats allowed for the spit operations in keyword form. Defaults 
   to `#{:edn}`.
-- `:metav.spit/template`: `::u/resource-path`, mustache template that 
+- `:metav.spit/template`: `:metav.utils/resource-path`, mustache template that 
   must be in the classpath to be used as a java resource. No Defaults.
-- `:metav.spit/rendering-output`: `::u/non-empty-str`, a path for the 
+- `:metav.spit/rendering-output`: `:metav.utils/non-empty-str`, a path for the 
   spitted infos rendered with the template. No Defaults.
 
 ### Release

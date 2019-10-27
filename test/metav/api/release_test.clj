@@ -7,12 +7,12 @@
     [metav.utils-test :as ut]
     [metav.git-shell :as gs]
     [metav.utils-test :as ut]
-    [metav.git :as m-git]
-    [metav.api.release :as m-release]))
+    [metav.domain.git :as git]
+    [metav.api :as api]))
 
 
 ;; TODO: can't sign tags in tests for now -> need to setup the environment so that gpg can be found by the java procees spawned with Runtime.exec
-;; TODO: Figure out how to use the git env from metav.git-shell/GIT_ENV when calling metav.git functions.
+;; TODO: Figure out how to use the git env from metav.git-shell/GIT_ENV when calling metav.domain.git functions.
 ;;       Right now, it's my git conf that's used instead.
 (deftest release-repo
   (testing "bump from a clean tagged repo, testing the spitted files"
@@ -26,14 +26,14 @@
                      :metav.spit/namespace "metav.meta"
                      :metav.spit/formats #{:edn :clj :json}}
             ctxt-A1 (ut/make-context moduleA1 options)
-            ctxt-after-release (m-release/perform! ctxt-A1)
+            ctxt-after-release (api/release! ctxt-A1)
 
             {bumped-version :metav/version
              bumped-tag :metav/tag
              prefix :metav/version-prefix} ctxt-after-release
 
-            [scm-base] (m-git/working-copy-description moduleA1 :prefix prefix)
-            tag-verify (m-git/tag-verify monorepo bumped-tag)]
+            [scm-base] (git/working-copy-description moduleA1 :prefix prefix)
+            tag-verify (git/tag-verify monorepo bumped-tag)]
         (facts
           (str bumped-version) => "1.3.5"
           scm-base => "1.3.5"
@@ -57,19 +57,19 @@
 
             release! (fn [level]
                        (let [options (assoc general-option :metav.release/level level)
-                             ctxt-after-release (m-release/perform! (ut/make-context moduleA2 options))
+                             ctxt-after-release (api/release! (ut/make-context moduleA2 options))
 
                              {bumped-version :metav/version
                               bumped-tag     :metav/tag
                               prefix         :metav/version-prefix} ctxt-after-release
 
-                             [scm-base] (m-git/working-copy-description moduleA2 :prefix prefix)]
+                             [scm-base] (git/working-copy-description moduleA2 :prefix prefix)]
                          (Thread/sleep 500) ;need to wait because the time resolution of the git describe command needs some time to elapse before asking whether a new tag is available
                          {:bumped-version bumped-version
                           :bumped-tag bumped-tag
                           :scm-base scm-base
-                          :tag-verify (m-git/tag-verify monorepo bumped-tag)
-                          :metadata (m-git/tag-message monorepo bumped-tag)}))
+                          :tag-verify (git/tag-verify monorepo bumped-tag)
+                          :metadata (git/tag-message monorepo bumped-tag)}))
 
             release1 (release! :patch)]
 

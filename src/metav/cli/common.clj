@@ -5,7 +5,7 @@
     [clojure.string :as string]
     [clojure.edn :as edn]
     [me.raynes.fs :as fs]
-    [metav.api :as m-api]))
+    [metav.api :as api]))
 
 
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -22,7 +22,7 @@
 ;; Common conf
 ;;----------------------------------------------------------------------------------------------------------------------
 (def default-options
-  (merge m-api/default-options
+  (merge api/default-options
          #:metav.cli{:verbose? false}))
 
 (s/def :metav.cli/verbose? boolean?)
@@ -154,7 +154,7 @@
     (let [{:keys [exit? ctxt-opts] :as parsed-and-validated} (validate-args-fn args)]
       (if exit?
         parsed-and-validated
-        (let [res (-> ctxt-opts m-api/make-context perform-command-fn)]
+        (let [res (-> ctxt-opts api/make-context perform-command-fn)]
           (assoc parsed-and-validated
             :ret res
             :exit? true

@@ -2,21 +2,21 @@
   (:require
     [clojure.test :as test :refer [deftest testing]]
     [testit.core :refer :all]
-    [metav.version.protocols :as m-p]
-    [metav.version.common :as m-v-common]
-    [metav.version.maven :as m-maven]
-    [metav.version.semver :as m-semver]))
+    [metav.domain.version.protocols :as version]
+    [metav.domain.version.common :as version-common]
+    [metav.domain.version.maven :as maven]
+    [metav.domain.version.semver :as semver]))
 
 
 (defn unsafe-bump [v & bumps]
   (reduce
     (fn [v b]
-      (m-p/bump v b))
+      (version/bump v b))
     v
     bumps))
 
 
-(def safer-bump m-v-common/bump)
+(def safer-bump version-common/bump)
 
 
 (defn semver-like-progression [v]
@@ -40,12 +40,12 @@
 
 
 (deftest semver-like-bumps
-  (semver-like-progression (m-semver/version))
-  (semver-like-progression (m-maven/version)))
+  (semver-like-progression (semver/version))
+  (semver-like-progression (maven/version)))
 
 
 (deftest maven-like-bumps
-  (let [v* (atom (m-maven/version))
+  (let [v* (atom (maven/version))
         bump! (fn [& bumps]
                 (swap! v* #(apply unsafe-bump % bumps)))]
 
@@ -113,12 +113,12 @@
 
 
 (deftest test-safer-bumps-semver-like
-  (test-safer-version-progression m-semver/version)
-  (test-safer-version-progression m-maven/version))
+  (test-safer-version-progression semver/version)
+  (test-safer-version-progression maven/version))
 
 
 (deftest test-ordering-in-maven-specifics
-  (let [v (m-maven/version "0.1.0-beta" 1 "1234" false)]
+  (let [v (maven/version "0.1.0-beta" 1 "1234" false)]
     (facts
       (str (unsafe-bump v :alpha)) => "0.1.0-alpha"
       (str (safer-bump v :alpha)) =throws=> Exception)))

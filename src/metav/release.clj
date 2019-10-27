@@ -1,9 +1,5 @@
 (ns metav.release
   (:require
-    [metav.cli.release :as m-release-cli]))
+    [metav.cli.release :as cli-release]))
 
-
-(def -main m-release-cli/main)
-
-
-
+(def -main cli-release/main)
