@@ -4,7 +4,7 @@
 > “The assumption of an absolute determinism is the essential foundation of every scientific enquiry.” 
 > ― _Max Planck_
 
-Metav is a library that helps the release and versioning process of Clojure projects, particularly the one using [tools.deps](https://github.com/clojure/tools.deps.alpha) and a _Monorepo_ style (see [Rationale](#rationale)).
+Metav is a library that cleanly version Clojure projects based on git tags and helps the release process, particularly the one using [tools.deps](https://github.com/clojure/tools.deps.alpha) and a _Monorepo_ style (see [Rationale](#rationale)).
 
 [![Clojars Project](https://img.shields.io/clojars/v/metav.svg)](https://clojars.org/metav)
 [![cljdoc badge](https://cljdoc.org/badge/metav/metav)](https://cljdoc.org/d/metav/metav/CURRENT)
