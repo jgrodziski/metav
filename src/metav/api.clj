@@ -2,15 +2,16 @@
   (:require
     [clojure.spec.alpha :as s]
     [clojure.data.json    :as json]
-    [metav.domain.context :as m-ctxt]
+    [metav.utils :as utils]
+    [metav.domain.common  :as common]
+    [metav.domain.context :as context]
     [metav.domain.display :as display]
     [metav.domain.spit    :as spit]
     [metav.domain.release :as release]
-    [metav.utils :as u]
-    [metav.domain.common :as m-a-c]))
+    ))
 
 (def default-options
-  (merge m-ctxt/default-options
+  (merge context/default-options
          display/default-options
          spit/defaults-options
          release/default-options))
@@ -27,13 +28,13 @@
   ([opts]
    (let [working-dir (:metav/working-dir opts)
          opts (cond-> opts
-                      (not working-dir) (assoc :metav/working-dir (u/pwd)))]
-     (m-ctxt/make-context
+                      (not working-dir) (assoc :metav/working-dir (utils/pwd)))]
+     (context/make-context
        (s/assert* :metav/options
                   (merge default-options opts))))))
 
 
-(def metadata-as-edn m-a-c/metadata-as-edn)
+(def metadata-as-edn common/metadata-as-edn)
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Display
@@ -43,15 +44,15 @@
 
 
 (defmethod display* :edn [context]
-  (print (m-a-c/metadata-as-edn context)))
+  (println (common/metadata-as-edn context)))
 
 
 (defmethod display* :json [context]
-  (print (json/write-str (m-a-c/metadata-as-edn context))))
+  (println (json/write-str (common/metadata-as-edn context))))
 
 
 (defmethod display* :tab [{:metav/keys [artefact-name version]}];default is tab separated module-name and version
-  (print (str artefact-name "\t" (str version))))
+  (println (str artefact-name "\t" (str version))))
 
 
 (defn display

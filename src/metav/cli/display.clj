@@ -45,7 +45,6 @@
              perform!))
 
 
-
 (comment
   (validate-args ["-c" "resources-test/example-conf.edn"])
   (main* "-c" "resources-test/example-conf.edn"))
