@@ -37,7 +37,7 @@
     (log/debug "Display artifact name and version in format " output-format
                ". Module-name override? " module-name-override
                ", hence artefact-name is" artefact-name)
-    (api/display! context)))
+    (api/display context)))
 
 
 (def main* (cli-common/make-main
@@ -48,7 +48,7 @@
 
 (comment
   (validate-args ["-c" "resources-test/example-conf.edn"])
-  (main* "-c" "resources-test/example-conf.edn" ))
+  (main* "-c" "resources-test/example-conf.edn"))
 
 (def main (cli-common/wrap-exit main*))
 

@@ -1,4 +1,4 @@
-(ns metav.domain.context-test
+(ns metav.api.context-test
   (:require
     [clojure.test :as test :refer [deftest testing]]
     [testit.core :refer :all]

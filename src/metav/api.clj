@@ -54,8 +54,8 @@
   (print (str artefact-name "\t" (str version))))
 
 
-(defn display!
-  ([] (display! (make-context)))
+(defn display
+  ([] (display (make-context)))
   ([context]
    (s/assert :metav.display/options context)
    (display* context)
