@@ -1,9 +1,9 @@
 
 ## Overview
 Metav basically provides 3 operation:
-- display : display the current version of the project/module.
-- spit: spit project version info into files at specified locations.
-- release: creates a new release of the project/module that means bumping 
+- **`display`**: display the current version of the project/module.
+- **`spit!`**: spit project version info into files at specified locations.
+- **`release!`**: creates a new release of the project/module that means bumping 
   the project version and tagging the repo with the new version.
 
 To do so Metav rests on a central api found in the namespace `metav.api`.
@@ -18,9 +18,11 @@ of the informations found there. A context is created with the function
 
 ### Context
 The context from which operations derives their behaviour revolves mainly 
-around two things. A working directory (WD) that must contain a deps.edn
-file and the git state of the repo relative to that WD. From this WD 
-metav generates in the context an artefact name, recovers the current 
+around two things:
+* A **working directory (WD)** that must contain a deps.edn file
+* The **git state** of the repo relative to that WD. 
+
+From this WD metav generates in the context an artefact name, recovers the current 
 version of the project by parsing git tags that have that artefact name 
 as prefix.
 
@@ -33,7 +35,7 @@ namespaced keys. For instance, release option are namespaced with
 `metav.release`.
 
 #### Notes on the naming process.
-To name a project metav takes several things into account.
+To name a project metav takes several things into account:
 - the name of the git root dir
 - the git prefix leading to the root of the module
 - the `:metav/use-full-name?` option
@@ -79,19 +81,19 @@ With metav in the classpath in a terminal:
 
 ### API example
 ```clojure
-(require '[metav.api :as m-api])
+(require '[metav.api :as api])
 
 ;; Defines some option for metav
-(def options {:metav/working-dir "my/projects/dir"     ;; dir from which metav bases its execution context
-              :metav.release/without-sign true         ;; we're not signing git tags
-              :metav.release/spit true                 ;; we want to spit project data before releasing
-              :metav.spit/output-dir "resources"       ;; location where the spitted files go
-              :metav.spit/namespace "metav.meta"       ;; namespace of the spitted files
-              :metav.spit/formats #{:edn :clj :json}}) ;; formats in which the data is spitted
+(def options {:metav/working-dir          "my/projects/dir"    ;; dir from which metav bases its execution context
+              :metav.release/without-sign true                 ;; we're not signing git tags
+              :metav.release/spit         true                 ;; we want to spit project data before releasing
+              :metav.spit/output-dir      "resources"          ;; location where the spitted files go
+              :metav.spit/namespace       "metav.meta"         ;; namespace of the spitted files
+              :metav.spit/formats         #{:edn :clj :json}}) ;; formats in which the data is spitted
               
-(def ctxt (m-api/make-context options)) ;; creates the execution context with the options
+(def ctxt (api/make-context options)) ;; creates the execution context with the options
 
-(def ctxt-after-release (m-api/release! ctxt-A1)) ;; actually perform the release.
+(def ctxt-after-release (api/release! ctxt)) ;; actually perform the release.
 ```
 
 ## Options description
