@@ -5,8 +5,8 @@
     [me.raynes.fs :as fs]
     [metav.domain.version.protocols :as version]
     [metav.git-shell :as git-shell]
-    [metav.utils-test :as utils-test]
-    ))
+    [metav.utils-test :as utils-test]))
+
 
 
 (defn version [repo-path]
@@ -112,7 +112,7 @@
             ctxt-full-name (utils-test/make-context repo {:metav/use-full-name? true})
             ctxt-other-name (utils-test/make-context repo {:metav/module-name-override "another-name"})
             ctxt-other-full-name (utils-test/make-context repo {:metav/use-full-name? true
-                                                        :metav/module-name-override    "another-name"})]
+                                                                :metav/module-name-override    "another-name"})]
         (facts
           ctxt =in=> {:metav/artefact-name (fs/base-name repo)}
           ctxt-full-name =in=> {:metav/artefact-name (fs/base-name repo)}
