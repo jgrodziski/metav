@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. 
 This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
+# [1.6.1] - 2019-10-28
+
+Refactor to provide a clean api to facilitate using metav within code and REPL, spec for options of operations.
+Add some documentation (`docs/doc.md`)
+See (Pull Request 9)[https://github.com/jgrodziski/metav/pull/9]
+
 # [1.5.4] - 2019-09-20
 
 Bumping edge case when bumping a dirty version (see https://github.com/jgrodziski/metav/pull/7)
