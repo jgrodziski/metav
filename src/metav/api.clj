@@ -7,8 +7,8 @@
     [metav.domain.context :as context]
     [metav.domain.display :as display]
     [metav.domain.spit    :as spit]
-    [metav.domain.release :as release]
-    ))
+    [metav.domain.release :as release]))
+
 
 (def default-options
   (merge context/default-options
