@@ -34,7 +34,7 @@
 
 
 (defn assert-context [context]
-  (utils/assert-spec :metav/context context))
+  (utils/check-spec :metav/context context))
 
 (def metadata-as-edn common/metadata-as-edn)
 (def bump-context common/bump-context)
@@ -61,10 +61,11 @@
 (defn display
   ([] (display (make-context)))
   ([context]
-   (->> context
-        (utils/assert-spec (s/and :metav/context
-                                  :metav.display/options))
-        (display*))
+   (-> context
+       (utils/merge&validate display/default-options
+                             (s/and :metav/context
+                                    :metav.display/options))
+       (display*))
    context))
 
 ;;----------------------------------------------------------------------------------------------------------------------

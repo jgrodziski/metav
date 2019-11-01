@@ -30,7 +30,7 @@
                        (str (fs/normalized path))))
 
 
-(defn assert-spec [spec x]
+(defn check-spec [spec x]
   (if (s/valid? spec x)
     x
     (let [ed (assoc (s/explain-data spec  x)
@@ -48,4 +48,4 @@
 (defn merge&validate [opts defaults spec]
   (->> opts
        (merge defaults)
-       (assert-spec spec)))
+       (check-spec spec)))
