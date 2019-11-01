@@ -5,7 +5,8 @@
     [clojure.string :as string]
     [clojure.edn :as edn]
     [me.raynes.fs :as fs]
-    [metav.api :as api]))
+    [metav.api :as api])
+  (:import (clojure.lang ExceptionInfo)))
 
 
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -21,10 +22,6 @@
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Common conf
 ;;----------------------------------------------------------------------------------------------------------------------
-(def default-options
-  (merge api/default-options
-         #:metav.cli{:verbose? false}))
-
 (s/def :metav.cli/verbose? boolean?)
 (s/def :metav.cli/config fs/exists?)
 
@@ -85,16 +82,23 @@
       (exit res))))
 
 
+(defn read-config-file [path]
+  (try
+    (-> path slurp edn/read-string)
+    (catch Exception e
+      {::error (.getMessage e)})))
+
+
 (defn process-parsed-opts [parsed]
   (let [{:keys [options]} parsed
-        file-config (:metav.cli/config options)
-        definitive-options (if file-config
-                             (merge (-> file-config slurp edn/read-string)
-                                    (dissoc options :metav.cli/config))
-                             options)]
-    (if (s/valid? :metav/options definitive-options)
-      (assoc parsed :custom-opts definitive-options)
-      (assoc parsed :exit-message (s/explain-str :metav/options definitive-options)))))
+        file-config (if-let [path (:metav.cli/config options)]
+                      (read-config-file path)
+                      nil)]
+    (if-let [error (::error file-config)]
+      (assoc parsed :exit-message (str "Error reading the config file: \n" error))
+      (assoc parsed :custom-opts (cond->> options
+                                         file-config (merge file-config))))))
+
 
 (defn make-validate-args
   "Makes a function that validates command line arguments. This function
@@ -154,8 +158,18 @@
     (let [{:keys [exit? ctxt-opts] :as parsed-and-validated} (validate-args-fn args)]
       (if exit?
         parsed-and-validated
-        (let [res (-> ctxt-opts api/make-context perform-command-fn)]
-          (assoc parsed-and-validated
-            :ret res
-            :exit? true
-            :ok? true))))))
+        (let [res (try
+                    (-> ctxt-opts api/make-context perform-command-fn)
+                    (catch ExceptionInfo e
+                      {::error (ex-message e)})
+                    (catch Exception e
+                      {::error (.getMessage e)}))]
+          (if-let [error (::error res)]
+            (assoc parsed-and-validated
+              :exit true
+              :ok? false
+              :exit-message error)
+            (assoc parsed-and-validated
+              :ret res
+              :exit? true
+              :ok? true)))))))

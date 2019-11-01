@@ -10,19 +10,6 @@
     [metav.domain.release :as release]))
 
 
-(def default-options
-  (merge context/default-options
-         display/default-options
-         spit/defaults-options
-         release/default-options))
-
-
-(s/def :metav/options (s/and :metav.context/options
-                             :metav.display/options
-                             :metav.spit/options
-                             :metav.release/options))
-
-
 (defn make-context
   ([]
    (make-context {}))
