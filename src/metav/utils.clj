@@ -24,10 +24,6 @@
                               resource?))
 
 
-(defn parent-exists? [p]
-  (-> p fs/parent fs/exists?))
-
-
 (defn ancestor? [path possible-descendant]
   (string/starts-with? (str (fs/normalized possible-descendant))
                        (str (fs/normalized path))))
