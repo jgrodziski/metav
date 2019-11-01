@@ -150,16 +150,17 @@
       (utils/assoc-computed :metav/tag tag)))
 
 
-(s/def :metav.context/param
+(s/def :metav.context/required
   (s/keys :req [:metav/working-dir]))
 
 
+(s/def ::make-context-param (s/and
+                              :metav.context/required
+                              :metav.context/options))
+
 (defn make-context [opts]
-  (s/assert (s/and
-              :metav.context/param
-              :metav.context/options)
-            opts)
   (-> opts
+      (utils/merge&validate default-options ::make-context-param)
       assoc-git-basics
       assert-repo-in-order
       assoc-names

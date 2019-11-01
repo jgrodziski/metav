@@ -29,3 +29,8 @@
                        (str (fs/normalized path))))
 
 (def assert-spec s/assert*)
+
+(defn merge&validate [opts defaults spec]
+  (->> opts
+       (merge defaults)
+       (assert-spec spec)))

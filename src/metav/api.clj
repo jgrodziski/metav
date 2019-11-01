@@ -16,6 +16,7 @@
          spit/defaults-options
          release/default-options))
 
+
 (s/def :metav/options (s/and :metav.context/options
                              :metav.display/options
                              :metav.spit/options
@@ -29,9 +30,7 @@
    (let [working-dir (:metav/working-dir opts)
          opts (cond-> opts
                       (not working-dir) (assoc :metav/working-dir (utils/pwd)))]
-     (context/make-context
-       (s/assert* :metav/options
-                  (merge default-options opts))))))
+     (context/make-context opts))))
 
 
 (def metadata-as-edn common/metadata-as-edn)

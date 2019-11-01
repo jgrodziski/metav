@@ -125,7 +125,9 @@
         ctxts))
 
 (defn spit! [context]
-  (s/assert :metav.spit/options context)
-  (let [spits (-> context standard-spits (add-template-spit context))]
+  (let [context (utils/merge&validate context
+                                      defaults-options
+                                      :metav.spit/options)
+        spits (-> context standard-spits (add-template-spit context))]
     (assoc context
            :metav.spit/spitted (spit-files! spits))))

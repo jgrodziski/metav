@@ -4,6 +4,7 @@
    [clojure.tools.logging :as log]
    [clojure.data.json :as json]
    [clojure.set :refer [union]]
+   [metav.utils :as utils]
    [metav.domain.common :as common]
    [metav.domain.git :as git]
    [metav.domain.version.semver :as semver]
@@ -58,20 +59,28 @@
                ::maven/accepted-bumps)]
     (s/valid? spec level)))
 
-(s/def :metav.release/param (s/keys :req [:metav.release/level]))
+
+(s/def :metav.release/required (s/keys :req [:metav.release/level]))
+
+
+(s/def ::release!-params (s/and :metav.release/required
+                                :metav.release/options
+                                bump-level-valid?))
 
 (defn release!
-  "assert that nothing leaves uncommitted or untracked,
+  "Assert that nothing leaves uncommitted or untracked,
   then bump version to a releasable one (depending on the release level),
-  commit, tag with the version (hence denoting a release),
-  then push
-  return [module-name next-version tag push-result]"
+  commit, tag with the version (hence denoting a release), then push.
+
+  Returns the context passed as parameter with the keys `:metav/version` and `:metav/tag`
+  updated to reflect the git state after release. If the release performed a git
+  push, the result of the push is found under the key `:metav.release/push-result`.
+  If the release spited metadata, the paths of the spitted files can be found
+  under the key `:metav.spit/spitted`.
+  "
   [context]
-  (s/assert (s/and :metav.release/param
-                   :metav.release/options
-                   bump-level-valid?)
-            context)
-  (let [{:metav/keys [working-dir artefact-name version top-level]
+  (let [context (utils/merge&validate context default-options ::release!-params)
+        {:metav/keys [working-dir artefact-name version top-level]
          :metav.release/keys [level spit without-push]} context]
     (git/assert-committed? working-dir)
     (log/debug "execute!" context level)
