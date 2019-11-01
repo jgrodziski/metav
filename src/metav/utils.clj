@@ -27,3 +27,5 @@
 (defn ancestor? [path possible-descendant]
   (string/starts-with? (str (fs/normalized possible-descendant))
                        (str (fs/normalized path))))
+
+(def assert-spec s/assert*)
