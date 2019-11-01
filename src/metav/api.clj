@@ -35,6 +35,7 @@
 
 
 (def metadata-as-edn common/metadata-as-edn)
+(def bump-context common/bump-context)
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Display
