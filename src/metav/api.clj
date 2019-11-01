@@ -33,6 +33,9 @@
      (context/make-context opts))))
 
 
+(defn assert-context [context]
+  (utils/assert-spec :metav/context context))
+
 (def metadata-as-edn common/metadata-as-edn)
 (def bump-context common/bump-context)
 
@@ -72,8 +75,8 @@
   ([] (spit! (make-context)))
   ([context]
    (->> context
-        (utils/assert-spec :metav/context)
-        (spit/spit!))))
+        assert-context
+        spit/spit!)))
 
 
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -84,5 +87,5 @@
   ([] (release! (make-context)))
   ([context]
    (->> context
-        (utils/assert-spec :metav/context)
+        assert-context
         release/release!)))
