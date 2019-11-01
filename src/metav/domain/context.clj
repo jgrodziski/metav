@@ -7,8 +7,8 @@
     [metav.utils :as utils]
     [metav.domain.version.semver :as semver]
     [metav.domain.version.maven :as maven]
-    [metav.domain.git :as git]
-    ))
+    [metav.domain.git :as git]))
+
 
 
 ;; TODO make sure that in release, we actually release from repos, not the top level for instance.

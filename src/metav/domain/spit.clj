@@ -5,8 +5,8 @@
    [me.raynes.fs :as fs]
    [cljstache.core :as cs]
    [metav.utils :as utils]
-   [metav.domain.common :as common]
-   ))
+   [metav.domain.common :as common]))
+
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Spit conf
