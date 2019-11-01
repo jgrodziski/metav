@@ -11,6 +11,12 @@
     [metav.api :as api]))
 
 
+
+(deftest bad-context
+  (testing "Metav won't release on bad context"
+    (fact (api/release! {}) =throws=> Exception)))
+
+
 ;; TODO: can't sign tags in tests for now -> need to setup the environment so that gpg can be found by the java procees spawned with Runtime.exec
 ;; TODO: Figure out how to use the git env from metav.git-shell/GIT_ENV when calling metav.domain.git functions.
 ;;       Right now, it's my git conf that's used instead.

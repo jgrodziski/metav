@@ -6,7 +6,8 @@
     [metav.git-shell :as gs]
     [metav.domain.version.protocols :as m-p]
     [metav.utils-test :as ut]
-    [me.raynes.fs :as fs]))
+    [me.raynes.fs :as fs]
+    [metav.api :as api]))
 
 
 
@@ -19,6 +20,29 @@
   (str (version repo-path)))
 
 
+;;----------------------------------------------------------------------------------------------------------------------
+;; Testing context
+;;----------------------------------------------------------------------------------------------------------------------
+(deftest context-validity
+  (ut/with-repo repo
+    (ut/prepare-base-repo! repo)
+
+    (let [context (api/make-context {:metav/working-dir repo})]
+      (testing "Metav generates correct contexts"
+        (fact
+          (api/assert-context  context) => context))
+
+      (testing "We can test a context"
+        (facts
+          (-> context
+              (dissoc :metav/working-dir)
+              api/assert-context)
+          =throws=> Exception
+
+          (-> context
+              (assoc :metav/version "bad value")
+              api/assert-context)
+          =throws=> Exception)))))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Testing simple repo.
