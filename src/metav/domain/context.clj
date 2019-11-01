@@ -7,6 +7,7 @@
     [metav.utils :as utils]
     [metav.domain.version.semver :as semver]
     [metav.domain.version.maven :as maven]
+    [metav.domain.version.protocols :as ps]
     [metav.domain.git :as git]))
 
 
@@ -165,3 +166,16 @@
       assert-repo-in-order
       assoc-names
       assoc-computed-keys))
+
+
+(s/def :metav/version (s/and #(satisfies? ps/Bumpable %)
+                             #(satisfies? ps/SCMHosted %)))
+(s/def :metav/artefact-name string?)
+(s/def :metav/version-prefix string?)
+(s/def :metav/tag string?)
+
+(s/def :metav/context (s/keys :req [:metav/working-dir
+                                    :metav/version
+                                    :metav/artefact-name
+                                    :metav/version-prefix
+                                    :metav/tag]))

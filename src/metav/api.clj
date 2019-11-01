@@ -58,8 +58,10 @@
 (defn display
   ([] (display (make-context)))
   ([context]
-   (s/assert :metav.display/options context)
-   (display* context)
+   (->> context
+        (utils/assert-spec (s/and :metav/context
+                                  :metav.display/options))
+        (display*))
    context))
 
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -68,10 +70,19 @@
 
 (defn spit!
   ([] (spit! (make-context)))
-  ([context] (spit/spit! context)))
+  ([context]
+   (->> context
+        (utils/assert-spec :metav/context)
+        (spit/spit!))))
+
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Release!
 ;;----------------------------------------------------------------------------------------------------------------------
 
-(def release! release/release!)
+(defn release!
+  ([] (release! (make-context)))
+  ([context]
+   (->> context
+        (utils/assert-spec :metav/context)
+        release/release!)))
