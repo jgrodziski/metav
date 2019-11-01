@@ -3,6 +3,7 @@
     [clojure.spec.alpha :as s]
     [clojure.java.io :as io]
     [clojure.string :as string]
+    [clojure.tools.logging :as log]
     [me.raynes.fs :as fs]))
 
 
@@ -28,7 +29,21 @@
   (string/starts-with? (str (fs/normalized possible-descendant))
                        (str (fs/normalized path))))
 
-(def assert-spec s/assert*)
+
+(defn assert-spec [spec x]
+  (if (s/valid? spec x)
+    x
+    (let [ed (assoc (s/explain-data spec  x)
+               ::failure :assertion-failed)
+          msg (str "Spec assertion for spec `" spec "` failed\n"
+                   (with-out-str (s/explain-out ed)))
+          err (ex-info
+                msg
+                ed)]
+      (log/error err msg)
+      (throw err))))
+
+
 
 (defn merge&validate [opts defaults spec]
   (->> opts
