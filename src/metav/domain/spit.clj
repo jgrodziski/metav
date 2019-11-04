@@ -91,8 +91,8 @@
          :metav.spit/keys [formats output-dir namespace]} context
         output-dir (fs/file working-dir output-dir)]
 
-    (assert (utils/ancestor? working-dir output-dir)
-            "Spitted files must be inside the repo.")
+    (utils/check (utils/ancestor? working-dir output-dir)
+                 "Spitted files must be inside the repo.")
 
     (mapv (fn [format]
             (assoc context
@@ -109,8 +109,8 @@
       (let [rendering-output (fs/with-cwd working-dir
                                (fs/normalized rendering-output))]
 
-        (assert (utils/ancestor? working-dir rendering-output)
-                "Rendered file must be inside the repo.")
+        (utils/check (utils/ancestor? working-dir rendering-output)
+                     "Rendered file must be inside the repo.")
 
         (conj spits (assoc context
                       ::dest rendering-output

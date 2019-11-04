@@ -30,7 +30,20 @@
                        (str (fs/normalized path))))
 
 
-(defn check-spec [spec x]
+(defmacro check
+  "Similar to clojure's `assert` but always on."
+  ([x]
+   `(when-not ~x
+      (throw (ex-info (str "Check failed: " (pr-str '~x))
+                      {:type :check-failed}))))
+  ([x message]
+   `(when-not ~x
+      (throw (ex-info (str "Check failed: " ~message "\n" (pr-str '~x))
+                      {:type :check-failed})))))
+
+(defn check-spec
+  "Similar to `clojure.spec.alpha/assert` but always on."
+  [spec x]
   (if (s/valid? spec x)
     x
     (let [ed (assoc (s/explain-data spec  x)
