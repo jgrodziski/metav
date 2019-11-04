@@ -118,10 +118,11 @@
 
 (defn spit-files! [ctxts]
   (into []
-        (comp (map (side-effect-from-ctxt ensure-dest!))
-           (map (side-effect-from-ctxt spit-file!))
-           (map ::dest)
-           (map str))
+        (comp
+          (map (side-effect-from-ctxt ensure-dest!))
+          (map (side-effect-from-ctxt spit-file!))
+          (map ::dest)
+          (map str))
         ctxts))
 
 (defn spit! [context]
