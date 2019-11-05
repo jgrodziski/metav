@@ -50,8 +50,8 @@
   ([context]
    (-> context
        (utils/merge&validate display/default-options
-                             (s/and :metav/context
-                                    :metav.display/options))
+                             (s/merge :metav/context
+                                      :metav.display/options))
        (display*))
    context))
 

@@ -155,7 +155,7 @@
   (s/keys :req [:metav/working-dir]))
 
 
-(s/def ::make-context-param (s/and
+(s/def ::make-context-param (s/merge
                               :metav.context/required
                               :metav.context/options))
 
