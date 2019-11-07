@@ -57,8 +57,19 @@
       (throw err))))
 
 
+(defmacro ensure-key [m k not-found]
+  `(if (contains? ~m ~k)
+     ~m
+     (assoc ~m ~k ~not-found)))
 
-(defn merge&validate [opts defaults spec]
-  (->> opts
-       (merge defaults)
-       (check-spec spec)))
+
+(defn merge-defaults [m defaults]
+  (reduce (fn [acc k]
+            (ensure-key acc k (get defaults k)))
+          m
+          (keys defaults)))
+
+(defn merge&validate [context defaults spec]
+  (-> context
+      (merge-defaults defaults)
+      (->> (check-spec spec))))
