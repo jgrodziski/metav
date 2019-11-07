@@ -20,7 +20,7 @@
      (context/make-context opts))))
 
 
-(defn assert-context [context]
+(defn check-context [context]
   (utils/check-spec :metav/context context))
 
 (def metadata-as-edn common/metadata-as-edn)

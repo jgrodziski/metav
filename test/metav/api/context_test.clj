@@ -30,18 +30,18 @@
     (let [context (api/make-context {:metav/working-dir repo})]
       (testing "Metav generates correct contexts"
         (fact
-          (api/assert-context  context) => context))
+          (api/check-context context) => context))
 
       (testing "We can test a context"
         (facts
           (-> context
               (dissoc :metav/working-dir)
-              api/assert-context)
+              api/check-context)
           =throws=> Exception
 
           (-> context
               (assoc :metav/version "bad value")
-              api/assert-context)
+              api/check-context)
           =throws=> Exception)))))
 
 ;;----------------------------------------------------------------------------------------------------------------------
