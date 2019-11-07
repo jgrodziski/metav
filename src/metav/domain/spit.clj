@@ -125,10 +125,14 @@
           (map str))
         ctxts))
 
+
+(s/def ::spit!param (s/merge :metav/context
+                             :metav.spit/options))
+
 (defn spit! [context]
   (let [context (utils/merge&validate context
                                       defaults-options
-                                      :metav.spit/options)
+                                      ::spit!param)
         spits (-> context standard-spits (add-template-spit context))]
     (assoc context
            :metav.spit/spitted (spit-files! spits))))

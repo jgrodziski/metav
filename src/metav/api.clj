@@ -62,9 +62,9 @@
 (defn spit!
   ([] (spit! (make-context)))
   ([context]
-   (->> context
-        assert-context
-        spit/spit!)))
+   (spit/spit! context)))
+
+
 
 
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -74,6 +74,5 @@
 (defn release!
   ([] (release! (make-context)))
   ([context]
-   (->> context
-        assert-context
-        release/release!)))
+   (release/release! context)))
+

@@ -63,7 +63,8 @@
 (s/def :metav.release/required (s/keys :req [:metav.release/level]))
 
 
-(s/def ::release!-params (s/and (s/merge :metav.release/required
+(s/def ::release!-params (s/and (s/merge :metav/context
+                                         :metav.release/required
                                          :metav.release/options)
                                 bump-level-valid?))
 
