@@ -165,7 +165,8 @@
       assoc-git-basics
       assert-repo-in-order
       assoc-names
-      assoc-computed-keys))
+      assoc-computed-keys
+      (->> (into (sorted-map)))))
 
 
 (s/def :metav/version (s/and #(satisfies? ps/Bumpable %)
