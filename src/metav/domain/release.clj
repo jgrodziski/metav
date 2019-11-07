@@ -1,15 +1,15 @@
 (ns metav.domain.release
   (:require
-   [clojure.spec.alpha :as s]
-   [clojure.tools.logging :as log]
-   [clojure.data.json :as json]
+   [clojure.spec.alpha          :as s]
+   [clojure.tools.logging       :as log]
    [clojure.set :refer [union]]
-   [metav.utils :as utils]
-   [metav.domain.common :as common]
-   [metav.domain.git :as git]
+   [metav.utils                 :as utils]
+   [metav.domain.context        :as context]
+   [metav.domain.git-operations :as git-ops]
+   [metav.domain.version.common :as version]
    [metav.domain.version.semver :as semver]
-   [metav.domain.version.maven :as maven]
-   [metav.domain.spit :as spit]))
+   [metav.domain.version.maven  :as maven]
+   [metav.domain.spit           :as spit]))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Release conf
@@ -42,13 +42,21 @@
     (s/valid? spec level)))
 
 
-(s/def :metav.release/required (s/keys :req [:metav.release/level]))
+(defn new-version [context]
+  (let [{current-version :metav/version
+         level :metav.release/level} context]
+    (version/bump current-version level)))
 
 
-(s/def ::release!-params (s/and (s/merge :metav/context
-                                         :metav.release/required
-                                         :metav.release/options)
-                                bump-level-valid?))
+(s/def ::bump-context-param (s/and (s/merge :metav/context
+                                            (s/keys :req [:metav.release/level]))
+                                   bump-level-valid?))
+
+(defn bump-context [context]
+  (-> context
+      (->> (utils/check-spec ::bump-context-param))
+      (utils/assoc-computed :metav/version new-version)
+      (utils/assoc-computed :metav/tag context/tag)))
 
 
 (defn log-before-bump [context]
@@ -65,19 +73,13 @@
     (log/debug "Next version of module '" artefact-name "' is:" (str bumped-version))
     (log/debug "Next tag is" bumped-tag)))
 
-(defn git-add-spitted! [context]
-  (let [{working-dir :metav/working-dir
-         spitted :metav.spit/spitted} context]
-    (apply git/add! working-dir spitted)
-    context))
-
 
 (defn do-spits-and-commit! [bumped-context]
   (let [{:metav/keys [artefact-name version]} bumped-context]
     (-> bumped-context
         (spit/spit!)
-        (git-add-spitted!)
-        (git/commit-context! (format "Bump module %s to version %s and spit/render related metadata in file(s)." artefact-name version)))))
+        (spit/git-add-spitted!)
+        (git-ops/commit! (format "Bump module %s to version %s and spit/render related metadata in file(s)." artefact-name version)))))
 
 
 (defn maybe-spit! [context]
@@ -86,29 +88,16 @@
             spit? do-spits-and-commit!)))
 
 
-(defn tag-repo! [bumped-context]
-  (git/assert-committed-context? bumped-context)
-  (let [{:metav/keys  [top-level tag]
-         :metav.release/keys [without-sign]} bumped-context
-        annotation (json/write-str (common/metadata-as-edn bumped-context))
-        tag-result (apply git/tag! top-level
-                          tag
-                          annotation
-                          (when without-sign [:sign false]))]
-    (if (int? (first tag-result)) ;;error exit code if so return stderr
-      (throw (Exception. (str "Error with git tag command:" (get tag-result 2))))
-      (assoc bumped-context :metav.release/tag-result
-                            {:git-res tag-result
-                             :tag tag
-                             :annotation annotation}))))
-
-
 (defn maybe-push! [context]
-  (let [{top-level     :metav/top-level
-         without-push? :metav.release/without-push} context]
+  (let [without-push? (:metav.release/without-push context)]
     (cond-> context
-            (not without-push?)
-            (assoc :metav.release/push-result (git/push! top-level)))))
+            (not without-push?) git-ops/push!)))
+
+
+(s/def ::release!-params (s/and (s/merge :metav/context
+                                         :metav.release/options)
+                                bump-level-valid?))
+
 
 (defn release!
   "Assert that nothing leaves uncommitted or untracked,
@@ -125,14 +114,14 @@
 
   (-> context
       (utils/merge&validate default-options ::release!-params)
-      git/assert-committed-context?
+      git-ops/check-committed?
 
       (utils/side-effect-from-context! log-before-bump)
-      common/bump-context
+      bump-context
       (utils/side-effect-from-context! log-bumped-data)
 
       maybe-spit!
-      tag-repo!
+      git-ops/tag-repo!
       maybe-push!))
 
 

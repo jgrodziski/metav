@@ -5,7 +5,8 @@
    [me.raynes.fs :as fs]
    [cljstache.core :as cs]
    [metav.utils :as utils]
-   [metav.domain.common :as common]))
+   [metav.domain.common :as common]
+   [metav.domain.git :as git]))
 
 
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -136,3 +137,16 @@
         spits (-> context standard-spits (add-template-spit context))]
     (assoc context
            :metav.spit/spitted (spit-files! spits))))
+
+
+(s/def ::git-add-spitted!-param (s/keys :req [:metav/working-dir
+                                              :metav.spit/spitted]))
+
+
+(defn git-add-spitted! [context]
+  (let [{working-dir :metav/working-dir
+         spitted :metav.spit/spitted} context]
+    (-> context
+        (->> (utils/check-spec ::git-add-spitted!-param))
+        (assoc :metav.spit/add-spitted-result
+               (apply git/add! working-dir spitted)))))

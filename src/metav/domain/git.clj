@@ -218,15 +218,3 @@
     {:status {:tracking (filter #(re-find #"^##\s" %) status)
               :files (remove empty? (remove #(re-find #"^##\s" %) status))}
      :describe (first (describe prefix min-sha-length))}))
-
-
-(defn assert-committed-context? [context]
-  (assert-committed? (:metav/working-dir context))
-  context)
-
-
-(defn commit-context! [context msg]
-  (let [commit-res (commit! (:metav/working-dir context) msg)]
-    (assoc context :metav.git/committed
-                   {:commit-res commit-res
-                    :msg msg})))
