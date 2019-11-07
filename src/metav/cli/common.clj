@@ -86,7 +86,8 @@
   (try
     (-> path slurp edn/read-string)
     (catch Exception e
-      {::error (.getMessage e)})))
+      {::error-msg (.getMessage e)
+       ::error e})))
 
 
 (defn process-parsed-opts [parsed]
@@ -94,7 +95,7 @@
         file-config (if-let [path (:metav.cli/config options)]
                       (read-config-file path)
                       nil)]
-    (if-let [error (::error file-config)]
+    (if-let [error (::error-msg file-config)]
       (assoc parsed :exit-message (str "Error reading the config file: \n" error))
       (assoc parsed :custom-opts (cond->> options
                                          file-config (merge file-config))))))
@@ -161,10 +162,12 @@
         (let [res (try
                     (-> ctxt-opts api/make-context perform-command-fn)
                     (catch ExceptionInfo e
-                      {::error (ex-message e)})
+                      {::error e
+                       ::error-msg (ex-message e)})
                     (catch Exception e
-                      {::error (.getMessage e)}))]
-          (if-let [error (::error res)]
+                      {::error e
+                       ::error-msg (.getMessage e)}))]
+          (if-let [error (::error-msg res)]
             (assoc parsed-and-validated
               :ret res
               :exit? true
