@@ -5,8 +5,8 @@
             [clojure.test :as t]
             [clojure.java.shell :as shell]
             [clojure.tools.logging :as log]
-            [me.raynes.fs :as fs]
-            ))
+            [me.raynes.fs :as fs]))
+
 
 
 (defn pwd
