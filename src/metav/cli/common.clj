@@ -166,7 +166,8 @@
                       {::error (.getMessage e)}))]
           (if-let [error (::error res)]
             (assoc parsed-and-validated
-              :exit true
+              :ret res
+              :exit? true
               :ok? false
               :exit-message error)
             (assoc parsed-and-validated
