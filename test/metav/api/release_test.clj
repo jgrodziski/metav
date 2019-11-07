@@ -26,7 +26,7 @@
       (let [{:keys [monorepo modules]} m
             {moduleA1 :A1} modules
 
-            options {:metav.release/without-sign true
+            options {:metav.git/without-sign true
                      :metav.release/spit true
                      :metav.spit/output-dir "resources"
                      :metav.spit/namespace "metav.meta"

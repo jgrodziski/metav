@@ -16,12 +16,10 @@
 ;;----------------------------------------------------------------------------------------------------------------------
 (def default-options
   #:metav.release{:level :patch
-                  :without-sign false
                   :spit false
                   :without-push false})
 
 (s/def :metav.release/level (union semver/allowed-bumps maven/allowed-bumps))
-(s/def :metav.release/without-sign boolean?)
 (s/def :metav.release/spit boolean?)
 (s/def :metav.release/without-push boolean?)
 
