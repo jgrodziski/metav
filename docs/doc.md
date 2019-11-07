@@ -57,7 +57,7 @@ versioning data is presented as follow in clojure edn format:
 ```clojure
 {:module-name artefact-name ;; the artefact name ase discussed above
  :version (str version)
- :tag tag ;; (str artefact-name "-" version)
+ :tag tag                   ;; (str artefact-name "-" version)
  :generated-at (iso-now)
  :path (if git-prefix git-prefix ".")}
 ```
@@ -85,7 +85,7 @@ With metav in the classpath in a terminal:
 
 ;; Defines some option for metav
 (def options {:metav/working-dir          "my/projects/dir"    ;; dir from which metav bases its execution context
-              :metav.release/without-sign true                 ;; we're not signing git tags
+              :metav.git/without-sign     true                 ;; we're not signing git tags
               :metav.release/spit         true                 ;; we want to spit project data before releasing
               :metav.spit/output-dir      "resources"          ;; location where the spitted files go
               :metav.spit/namespace       "metav.meta"         ;; namespace of the spitted files
@@ -133,7 +133,7 @@ The full range of options that can be passed to metav operations.
 - `:metav.release/level`: `#{:alpha :beta :major :minor :patch :rc :release}`,
   the bump levels available, must be correlated with `:metav/version-scheme`.
   Defaults to `:patch`.
-- `:metav.release/without-sign`: `boolean?`, whether version git tags 
+- `:metav.git/without-sign`: `boolean?`, whether version git tags 
   won't be signed with gpg. Defaults to `false`.
 - `:metav.release/without-push`: `boolean?`, whether we don't want to push 
   after tagging a new version.  Defaults to `false`.
