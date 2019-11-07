@@ -33,6 +33,38 @@
                 :metav.release/without-push]))
 
 
+(defn bump-level-valid? [context]
+  (let [{scheme :metav/version-scheme
+         level :metav.release/level} context
+        spec (if (= :semver scheme)
+               ::semver/accepted-bumps
+               ::maven/accepted-bumps)]
+    (s/valid? spec level)))
+
+
+(s/def :metav.release/required (s/keys :req [:metav.release/level]))
+
+
+(s/def ::release!-params (s/and (s/merge :metav/context
+                                         :metav.release/required
+                                         :metav.release/options)
+                                bump-level-valid?))
+
+
+(defn log-before-bump [context]
+  (let [{:metav/keys [artefact-name version]
+         level :metav.release/level} context]
+    (log/debug "execute!" context level)
+    (log/debug "Current version of module '" artefact-name "' is:" (str version))))
+
+
+(defn log-bumped-data [context]
+  (let [{artefact-name  :metav/artefact-name
+         bumped-version :metav/version
+         bumped-tag     :metav/tag} context]
+    (log/debug "Next version of module '" artefact-name "' is:" (str bumped-version))
+    (log/debug "Next tag is" bumped-tag)))
+
 (defn git-add-spitted! [context]
   (let [{working-dir :metav/working-dir
          spitted :metav.spit/spitted} context]
@@ -46,6 +78,12 @@
         (spit/spit!)
         (git-add-spitted!)
         (git/commit-context! (format "Bump module %s to version %s and spit/render related metadata in file(s)." artefact-name version)))))
+
+
+(defn maybe-spit! [context]
+  (let [spit? (:metav.release/spit context)]
+    (cond-> context
+            spit? do-spits-and-commit!)))
 
 
 (defn tag-repo! [bumped-context]
@@ -64,22 +102,13 @@
                              :tag tag
                              :annotation annotation}))))
 
-(defn bump-level-valid? [context]
-  (let [{scheme :metav/version-scheme
-         level :metav.release/level} context
-        spec (if (= :semver scheme)
-               ::semver/accepted-bumps
-               ::maven/accepted-bumps)]
-    (s/valid? spec level)))
 
-
-(s/def :metav.release/required (s/keys :req [:metav.release/level]))
-
-
-(s/def ::release!-params (s/and (s/merge :metav/context
-                                         :metav.release/required
-                                         :metav.release/options)
-                                bump-level-valid?))
+(defn maybe-push! [context]
+  (let [{top-level     :metav/top-level
+         without-push? :metav.release/without-push} context]
+    (cond-> context
+            (not without-push?)
+            (assoc :metav.release/push-result (git/push! top-level)))))
 
 (defn release!
   "Assert that nothing leaves uncommitted or untracked,
@@ -93,24 +122,17 @@
   under the key `:metav.spit/spitted`.
   "
   [context]
-  (let [context (utils/merge&validate context default-options ::release!-params)
-        {:metav/keys [artefact-name version top-level]
-         :metav.release/keys [level spit without-push]} context]
-    (git/assert-committed-context? context)
-    (log/debug "execute!" context level)
-    (log/debug "Current version of module '" artefact-name "' is:" (str version))
 
-    (let [{bumped-version :metav/version
-           bumped-tag     :metav/tag
-           :as            bumped-context} (common/bump-context context)]
+  (-> context
+      (utils/merge&validate default-options ::release!-params)
+      git/assert-committed-context?
 
-      (log/debug "Next version of module '" artefact-name "' is:" (str bumped-version))
-      (log/debug "Next tag is" bumped-tag)
+      (utils/side-effect-from-context! log-before-bump)
+      common/bump-context
+      (utils/side-effect-from-context! log-bumped-data)
 
-      ;;spit meta file and commit
-      (cond-> bumped-context
-              spit               do-spits-and-commit!
-              :always            tag-repo!
-              (not without-push) (assoc :metav.release/push-result (git/push! top-level))))))
+      maybe-spit!
+      tag-repo!
+      maybe-push!))
 
 
