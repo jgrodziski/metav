@@ -33,23 +33,36 @@
                 :metav.release/without-push]))
 
 
+(defn git-add-spitted! [context]
+  (let [{working-dir :metav/working-dir
+         spitted :metav.spit/spitted} context]
+    (apply git/add! working-dir spitted)
+    context))
+
+
 (defn do-spits-and-commit! [bumped-context]
-  (let [{:metav/keys [working-dir artefact-name version]} bumped-context
-        ctxt-with-spits (spit/spit! bumped-context)]
-    (apply git/add! working-dir (:metav.spit/spitted ctxt-with-spits))
-    (git/commit! working-dir
-                   (format "Bump module %s to version %s and spit/render related metadata in file(s)." artefact-name version))
-    ctxt-with-spits))
+  (let [{:metav/keys [artefact-name version]} bumped-context]
+    (-> bumped-context
+        (spit/spit!)
+        (git-add-spitted!)
+        (git/commit-context! (format "Bump module %s to version %s and spit/render related metadata in file(s)." artefact-name version)))))
+
 
 (defn tag-repo! [bumped-context]
+  (git/assert-committed-context? bumped-context)
   (let [{:metav/keys  [top-level tag]
          :metav.release/keys [without-sign]} bumped-context
+        annotation (json/write-str (common/metadata-as-edn bumped-context))
         tag-result (apply git/tag! top-level
                           tag
-                          (json/write-str (common/metadata-as-edn bumped-context))
+                          annotation
                           (when without-sign [:sign false]))]
     (if (int? (first tag-result)) ;;error exit code if so return stderr
-      (throw (Exception. (str "Error with git tag command:" (get tag-result 2)))))))
+      (throw (Exception. (str "Error with git tag command:" (get tag-result 2))))
+      (assoc bumped-context :metav.release/tag-result
+                            {:git-res tag-result
+                             :tag tag
+                             :annotation annotation}))))
 
 (defn bump-level-valid? [context]
   (let [{scheme :metav/version-scheme
@@ -81,9 +94,9 @@
   "
   [context]
   (let [context (utils/merge&validate context default-options ::release!-params)
-        {:metav/keys [working-dir artefact-name version top-level]
+        {:metav/keys [artefact-name version top-level]
          :metav.release/keys [level spit without-push]} context]
-    (git/assert-committed? working-dir)
+    (git/assert-committed-context? context)
     (log/debug "execute!" context level)
     (log/debug "Current version of module '" artefact-name "' is:" (str version))
 
@@ -95,13 +108,9 @@
       (log/debug "Next tag is" bumped-tag)
 
       ;;spit meta file and commit
-      (let [bumped-context (when spit
-                             (do-spits-and-commit! bumped-context))]
-
-        (tag-repo! bumped-context)
-
-        (cond-> bumped-context
-                (not without-push)
-                (assoc :metav.release/push-result (git/push! top-level)))))))
+      (cond-> bumped-context
+              spit               do-spits-and-commit!
+              :always            tag-repo!
+              (not without-push) (assoc :metav.release/push-result (git/push! top-level))))))
 
 
