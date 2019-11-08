@@ -55,9 +55,9 @@
             {moduleA2 :A2} modules
 
             general-option {:metav.spit/formats         #{:edn}
+                            :metav.git/without-sign     true
                             :metav.release/level        :patch
                             :metav.release/spit         true
-                            :metav.release/without-sign true
                             :metav.release/output-dir   "resources"
                             :metav.release/namespace    "meta"}
 
