@@ -5,7 +5,7 @@
     [testit.core :refer :all]
     [metav.cli.common :as cli-common]))
 
-;; TODO
+
 
 (def common-validate
   (cli-common/make-validate-args cli-common/cli-options
