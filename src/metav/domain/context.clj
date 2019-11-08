@@ -133,12 +133,9 @@
     (apply make-version state)))
 
 
-(defn make-tag [context version]
-  (str (:metav/version-prefix context) version))
-
-
 (defn tag [context]
-  (make-tag context (:metav/version context)))
+  (let [{:metav/keys [version version-prefix]} context]
+    (str version-prefix version)))
 
 
 (defn assoc-computed-keys [context]
