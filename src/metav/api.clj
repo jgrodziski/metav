@@ -3,7 +3,7 @@
     [clojure.spec.alpha          :as s]
     [clojure.data.json           :as json]
     [metav.utils                 :as utils]
-    [metav.domain.common         :as common]
+    [metav.domain.metadata         :as metadata]
     [metav.domain.context        :as context]
     [metav.domain.display        :as display]
     [metav.domain.git-operations :as git-ops]
@@ -26,7 +26,7 @@
   (utils/check-spec :metav/context context))
 
 
-(def metadata-as-edn common/metadata-as-edn)
+(def metadata-as-edn metadata/metadata-as-edn)
 
 
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -37,11 +37,11 @@
 
 
 (defmethod display* :edn [context]
-  (println (common/metadata-as-edn context)))
+  (println (metadata/metadata-as-edn context)))
 
 
 (defmethod display* :json [context]
-  (println (json/write-str (common/metadata-as-edn context))))
+  (println (json/write-str (metadata/metadata-as-edn context))))
 
 
 (defmethod display* :tab [{:metav/keys [artefact-name version]}];default is tab separated module-name and version

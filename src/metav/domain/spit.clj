@@ -5,7 +5,7 @@
    [me.raynes.fs :as fs]
    [cljstache.core :as cs]
    [metav.utils :as utils]
-   [metav.domain.common :as common]
+   [metav.domain.metadata :as metadata]
    [metav.domain.git :as git]))
 
 
@@ -68,23 +68,23 @@
 
 (defmethod spit-file! :edn [context]
   (spit (::dest context)
-        (pr-str (common/metadata-as-edn context))))
+        (pr-str (metadata/metadata-as-edn context))))
 
 
 (defmethod spit-file! :json [context]
   (spit (::dest context)
-        (json/write-str (common/metadata-as-edn context))))
+        (json/write-str (metadata/metadata-as-edn context))))
 
 
 (defmethod spit-file! :template [context]
   (spit (::dest context)
         (cs/render-resource (:metav.spit/template context)
-                            (common/metadata-as-edn context))))
+                            (metadata/metadata-as-edn context))))
 
 
 (defmethod spit-file! :default [context];default are cljs,clj and cljc
   (spit (::dest context)
-        (common/metadata-as-code context)))
+        (metadata/metadata-as-code context)))
 
 
 (defn standard-spits [context]

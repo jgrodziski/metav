@@ -3,7 +3,7 @@
     [clojure.spec.alpha :as s]
     [clojure.data.json :as json]
     [metav.domain.context]
-    [metav.domain.common :as common]
+    [metav.domain.metadata :as metadata]
     [metav.domain.git :as git]
     [metav.utils :as utils]))
 
@@ -39,7 +39,7 @@
   (let [context (utils/merge&validate context default-tag-options ::tag-repo!-param)
         {:metav/keys  [top-level tag]
          :metav.git/keys [without-sign]} context
-        annotation (json/write-str (common/metadata-as-edn context))
+        annotation (json/write-str (metadata/metadata-as-edn context))
         tag-result (apply git/tag! top-level
                           tag
                           annotation

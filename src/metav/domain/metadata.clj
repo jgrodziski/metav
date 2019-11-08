@@ -1,10 +1,10 @@
-(ns metav.domain.common
+(ns metav.domain.metadata
   (:require
    [clojure.string :as string])
   (:import [java.util Date TimeZone]
            [java.text SimpleDateFormat]))
 
-
+;; TODO: rename this ns to metadata
 (defn iso-now []
   (let [tz (TimeZone/getTimeZone "UTC")
         df (SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ss'Z'")]
