@@ -2,10 +2,9 @@
   (:require
     [clojure.test :as test :refer [deftest testing]]
     [testit.core :refer :all]
-    [metav.utils-test :as ut]
+    [metav.test-utils :as test-utils]
     [metav.git-shell :as gs]
     [metav.domain.version.protocols :as m-p]
-    [metav.utils-test :as ut]
     [me.raynes.fs :as fs]
     [metav.api :as api]))
 
@@ -13,7 +12,7 @@
 
 
 (defn version [repo-path]
-  (let [ctxt (ut/make-context repo-path)]
+  (let [ctxt (test-utils/make-context repo-path)]
     (-> ctxt :metav/version)))
 
 (defn version-str [repo-path]
@@ -24,8 +23,8 @@
 ;; Testing context
 ;;----------------------------------------------------------------------------------------------------------------------
 (deftest context-validity
-  (ut/with-repo repo
-    (ut/prepare-base-repo! repo)
+  (test-utils/with-repo repo
+    (test-utils/prepare-base-repo! repo)
 
     (let [context (api/make-context {:metav/working-dir repo})]
       (testing "Metav generates correct contexts"
@@ -51,18 +50,18 @@
   `(fact (version-str ~repo) ~arrow ~test))
 
 (deftest dedicated-repo-test
-  (ut/with-repo repo
+  (test-utils/with-repo repo
 
     (testing "Metav won't work in a repo without any commits."
       (fact
-        (ut/make-context repo) =throws=> java.lang.Exception))
+        (test-utils/make-context repo) =throws=> java.lang.Exception))
 
     (gs/shell-in-dir! repo
       (gs/commit!))
 
     (testing "Metav won't work in a dir without a build file."
       (fact
-        (ut/make-context repo) =throws=> java.lang.Exception))
+        (test-utils/make-context repo) =throws=> java.lang.Exception))
 
 
     (gs/shell-in-dir! repo
@@ -126,7 +125,7 @@
       (gs/commit!))
 
     (testing "correct distance"
-      (let [ctxt (ut/make-context repo)
+      (let [ctxt (test-utils/make-context repo)
             version (:metav/version ctxt)
             distance (m-p/distance version)]
         (facts
@@ -135,11 +134,11 @@
 
 
     (testing "Correct naming"
-      (let [ctxt (ut/make-context repo)
-            ctxt-full-name (ut/make-context repo {:metav/use-full-name? true})
-            ctxt-other-name (ut/make-context repo {:metav/module-name-override "another-name"})
-            ctxt-other-full-name (ut/make-context repo {:metav/use-full-name? true
-                                                        :metav/module-name-override    "another-name"})]
+      (let [ctxt (test-utils/make-context repo)
+            ctxt-full-name (test-utils/make-context repo {:metav/use-full-name? true})
+            ctxt-other-name (test-utils/make-context repo {:metav/module-name-override "another-name"})
+            ctxt-other-full-name (test-utils/make-context repo {:metav/use-full-name? true
+                                                                :metav/module-name-override   "another-name"})]
         (facts
           ctxt =in=> {:metav/artefact-name (fs/base-name repo)}
           ctxt-full-name =in=> {:metav/artefact-name (fs/base-name repo)}
@@ -154,7 +153,7 @@
 (def str->v-regex #(->> % (str "^") re-pattern))
 
 (deftest monorepo-test
-  (ut/with-example-monorepo m
+  (test-utils/with-example-monorepo m
     (let [{:keys [remote monorepo modules] :as mono} m
           {project1 :p1
            project2 :p2
@@ -164,27 +163,27 @@
            moduleB2 :B2
            moduleB3 :B3} modules
 
-          ctxt1 (ut/make-context project1)
-          ctxt2 (ut/make-context project2 {:metav/use-full-name? true})
-          ctxtA1 (ut/make-context moduleA1)
-          ctxtA2 (ut/make-context moduleA2)
-          ctxtB1 (ut/make-context moduleB1)
-          ctxtB2 (ut/make-context moduleB2)
-          ctxtB3 (ut/make-context moduleB3)
+          ctxt1 (test-utils/make-context project1)
+          ctxt2 (test-utils/make-context project2 {:metav/use-full-name? true})
+          ctxtA1 (test-utils/make-context moduleA1)
+          ctxtA2 (test-utils/make-context moduleA2)
+          ctxtB1 (test-utils/make-context moduleB1)
+          ctxtB2 (test-utils/make-context moduleB2)
+          ctxtB3 (test-utils/make-context moduleB3)
           expected-project2-name (str (fs/base-name monorepo) "-project2")]
       (testing "The root of the monorepo doesn't have a build file. Exception thrown."
         (facts
-          (ut/make-context monorepo) =throws=> Exception))
+          (test-utils/make-context monorepo) =throws=> Exception))
 
       (testing "Versions are set correctly."
         (facts
-          (v-str ctxt1) =in=> (str->v-regex ut/project1-version)
-          (v-str ctxt2) =in=> (str->v-regex ut/project2-version)
-          (v-str ctxtA1) =in=> (str->v-regex ut/sysA-c1-version)
-          (v-str ctxtA2) =in=> (str->v-regex ut/sysA-c2-version)
-          (v-str ctxtB1) =in=> (str->v-regex ut/sysB-c1-version)
-          (v-str ctxtB2) =in=> (str->v-regex ut/sysB-c2-version)
-          (v-str ctxtB3) =in=> (str->v-regex ut/sysB-c3-version)))
+          (v-str ctxt1) =in=> (str->v-regex test-utils/project1-version)
+          (v-str ctxt2) =in=> (str->v-regex test-utils/project2-version)
+          (v-str ctxtA1) =in=> (str->v-regex test-utils/sysA-c1-version)
+          (v-str ctxtA2) =in=> (str->v-regex test-utils/sysA-c2-version)
+          (v-str ctxtB1) =in=> (str->v-regex test-utils/sysB-c1-version)
+          (v-str ctxtB2) =in=> (str->v-regex test-utils/sysB-c2-version)
+          (v-str ctxtB3) =in=> (str->v-regex test-utils/sysB-c3-version)))
 
       (testing "Names are properly read."
         (facts

@@ -1,4 +1,4 @@
-(ns metav.utils-test
+(ns metav.test-utils
   (:require
     [clojure.java.shell :as shell]
     [me.raynes.fs :as fs]

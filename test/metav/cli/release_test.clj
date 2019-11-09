@@ -4,14 +4,14 @@
     [testit.core :refer :all]
     [metav.git-shell :as gs]
     [me.raynes.fs :as fs]
-    [metav.utils-test :as utils-test]
+    [metav.test-utils :as test-utils]
     [metav.domain.git :as git]
     [metav.cli.release :as cli-release]))
 
 
 (deftest release-with-cli
   (testing "Major release with cli."
-    (utils-test/with-example-monorepo m
+    (test-utils/with-example-monorepo m
       (let [{:keys [modules monorepo]} m
             {:keys [p2]} modules]
 

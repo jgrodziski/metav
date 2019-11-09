@@ -4,9 +4,8 @@
     [testit.core :refer :all]
     [me.raynes.fs :as fs]
 
-    [metav.utils-test :as ut]
+    [metav.test-utils :as test-utils]
     [metav.git-shell :as gs]
-    [metav.utils-test :as ut]
     [metav.domain.git :as git]
     [metav.api :as api]))
 
@@ -22,7 +21,7 @@
 ;;       Right now, it's my git conf that's used instead.
 (deftest release-repo
   (testing "bump from a clean tagged repo, testing the spitted files"
-    (ut/with-example-monorepo m
+    (test-utils/with-example-monorepo m
       (let [{:keys [monorepo modules]} m
             {moduleA1 :A1} modules
 
@@ -31,7 +30,7 @@
                      :metav.spit/output-dir "resources"
                      :metav.spit/namespace "metav.meta"
                      :metav.spit/formats #{:edn :clj :json}}
-            ctxt-A1 (ut/make-context moduleA1 options)
+            ctxt-A1 (test-utils/make-context moduleA1 options)
             ctxt-after-release (api/release! ctxt-A1)
 
             {bumped-version :metav/version
@@ -50,7 +49,7 @@
           (fs/exists? (str moduleA1 "/resources/metav/meta.json")) => true))))
 
   (testing "bump from a clean tagged repo, two patch releases, then one minor, then one major"
-    (ut/with-example-monorepo m
+    (test-utils/with-example-monorepo m
       (let [{:keys [remote monorepo modules] :as mono} m
             {moduleA2 :A2} modules
 
@@ -63,7 +62,7 @@
 
             release! (fn [level]
                        (let [options (assoc general-option :metav.release/level level)
-                             ctxt-after-release (api/release! (ut/make-context moduleA2 options))
+                             ctxt-after-release (api/release! (test-utils/make-context moduleA2 options))
 
                              {bumped-version :metav/version
                               bumped-tag     :metav/tag
