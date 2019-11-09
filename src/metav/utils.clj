@@ -67,9 +67,13 @@
 ;;----------------------------------------------------------------------------------------------------------------------
 (defmacro ensure-keys [m & kvs]
   (assert (even? (count kvs)))
-  `(cond-> ~m
+  (let [res (gensym "res")]
+    `(let [~res ~m
            ~@(apply concat (for [[k v] (partition 2 kvs)]
-                             `[(not (contains? ~m ~k)) (assoc ~k ~v)]))))
+                             `[~res (if (contains? ~m ~k)
+                                        ~res
+                                        (assoc ~res ~k ~v))]))]
+       ~res)))
 
 
 (defmacro ensure-key [m k v]
@@ -81,6 +85,7 @@
             (ensure-key acc k (get defaults k)))
           m
           (keys defaults)))
+
 
 (defn merge&validate [context defaults spec]
   (-> context
