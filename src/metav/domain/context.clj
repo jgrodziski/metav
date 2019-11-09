@@ -58,7 +58,10 @@
     (fs/file? build-file)))
 
 
-(defn assert-repo-in-order [context]
+(defn check-repo-in-order
+  "Checks that the working dir has a build file and is in a repo
+  which already has at least one commit."
+  [context]
   (let [working-dir (:metav/working-dir context)]
     (when-not (git/any-commits? working-dir)
       (let [msg "No commits  found."
@@ -160,7 +163,7 @@
   (-> opts
       (utils/merge&validate default-options ::make-context-param)
       assoc-git-basics
-      assert-repo-in-order
+      check-repo-in-order
       assoc-names
       assoc-computed-keys
       (->> (into (sorted-map)))))
