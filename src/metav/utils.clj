@@ -10,6 +10,10 @@
 (defn pwd []
   (str fs/*cwd*))
 
+(defn normalize-in-context [context path]
+  (fs/with-cwd (:metav/working-dir context)
+    (str (fs/normalized path))))
+
 (defn assoc-computed [context k f]
   (assoc context k (f context)))
 
@@ -61,10 +65,15 @@
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Options handling
 ;;----------------------------------------------------------------------------------------------------------------------
-(defmacro ensure-key [m k not-found]
-  `(if (contains? ~m ~k)
-     ~m
-     (assoc ~m ~k ~not-found)))
+(defmacro ensure-keys [m & kvs]
+  (assert (even? (count kvs)))
+  `(cond-> ~m
+           ~@(apply concat (for [[k v] (partition 2 kvs)]
+                             `[(not (contains? ~m ~k)) (assoc ~k ~v)]))))
+
+
+(defmacro ensure-key [m k v]
+  (list `ensure-keys m k v))
 
 
 (defn merge-defaults [m defaults]
@@ -79,7 +88,6 @@
       (->> (check-spec spec))))
 
 ;;----------------------------------------------------------------------------------------------------------------------
-;; log utilis
 ;;----------------------------------------------------------------------------------------------------------------------
 (defn side-effect-from-context! [context f!]
   (f! context)
