@@ -11,7 +11,8 @@
  :metav.spit/template "mustache-template.txt"
  :metav.spit/rendering-output "resources/rendered-conf.txt"
 
+ :metav.git/without-sign true
+
  :metav.release/spit false
  :metav.release/level :patch
- :metav.release/without-sign true
  :metav.release/without-push false}
