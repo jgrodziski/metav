@@ -3,6 +3,8 @@
     [clojure.spec.alpha :as s]
     [clojure.string :as string]
     [clojure.tools.logging :as log]
+    [clojure.tools.deps.alpha.specs :as deps-specs]
+    [clojure.tools.deps.alpha.reader :as deps-reader]
     [me.raynes.fs :as fs]
     [metav.utils :as utils]
     [metav.domain.version.semver :as semver]
@@ -24,6 +26,8 @@
 (s/def :metav/min-sha-length integer?)
 (s/def :metav/use-full-name? boolean?)
 (s/def :metav/module-name-override ::utils/non-empty-str)
+(s/def :metav/project-deps ::deps-specs/deps-map)
+
 
 
 (s/def :metav.context/options
@@ -53,7 +57,9 @@
 (def module-build-file "deps.edn")
 
 
-(defn has-build-file? [working-dir]
+(defn has-build-file?
+  "Checking that the working dir contains a `deps.edn` file."
+  [working-dir]
   (let [build-file (fs/file working-dir module-build-file)]
     (fs/file? build-file)))
 
@@ -82,7 +88,11 @@
     (subs name 0 (dec (count name)))))
 
 
-(defn assoc-names [context]
+(defn assoc-names
+  "Adds to the context basic names from git state:
+  - `:metav/project-name`: from git rev-parse --show-toplevel
+  - `:metav/module-name`: from git rev-parse --show-prefix"
+  [context]
   (let [{:metav/keys [top-level git-prefix]} context
         project-name (fs/base-name top-level)
         module-name (if git-prefix
@@ -92,25 +102,44 @@
                            :module-name module-name})))
 
 
-(defn definitive-module-name [context]
+(defn assoc-deps
+  "Slurps the build file and adds it to the context under the key `:metav/project-deps`."
+  [context]
+  (let [working-dir (:metav/working-dir context)]
+    (assoc context
+      :metav/project-deps (-> working-dir
+                              (fs/file module-build-file)
+                              deps-reader/slurp-deps))))
+
+
+(defn definitive-module-name
+  "Choose the module name to be used between the one metav generates automaticaly or
+  an overide provided by the user."
+  [context]
   (let [{:metav/keys [module-name-override module-name]} context]
     (or module-name-override module-name)))
 
 
-(defn full-name [context]
+(defn full-name
+  "Full name of a project, constructed with the project name and the module name."
+  [context]
   (let [{:metav/keys [git-prefix project-name definitive-module-name]} context]
     (if git-prefix
       (str project-name "-" definitive-module-name)
       definitive-module-name)))
 
 
-(defn artefact-name [context]
+(defn artefact-name
+  "The name used to create tag prefixes and maven artifact name."
+  [context]
   (if (get context :metav/use-full-name?)
     (:metav/full-name context)
     (:metav/definitive-module-name context)))
 
 
-(defn version-prefix [context]
+(defn version-prefix
+  "Version prefix in git tags, \"v\" in dedicated repos \"artefact-name-\" in monorepos."
+  [context]
   (let [{:metav/keys [git-prefix artefact-name]} context]
     (if git-prefix
       (str artefact-name "-")
@@ -122,7 +151,9 @@
    :maven maven/version})
 
 
-(defn version [context]
+(defn version
+  "Construct a version from a context and git state."
+  [context]
   (let [{:metav/keys [working-dir version-scheme version-prefix min-sha-length]} context
         make-version (get version-scheme->builder version-scheme)
         state (git/working-copy-description working-dir
@@ -136,12 +167,16 @@
     (apply make-version state)))
 
 
-(defn tag [context]
+(defn tag
+  "Makes a tag name from a context using the version prefix and the version number."
+  [context]
   (let [{:metav/keys [version version-prefix]} context]
     (str version-prefix version)))
 
 
-(defn assoc-computed-keys [context]
+(defn assoc-computed-keys
+  "Adds to a context all the computed info from a base context and git state."
+  [context]
   (-> context
       (utils/assoc-computed :metav/definitive-module-name definitive-module-name)
       (utils/assoc-computed :metav/full-name full-name)
@@ -165,6 +200,7 @@
       assoc-git-basics
       check-repo-in-order
       assoc-names
+      assoc-deps
       assoc-computed-keys
       (->> (into (sorted-map)))))
 

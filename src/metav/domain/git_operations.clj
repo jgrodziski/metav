@@ -5,7 +5,8 @@
     [metav.domain.context]
     [metav.domain.metadata :as metadata]
     [metav.domain.git :as git]
-    [metav.utils :as utils]))
+    [metav.utils :as utils]
+    [metav.domain.context :as context]))
 
 
 (s/def ::working-dir-present (s/keys :req [:metav/working-dir]))
@@ -31,12 +32,13 @@
 
 (s/def :metav.git.tag-repo/options (s/keys :opt [:metav.git/without-sign]))
 
-(s/def ::tag-repo!-param (s/and (s/merge :metav/context
-                                         :metav.git.tag-repo/options)
-                                check-committed?))
+(s/def ::tag-repo!-param (s/merge :metav/context
+                                  :metav.git.tag-repo/options))
 
 (defn tag-repo! [context]
-  (let [context (utils/merge&validate context default-tag-options ::tag-repo!-param)
+  (let [context (-> context
+                    (utils/merge&validate default-tag-options ::tag-repo!-param)
+                    (check-committed?))
         {:metav/keys  [top-level tag]
          :metav.git/keys [without-sign]} context
         annotation (json/write-str (metadata/metadata-as-edn context))
