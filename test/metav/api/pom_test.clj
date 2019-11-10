@@ -29,6 +29,18 @@
           (-> (select-keys pom-tags)))))
 
 
+(defn test-pom [ctxt]
+  (let [pom-data (-> ctxt
+                     (-> :metav.maven.pom/sync-path
+                         pom/read-xml
+                         extract-pom-data))]
+    (facts
+      (:groupId pom-data)    => (:metav.maven/group-id ctxt)
+      (:name pom-data)       => (:metav.maven.pom/name ctxt)
+      (:artifactId pom-data) => (:metav/artefact-name ctxt)
+      (:version pom-data)    => (str (:metav/version ctxt)))))
+
+
 (deftest pom-sync!
   (test-utils/with-example-monorepo m
     (let [{:keys [monorepo modules]} m
@@ -36,14 +48,5 @@
 
           ctxt-A1 (-> moduleA1
                       test-utils/make-context
-                      api/sync-pom!)
-          pom-data (-> ctxt-A1
-                       (-> :metav.maven.pom/sync-path
-                           pom/read-xml
-                           extract-pom-data))]
-      (facts
-        (:groupId pom-data)    => (:metav.maven/group-id ctxt-A1)
-        (:name pom-data)       => (:metav.maven.pom/name ctxt-A1)
-        (:artifactId pom-data) => (:metav/artefact-name ctxt-A1)
-        (:version pom-data)    => (str (:metav/version ctxt-A1))))))
-
+                      api/sync-pom!)]
+      (test-pom ctxt-A1))))

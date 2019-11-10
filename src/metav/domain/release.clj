@@ -17,14 +17,14 @@
 ;; Release conf
 ;;----------------------------------------------------------------------------------------------------------------------
 (def default-options
-  #:metav.release{:level :patch
-                  :spit false
-                  :pom? false
+  #:metav.release{:level        :patch
+                  :spit         false
+                  :pom          false
                   :without-push false})
 
 (s/def :metav.release/level (union semver/allowed-bumps maven/allowed-bumps))
 (s/def :metav.release/spit boolean?)
-(s/def :metav.release/pom? boolean?)
+(s/def :metav.release/pom boolean?)
 (s/def :metav.release/without-push boolean?)
 
 
@@ -98,7 +98,7 @@
 
 
 (defn maybe-sync-pom! [context]
-  (let [pom? (:metav.release/pom? context)]
+  (let [pom? (:metav.release/pom context)]
     (cond-> context
             pom? sync-pom-and-commit!)))
 

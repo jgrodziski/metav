@@ -8,7 +8,7 @@
     [metav.cli.spit :as cli-spit]
     [metav.api :as api]))
 
-;; TODO: add pom generation as an option.
+
 (def cli-options
   (conj cli-spit/cli-options
         [nil "--without-sign" "Should the git tag used for release be signed with the current user's GPG key configured with git"
@@ -16,6 +16,9 @@
          :default-desc "false"]
         [nil "--spit" "Indicates the release process should spit the metadata file as with the \"spit\" task, in that case the spit options must be provided"
          :id :metav.release/spit
+         :default-desc "false"]
+        [nil "--pom" "Indicates the release process should update (or create) a pom.xml file for the project."
+         :id :metav.release/pom
          :default-desc "false"]
         ["-w" "--without-push" "Execute the release process but without pushing at the end, if you want to control the pushing instant yourself"
          :id :metav.release/without-push

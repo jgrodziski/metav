@@ -4,10 +4,11 @@
     [testit.core :refer :all]
     [me.raynes.fs :as fs]
 
-    [metav.test-utils :as test-utils]
-    [metav.git-shell :as gs]
+    [metav.api :as api]
     [metav.domain.git :as git]
-    [metav.api :as api]))
+    [metav.git-shell :as gs]
+    [metav.api.pom-test :as pom-test]
+    [metav.test-utils :as test-utils]))
 
 
 
@@ -26,10 +27,11 @@
             {moduleA1 :A1} modules
 
             options {:metav.git/without-sign true
-                     :metav.release/spit true
-                     :metav.spit/output-dir "resources"
-                     :metav.spit/namespace "metav.meta"
-                     :metav.spit/formats #{:edn :clj :json}}
+                     :metav.release/pom      true
+                     :metav.release/spit     true
+                     :metav.spit/output-dir  "resources"
+                     :metav.spit/namespace   "metav.meta"
+                     :metav.spit/formats     #{:edn :clj :json}}
             ctxt-A1 (test-utils/make-context moduleA1 options)
             ctxt-after-release (api/release! ctxt-A1)
 
@@ -39,6 +41,9 @@
 
             [scm-base] (git/working-copy-description moduleA1 :prefix prefix)
             tag-verify (git/tag-verify monorepo bumped-tag)]
+
+        (pom-test/test-pom ctxt-after-release)
+
         (facts
           (str bumped-version) => "1.3.5"
           scm-base => "1.3.5"
@@ -57,6 +62,7 @@
                             :metav.git/without-sign     true
                             :metav.release/level        :patch
                             :metav.release/spit         true
+                            :metav.release/pom          true
                             :metav.release/output-dir   "resources"
                             :metav.release/namespace    "meta"}
 
@@ -70,6 +76,9 @@
 
                              [scm-base] (git/working-copy-description moduleA2 :prefix prefix)]
                          (Thread/sleep 500) ;need to wait because the time resolution of the git describe command needs some time to elapse before asking whether a new tag is available
+
+                         (pom-test/test-pom ctxt-after-release)
+
                          {:bumped-version bumped-version
                           :bumped-tag bumped-tag
                           :scm-base scm-base
@@ -110,3 +119,5 @@
             (:scm-base release4)  => "2.0.0"
             (:bumped-tag release4) => "sysA-container2-2.0.0"
             (:metadata release4)   => truthy))))))
+
+(release-repo)
