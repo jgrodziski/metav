@@ -21,9 +21,6 @@
     :opt [:metav.maven/group-id
           :metav.maven.pom/name]))
 
-(s/def ::gen-pom!-param (s/merge :metav/context
-                                 :metav.maven.pom/options))
-
 
 (defn ctxt->group-id [context]
   (:metav/project-name context))
@@ -70,6 +67,10 @@
                                                  :skip-whitespace true}))]
     (first (filter #(instance? Element %) (first roots)))))
 ;;----------------------------------------------------------------------------------------------------------------------
+(defn read-xml [path]
+  (with-open [rdr (-> path fs/file io/reader)]
+    (parse-xml rdr)))
+
 (defn update-element [xml-root xml-path v]
   (xml-update xml-root
               xml-path
@@ -91,11 +92,15 @@
 ;; rework of clojure.tools.deps.alpha.gen.pom/sync-pom
 (defn update-pom! [context]
   (let [pom-file-path (ctxt->pom-path context)
-        updated-pom (with-open [rdr (-> pom-file-path fs/file io/reader)]
-                      (-> rdr
-                          parse-xml
-                          (update-pom context)))]
-    (spit pom-file-path (xml/indent-str updated-pom))))
+        updated-pom (-> pom-file-path
+                        read-xml
+                        (update-pom context))]
+    (spit pom-file-path (xml/indent-str updated-pom))
+    (assoc context :metav.maven.pom/sync-path pom-file-path)))
+
+
+(s/def ::sync-pom!-param (s/merge :metav/context
+                                  :metav.maven.pom/options))
 
 
 (defn sync-pom! [context]
@@ -104,8 +109,7 @@
                           (as-> context
                                 (utils/ensure-key context :metav.maven/group-id (ctxt->group-id context))
                                 (utils/ensure-key context :metav.maven.pom/name (ctxt->pom-name context)))
-                          (->> (utils/check-spec :metav.maven.pom/options)))]
+                          (->> (utils/check-spec ::sync-pom!-param)))]
 
     (deps-pom/sync-pom project-deps (fs/file working-dir))
-    (update-pom! context)
-    context))
+    (update-pom! context)))
