@@ -70,7 +70,7 @@
   (let [res (gensym "res")]
     `(let [~res ~m
            ~@(apply concat (for [[k v] (partition 2 kvs)]
-                             `[~res (if (contains? ~m ~k)
+                             `[~res (if (contains? ~res ~k)
                                         ~res
                                         (assoc ~res ~k ~v))]))]
        ~res)))
