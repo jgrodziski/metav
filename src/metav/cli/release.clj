@@ -8,7 +8,7 @@
     [metav.cli.spit :as cli-spit]
     [metav.api :as api]))
 
-
+;; TODO: add pom generation as an option.
 (def cli-options
   (conj cli-spit/cli-options
         [nil "--without-sign" "Should the git tag used for release be signed with the current user's GPG key configured with git"
