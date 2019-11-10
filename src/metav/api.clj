@@ -3,10 +3,11 @@
     [clojure.spec.alpha          :as s]
     [clojure.data.json           :as json]
     [metav.utils                 :as utils]
-    [metav.domain.metadata         :as metadata]
     [metav.domain.context        :as context]
     [metav.domain.display        :as display]
     [metav.domain.git-operations :as git-ops]
+    [metav.domain.metadata       :as metadata]
+    [metav.domain.pom            :as pom]
     [metav.domain.release        :as release]
     [metav.domain.spit           :as spit]))
 
@@ -71,6 +72,12 @@
 (defn git-add-spitted! [context]
   (spit/git-add-spitted! context))
 
+;;----------------------------------------------------------------------------------------------------------------------
+;; Pom!
+;;----------------------------------------------------------------------------------------------------------------------
+
+(defn sync-pom! [context]
+  (pom/sync-pom! context))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; git!
@@ -103,4 +110,3 @@
   ([] (release! (make-context)))
   ([context]
    (release/release! context)))
-

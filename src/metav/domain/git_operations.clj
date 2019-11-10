@@ -6,7 +6,7 @@
     [metav.domain.metadata :as metadata]
     [metav.domain.git :as git]
     [metav.utils :as utils]
-    [metav.domain.context :as context]))
+    [metav.domain.context]))
 
 
 (s/def ::working-dir-present (s/keys :req [:metav/working-dir]))
