@@ -107,13 +107,15 @@
 (def status-codes #{"M" "A" "D" "R" "C" "U"})
 
 
-(defn assert-committed?
-  ([] (assert-committed? nil))
-  ([repo-dir]
-   (let [paths (git-short-status repo-dir)
-         uncommitted-pred #(re-find #"(M|A|D|R|C|U|\\?| )(M|A|D|R|C|U|\\?| ) .*" %)]
-     (when (some uncommitted-pred paths)
-       (throw (Exception. (str "Untracked or uncommitted changes in " repo-dir " git directory (as stated by 'git status command'). Please add/commit your change to get a clean repo.")))))))
+(defn committed? [repo-dir]
+  (let [paths (git-short-status repo-dir)
+        uncommitted-pred #(re-find #"(M|A|D|R|C|U|\\?| )(M|A|D|R|C|U|\\?| ) .*" %)]
+    (some uncommitted-pred paths)))
+
+
+(defn assert-committed? [repo-dir]
+  (when (committed? repo-dir)
+    (throw (Exception. (str "Untracked or uncommitted changes in " repo-dir " git directory (as stated by 'git status command'). Please add/commit your change to get a clean repo.")))))
 
 
 (defn latest-tag [repo-dir]
