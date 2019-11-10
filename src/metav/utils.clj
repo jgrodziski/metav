@@ -10,9 +10,6 @@
 (defn pwd []
   (str fs/*cwd*))
 
-(defn normalize-in-context [context path]
-  (fs/with-cwd (:metav/working-dir context)
-    (str (fs/normalized path))))
 
 (defn assoc-computed [context k f]
   (assoc context k (f context)))
@@ -46,6 +43,7 @@
    `(when-not ~x
       (throw (ex-info (str "Check failed: " ~message "\n" (pr-str '~x))
                       {:type :check-failed})))))
+
 
 (defn check-spec
   "Similar to `clojure.spec.alpha/assert` but always on."
