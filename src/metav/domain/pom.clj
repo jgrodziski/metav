@@ -8,6 +8,7 @@
     [clojure.tools.deps.alpha.gen.pom :as deps-pom]
     [clojure.zip :as zip]
     [me.raynes.fs :as fs]
+    [metav.domain.git :as git]
     [metav.utils :as utils])
   (:import [java.io Reader]
            [clojure.data.xml.node Element]))
@@ -113,3 +114,16 @@
 
     (deps-pom/sync-pom project-deps (fs/file working-dir))
     (update-pom! context)))
+
+
+(s/def ::git-add-pom!-param (s/keys :req [:metav/working-dir
+                                          :metav.maven.pom/sync-path]))
+
+
+(defn git-add-pom! [context]
+  (let [{working-dir :metav/working-dir
+         pom :metav.maven.pom/sync-path} context]
+    (-> context
+        (->> (utils/check-spec ::git-add-pom!-param))
+        (assoc :metav.maven.pom/git-add-pom-result
+               (git/add! working-dir pom)))))

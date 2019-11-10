@@ -6,10 +6,12 @@
    [metav.utils                 :as utils]
    [metav.domain.context        :as context]
    [metav.domain.git-operations :as git-ops]
+   [metav.domain.pom            :as pom]
+   [metav.domain.spit           :as spit]
    [metav.domain.version.common :as version]
    [metav.domain.version.semver :as semver]
-   [metav.domain.version.maven  :as maven]
-   [metav.domain.spit           :as spit]))
+   [metav.domain.version.maven  :as maven]))
+
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Release conf
@@ -17,10 +19,12 @@
 (def default-options
   #:metav.release{:level :patch
                   :spit false
+                  :pom? false
                   :without-push false})
 
 (s/def :metav.release/level (union semver/allowed-bumps maven/allowed-bumps))
 (s/def :metav.release/spit boolean?)
+(s/def :metav.release/pom? boolean?)
 (s/def :metav.release/without-push boolean?)
 
 
@@ -86,6 +90,19 @@
             spit? do-spits-and-commit!)))
 
 
+(defn sync-pom-and-commit! [context]
+  (-> context
+      pom/sync-pom!
+      pom/git-add-pom!
+      (git-ops/commit! "Synced and added pom.xml")))
+
+
+(defn maybe-sync-pom! [context]
+  (let [pom? (:metav.release/pom? context)]
+    (cond-> context
+            pom? sync-pom-and-commit!)))
+
+
 (defn maybe-push! [context]
   (let [without-push? (:metav.release/without-push context)]
     (cond-> context
@@ -119,6 +136,7 @@
       (utils/side-effect-from-context! log-bumped-data)
 
       maybe-spit!
+      maybe-sync-pom!
       git-ops/tag-repo!
       maybe-push!))
 
