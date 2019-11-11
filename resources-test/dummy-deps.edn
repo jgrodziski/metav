@@ -1,10 +1,12 @@
-{:paths [\"resources\" \"src\"]
- :deps {org.clojure/clojure {:mvn/version \"1.10.0\"}}
- :jvm-opts [\"-Djava.io.tmpdir=./tmp\"]
- :aliases {:artifact-name {:extra-deps {jgrodziski/metav {:git/url \"https://github.com/jgrodziski/metav\"
-                                                          :sha \"5c4059c96ffeb3b097399f14739be8b5eb2d48b8\"}}
-                           :main-opts [\"-m\" \"metav.display\"]}
-           :release {:extra-deps {jgrodziski/metav {:git/url \"https://github.com/jgrodziski/metav\"
-                                                    :sha \"5c4059c96ffeb3b097399f14739be8b5eb2d48b8\"}}
-                     :main-opts [\"-m\" \"metav.release\"]}
-           }}
+{:paths ["resources" "src"]
+ :deps {org.clojure/clojure {:mvn/version "1.10.0"}}
+
+ :jvm-opts ["-Djava.io.tmpdir=./tmp"]
+
+ :aliases {:artifact-name {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav"
+                                                          :sha "5c4059c96ffeb3b097399f14739be8b5eb2d48b8"}}
+                           :main-opts ["-m" "metav.display"]}
+           :release {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav"
+                                                    :sha "5c4059c96ffeb3b097399f14739be8b5eb2d48b8"}}
+                     :main-opts ["-m" "metav.release"]}}}
+

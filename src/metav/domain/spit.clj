@@ -5,8 +5,9 @@
    [me.raynes.fs :as fs]
    [cljstache.core :as cs]
    [metav.utils :as utils]
-   [metav.domain.common :as common]
-   ))
+   [metav.domain.metadata :as metadata]
+   [metav.domain.git :as git]))
+
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Spit conf
@@ -67,23 +68,23 @@
 
 (defmethod spit-file! :edn [context]
   (spit (::dest context)
-        (pr-str (common/metadata-as-edn context))))
+        (pr-str (metadata/metadata-as-edn context))))
 
 
 (defmethod spit-file! :json [context]
   (spit (::dest context)
-        (json/write-str (common/metadata-as-edn context))))
+        (json/write-str (metadata/metadata-as-edn context))))
 
 
 (defmethod spit-file! :template [context]
   (spit (::dest context)
         (cs/render-resource (:metav.spit/template context)
-                            (common/metadata-as-edn context))))
+                            (metadata/metadata-as-edn context))))
 
 
 (defmethod spit-file! :default [context];default are cljs,clj and cljc
   (spit (::dest context)
-        (common/metadata-as-code context)))
+        (metadata/metadata-as-code context)))
 
 
 (defn standard-spits [context]
@@ -91,8 +92,8 @@
          :metav.spit/keys [formats output-dir namespace]} context
         output-dir (fs/file working-dir output-dir)]
 
-    (assert (utils/ancestor? working-dir output-dir)
-            "Spitted files must be inside the repo.")
+    (utils/check (utils/ancestor? working-dir output-dir)
+                 "Spitted files must be inside the repo.")
 
     (mapv (fn [format]
             (assoc context
@@ -109,8 +110,8 @@
       (let [rendering-output (fs/with-cwd working-dir
                                (fs/normalized rendering-output))]
 
-        (assert (utils/ancestor? working-dir rendering-output)
-                "Rendered file must be inside the repo.")
+        (utils/check (utils/ancestor? working-dir rendering-output)
+                     "Rendered file must be inside the repo.")
 
         (conj spits (assoc context
                       ::dest rendering-output
@@ -118,14 +119,34 @@
 
 (defn spit-files! [ctxts]
   (into []
-        (comp (map (side-effect-from-ctxt ensure-dest!))
-           (map (side-effect-from-ctxt spit-file!))
-           (map ::dest)
-           (map str))
+        (comp
+          (map (side-effect-from-ctxt ensure-dest!))
+          (map (side-effect-from-ctxt spit-file!))
+          (map ::dest)
+          (map str))
         ctxts))
 
+
+(s/def ::spit!param (s/merge :metav/context
+                             :metav.spit/options))
+
 (defn spit! [context]
-  (s/assert :metav.spit/options context)
-  (let [spits (-> context standard-spits (add-template-spit context))]
+  (let [context (utils/merge&validate context
+                                      defaults-options
+                                      ::spit!param)
+        spits (-> context standard-spits (add-template-spit context))]
     (assoc context
            :metav.spit/spitted (spit-files! spits))))
+
+
+(s/def ::git-add-spitted!-param (s/keys :req [:metav/working-dir
+                                              :metav.spit/spitted]))
+
+
+(defn git-add-spitted! [context]
+  (let [{working-dir :metav/working-dir
+         spitted :metav.spit/spitted} context]
+    (-> context
+        (->> (utils/check-spec ::git-add-spitted!-param))
+        (assoc :metav.spit/add-spitted-result
+               (apply git/add! working-dir spitted)))))

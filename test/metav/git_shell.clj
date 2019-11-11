@@ -5,8 +5,8 @@
             [clojure.test :as t]
             [clojure.java.shell :as shell]
             [clojure.tools.logging :as log]
-            [me.raynes.fs :as fs]
-            ))
+            [me.raynes.fs :as fs]))
+
 
 
 (defn pwd
@@ -45,7 +45,7 @@
        (shell/with-sh-env GIT_ENV ~@body dir#))))
 
 
-(def deps-edn (slurp (io/resource "dummy-deps.edn")))
+(def deps-edn-path (-> "dummy-deps.edn" io/resource io/file str))
 
 
 (defn sh [command]
@@ -81,7 +81,13 @@
 
 (defn write-dummy-deps-edn-in! [& dirs]
   (apply mkdir-p! dirs)
-  (let [command (str "echo \"" deps-edn "\" >> " (apply str (interpose "/" dirs)) (when dirs "/") "deps.edn")]
+  (let [dest (fs/with-cwd shell/*sh-dir*
+               (-> dirs
+                   vec
+                   (conj "deps.edn")
+                   (->> (apply fs/file))
+                   str))
+        command (str "cp " deps-edn-path " " dest)]
     ;(log/debug "will execute: "command)
     (sh command)))
 

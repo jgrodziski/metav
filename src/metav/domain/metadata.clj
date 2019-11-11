@@ -1,25 +1,10 @@
-(ns metav.domain.common
+(ns metav.domain.metadata
   (:require
-   [clojure.string :as string]
-   [metav.utils :as utils]
-   [metav.domain.context :as context]
-   [metav.domain.version.common :as version])
+   [clojure.string :as string])
   (:import [java.util Date TimeZone]
            [java.text SimpleDateFormat]))
 
-
-(defn new-version [context]
-  (let [{current-version :metav/version
-         level :metav.release/level} context]
-    (version/bump current-version level)))
-
-
-(defn bump-context [context]
-  (-> context
-      (utils/assoc-computed :metav/version new-version)
-      (utils/assoc-computed :metav/tag context/tag)))
-
-
+;; TODO: rename this ns to metadata
 (defn iso-now []
   (let [tz (TimeZone/getTimeZone "UTC")
         df (SimpleDateFormat. "yyyy-MM-dd'T'HH:mm:ss'Z'")]
