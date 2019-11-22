@@ -32,7 +32,7 @@
         "  - assert the command is invoked with a deps.edn in the working directory"
         "  - assert everything is committed (no untracked or uncommitted files)."
         "  - bump the version"
-        "  - [optional: spit and commit the version metadata (module-name, tag, version, sha, timestamp) in file(s)]"
+        "  - [optional: spit and commit the version metadata (module-name, tag, version, sha, timestamp) in file(s), generate pom file]"
         "  - tag the repo with the version prefixed by the module-name in cas of a monorepo"
         "  - push everything"
         ""

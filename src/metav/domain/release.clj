@@ -81,7 +81,7 @@
     (-> bumped-context
         (spit/spit!)
         (spit/git-add-spitted!)
-        (git-ops/commit! (format "Bump module %s to version %s and spit/render related metadata in file(s)." artefact-name version)))))
+        (git-ops/commit! (format "Bump %s to %s and spit metadata" artefact-name version)))))
 
 
 (defn maybe-spit! [context]

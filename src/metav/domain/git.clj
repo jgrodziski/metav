@@ -115,7 +115,9 @@
 
 (defn assert-committed? [repo-dir]
   (when (committed? repo-dir)
-    (throw (Exception. (str "Untracked or uncommitted changes in " repo-dir " git directory (as stated by 'git status command'). Please add/commit your change to get a clean repo.")))))
+    (let [error-msg-uncommitted (str "Untracked or uncommitted changes in " repo-dir " git directory (as stated by 'git status command'). Please add/commit your change to get a clean repo.")]
+      (log/error error-msg-uncommitted)
+      (throw (Exception. error-msg-uncommitted)))))
 
 
 (defn latest-tag [repo-dir]
