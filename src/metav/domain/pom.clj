@@ -24,7 +24,8 @@
 
 
 (defn ctxt->group-id [context]
-  (:metav/project-name context))
+  "com.atomist"
+  #_(:metav/project-name context))
 
 
 (defn ctxt->pom-name [context]
