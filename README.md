@@ -43,7 +43,7 @@ Metav is a library that cleanly version Clojure projects based on git tags and h
 
 # Installation
 
-Latest version: 1.6.2
+Latest version: 1.6.2 see the (CHANGELOG)[https://github.com/jgrodziski/metav/blob/master/CHANGELOG.md].
 
 [deps.edn](https://clojure.org/guides/deps_and_cli) dependency information:
 ```
