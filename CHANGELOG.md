@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file. 
 This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
+# [1.6.2] - 2020-02-18
+
+Add explicit behavior for spit
+See (Issue 14)[https://github.com/jgrodziski/metav/issues/14]
+
 # [1.6.1] - 2019-10-28
 
 Refactor to provide a clean api to facilitate using metav within code and REPL, spec for options of operations.
