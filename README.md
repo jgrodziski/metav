@@ -334,6 +334,6 @@ and of course the [release task of lein](https://github.com/technomancy/leininge
 
 # License
 
-Copyright © 2019 Jeremie Grodziski
+Copyright © 2020 Jeremie Grodziski
 
 Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.
