@@ -10,8 +10,7 @@
   ([path]
    (api/make-context {:metav/working-dir path}))
   ([path opts]
-   (api/make-context (assoc opts
-                         :metav/working-dir path))))
+   (api/make-context (assoc opts :metav/working-dir path))))
 
 (defmacro with-repo [n & body]
   `(let [~n (gs/shell! (gs/init!))]

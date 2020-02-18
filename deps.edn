@@ -13,7 +13,7 @@
                  :extra-deps {org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version"2.12.1"}
                               org.apache.logging.log4j/log4j-core {:mvn/version "2.12.1"}}}
            :test {:extra-paths ["test" "resources-test"]
-                  :extra-deps {org.clojure/test.check {:mvn/version "RELEASE"}
+                  :extra-deps {org.clojure/test.check {:mvn/version "0.10.0"}
                                lambdaisland/kaocha {:mvn/version "0.0-389"}
                                metosin/testit {:mvn/version "0.4.0"}
                                pjstadig/humane-test-output {:mvn/version "0.9.0"}}}

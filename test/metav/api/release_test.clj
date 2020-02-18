@@ -23,24 +23,21 @@
 (deftest release-repo
   (testing "bump from a clean tagged repo, testing the spitted files"
     (test-utils/with-example-monorepo m
-      (let [{:keys [monorepo modules]} m
-            {moduleA1 :A1} modules
-
-            options {:metav.git/without-sign true
-                     :metav.release/pom      true
-                     :metav.release/spit     true
-                     :metav.spit/output-dir  "resources"
-                     :metav.spit/namespace   "metav.meta"
-                     :metav.spit/formats     #{:edn :clj :json}}
-            ctxt-A1 (test-utils/make-context moduleA1 options)
-            ctxt-after-release (api/release! ctxt-A1)
-
+      (let [{:keys [monorepo modules]}     m
+            {moduleA1 :A1}                 modules
+            options                        {:metav.git/without-sign true
+                                            :metav.release/pom      true
+                                            :metav.release/spit     true
+                                            :metav.spit/output-dir  "resources"
+                                            :metav.spit/namespace   "metav.meta"
+                                            :metav.spit/formats     #{:edn :clj :json}}
+            ctxt-A1                        (test-utils/make-context moduleA1 options)
+            ctxt-after-release             (api/release! ctxt-A1)
             {bumped-version :metav/version
              bumped-tag :metav/tag
              prefix :metav/version-prefix} ctxt-after-release
-
-            [scm-base] (git/working-copy-description moduleA1 :prefix prefix)
-            tag-verify (git/tag-verify monorepo bumped-tag)]
+            [scm-base]                     (git/working-copy-description moduleA1 :prefix prefix)
+            tag-verify                     (git/tag-verify monorepo bumped-tag)]
 
         (pom-test/test-pom ctxt-after-release)
 
@@ -120,4 +117,4 @@
             (:bumped-tag release4) => "sysA-container2-2.0.0"
             (:metadata release4)   => truthy))))))
 
-(release-repo)
+;(release-repo)
