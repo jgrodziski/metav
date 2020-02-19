@@ -43,31 +43,31 @@ Metav is a library that cleanly version Clojure projects based on git tags and h
 
 # Installation
 
-Latest version: 1.6.2 see the [CHANGELOG](https://github.com/jgrodziski/metav/blob/master/CHANGELOG.md).
+Latest version: 1.6.3 see the [CHANGELOG](https://github.com/jgrodziski/metav/blob/master/CHANGELOG.md).
 
 [deps.edn](https://clojure.org/guides/deps_and_cli) dependency information:
 ```
-{metav {:mvn/version "1.6.2"}}
+{metav {:mvn/version "1.6.3"}}
 ```
 
 Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several alias in your `deps.edn` for each main task (display, spit, release) like this with git ref:
 
 ```clojure
-{:aliases {:metav {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "42ed18317ec843813e5084b4a4b616eb03e9679e"}}}
-           :artifact-name {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "42ed18317ec843813e5084b4a4b616eb03e9679e"}}
+{:aliases {:metav {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "e4c322d4f89358cba3d16bab430fb01b2bf192c7"}}}
+           :artifact-name {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "e4c322d4f89358cba3d16bab430fb01b2bf192c7"}}
                            :main-opts ["-m" "metav.display"]}
-           :release {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "42ed18317ec843813e5084b4a4b616eb03e9679e"}}
+           :release {:extra-deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "e4c322d4f89358cba3d16bab430fb01b2bf192c7"}}
                      :main-opts ["-m" "metav.release"]}}}
 ```
 
-Or using the clojars version `{metav {:mvn/version "1.5.2"}}` or use `{metav {:mvn/version "LATEST"}}` to always living on the edge:
+Or using the clojars version `{metav {:mvn/version "1.6.3"}}` :
 ```clojure
 {:aliases {:metav {:extra-deps {metav {:mvn/version "LATEST"}}}
-           :artifact-name {:extra-deps {metav {:mvn/version "LATEST"}}
+           :artifact-name {:extra-deps {metav {:mvn/version "1.6.3"}}
                            :main-opts ["-m" "metav.display"]}
-           :release {:extra-deps {metav {:mvn/version "LATEST"}}
+           :release {:extra-deps {metav {:mvn/version "1.6.3"}}
                      :main-opts ["-m" "metav.release"]}
-           :spit     {:extra-deps {metav {:mvn/version "LATEST"}}
+           :spit     {:extra-deps {metav {:mvn/version "1.6.3"}}
                       :main-opts ["-m" "metav.spit"
                                   "--output-dir" "src"
                                   "--namespace" "yournamespace.meta"
@@ -80,7 +80,7 @@ Or using the clojars version `{metav {:mvn/version "1.5.2"}}` or use `{metav {:m
 
 One liner:
 ```
-clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha "42ed18317ec843813e5084b4a4b616eb03e9679e"}}}' -m metav.display
+clj -Sdeps '{:deps {jgrodziski/metav {:git/url "https://github.com/jgrodziski/metav.git" :sha  "e4c322d4f89358cba3d16bab430fb01b2bf192c7"}}}' -m metav.display
 ```
 
 If you've installed Metav's dependency in `deps.edn` like in the above Installation section, just run:
