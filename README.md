@@ -62,7 +62,7 @@ Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several ali
 
 Or using the clojars version `{metav {:mvn/version "1.6.3"}}` :
 ```clojure
-{:aliases {:metav {:extra-deps {metav {:mvn/version "LATEST"}}}
+{:aliases {:metav {:extra-deps {metav {:mvn/version "1.6.3"}}}
            :artifact-name {:extra-deps {metav {:mvn/version "1.6.3"}}
                            :main-opts ["-m" "metav.display"]}
            :release {:extra-deps {metav {:mvn/version "1.6.3"}}
