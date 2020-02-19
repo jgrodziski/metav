@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file. 
 This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
+# [1.6.3] - 2020-02-19
+
+Bump clojure.tools.deps.alpha to latest version to fix bug during reading deps.edn in user project
+
 # [1.6.2] - 2020-02-18
 
 Add explicit behavior for spit
