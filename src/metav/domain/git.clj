@@ -164,7 +164,7 @@
 
 
 (defn push!
-  ([repo-dir] (git-in-dir repo-dir "push")))
+  ([repo-dir] (git-in-dir repo-dir "push" "--tags")))
 
 
 (defn git-dir-opt [repo-dir]
