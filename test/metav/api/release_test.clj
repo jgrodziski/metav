@@ -1,6 +1,6 @@
 (ns metav.api.release-test
   (:require
-    [clojure.test :as test :refer [deftest testing]]
+    [clojure.test :as test :refer [deftest testing is]]
     [testit.core :refer :all]
     [me.raynes.fs :as fs]
 
@@ -36,16 +36,17 @@
             {bumped-version :metav/version
              bumped-tag :metav/tag
              prefix :metav/version-prefix} ctxt-after-release
-            [scm-base]                     (git/working-copy-description moduleA1 :prefix prefix)
-            tag-verify                     (git/tag-verify monorepo bumped-tag)]
+            [scm-base]                     (git/working-copy-description moduleA1 :prefix prefix)]
 
         (pom-test/test-pom ctxt-after-release)
-
+        (is (thrown? clojure.lang.ExceptionInfo (git/tag-verify monorepo bumped-tag)))
+ 
+        ;;(ex-info? (str "Can't verify tag " bumped-tag " with GPG signature in directory " moduleA1)
+        ;;{:working-dir moduleA1 :tag bumped-tag :result nil})
         (facts
           (str bumped-version) => "1.3.5"
           scm-base => "1.3.5"
           bumped-tag =>   "sysA-container1-1.3.5"
-          (:exit tag-verify) => 1
           (fs/exists? (str moduleA1 "/resources/metav/meta.edn")) => true
           (fs/exists? (str moduleA1 "/resources/metav/meta.clj")) => true
           (fs/exists? (str moduleA1 "/resources/metav/meta.json")) => true))))
@@ -56,7 +57,7 @@
             {moduleA2 :A2} modules
 
             general-option {:metav.spit/formats         #{:edn}
-                            :metav.git/without-sign     true
+                            :metav.git/without-sign     false
                             :metav.release/level        :patch
                             :metav.release/spit         true
                             :metav.release/pom          true

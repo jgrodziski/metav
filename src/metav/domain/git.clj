@@ -133,14 +133,14 @@
                                                 "--always")))
 
 
-(defn tag!
-  ([repo-dir tag metadata & {:keys [sign] :or {sign "--sign"}}]
-   (apply git-in-dir repo-dir (filter identity ["tag" sign "--annotate"
-                                                "--message" metadata tag]))))
+(defn tag! [repo-dir tag metadata & {:keys [sign] :or {sign "--sign"}}]
+  ;;tagging with git returns nothing in the std out, there is somethin only in case of failure
+  (let [result (apply git-in-dir repo-dir (filter identity ["tag" sign "--annotate" "--message" metadata tag]))]
+    (when (and result (map? result) (:exit result) (not (zero? (:exit result))))
+      (throw (ex-info "Failure when trying to tag repository" {:tag tag :metadata metadata :sign? sign :repo-dir repo-dir :result result})))))
 
 
-(defn add!
-  [repo-dir & paths]
+(defn add! [repo-dir & paths]
   (apply git-in-dir repo-dir "add" paths))
 
 
@@ -188,7 +188,10 @@
 
 
 (defn tag-verify [working-dir tag]
-  (git-in-dir working-dir "tag" "-v" tag))
+  (let [result (git-in-dir working-dir "tag" "-v" tag)]
+    (if (and result (map? result) (:exit result) (not (zero? (:exit result))))
+      (throw (ex-info (str "Can't verify tag " tag " with GPG signature in directory " working-dir) {:working-dir working-dir :tag tag :result result}))
+      result)))
 
 
 (defn last-sha [working-dir]
