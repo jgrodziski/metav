@@ -13,9 +13,8 @@
 (deftest release-with-cli
   (testing "Major release with cli and without signature."
     (test-utils/with-example-monorepo m
-      (let [{:keys [modules monorepo]} m
+      (let [{:keys [modules monorepo remote]} m
             {:keys [p2]} modules]
-
         (gs/shell-in-dir! p2
           (gs/write-dummy-file-in! p2 "src")
           (gs/add!)
@@ -35,13 +34,16 @@
                  prefix         :metav/version-prefix
                  :as ctxt-after-release} (:ret release-res)
                 [scm-base] (git/working-copy-description p2 :prefix prefix)
-                metadata (git/tag-message monorepo bumped-tag)]
+                metadata (git/tag-message monorepo bumped-tag)
+                remote-tags (git/list-remote-tags remote)
+                tag (str (fs/base-name monorepo) "-project2-2.0.0")]
             (pom-test/test-pom ctxt-after-release)
             (facts
               (str bumped-version) => "2.0.0"
               scm-base => "2.0.0"
-              bumped-tag => (str (fs/base-name monorepo) "-project2-2.0.0")
+              bumped-tag => tag
               metadata => truthy
+              (get remote-tags tag) => truthy
               (fs/exists? (fs/file p2 "resources" "meta.edn")) => true))))))
   (testing "Minor release with cli and with signature."
     (test-utils/with-example-monorepo m
@@ -77,3 +79,4 @@
               tag-verify => truthy
               metadata => truthy
               (fs/exists? (fs/file p2 "resources" "meta.edn")) => true)))))))
+

@@ -121,7 +121,7 @@
 
   Returns the context passed as parameter with the keys `:metav/version` and `:metav/tag`
   updated to reflect the git state after release. If the release performed a git
-  push, the result of the push is found under the key `:metav.release/push-result`.
+  push, metav push the commits and tags in two successive push, the result of the pushs are found under the key `:metav.release/push-results`.
   If the release spited metadata, the paths of the spitted files can be found
   under the key `:metav.spit/spitted`.
   "

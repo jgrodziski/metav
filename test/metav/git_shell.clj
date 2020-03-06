@@ -7,13 +7,10 @@
             [clojure.tools.logging :as log]
             [me.raynes.fs :as fs]))
 
-
-
 (defn pwd
   "return working dir of the JVM (cannot be changed once JVM is started)"
   []
   (.getCanonicalFile (clojure.java.io/file ".")))
-
 
 (def GIT_ENV {"GIT_AUTHOR_NAME" "Test User"
               "GIT_AUTHOR_EMAIL" "user@domain.com"
@@ -22,13 +19,11 @@
               "GIT_COMMITTER_EMAIL" "user@domain.com"
               "GIT_COMMITTER_DATE" "2019-01-16T22:22:22"})
 
-
 (defn repo-temp-dir []
   (Files/createTempDirectory
    (.toPath (io/as-file (System/getProperty "java.io.tmpdir")))
    "repo"
    (into-array java.nio.file.attribute.FileAttribute [])))
-
 
 (defmacro shell!
   [& body]
@@ -94,12 +89,21 @@
 
 (defn add! [] (sh "git add ."))
 
+(defn remote-add! [remote-name remote-dir] (sh (format "git remote add %s %s" remote-name remote-dir)))
 
 (defn commit! [] (sh "git commit -m \"Commit\" --allow-empty"))
 
 
 (defn tag! [t] (sh (format "git tag -a -m \"R %s\" %s" t t)))
 
+(defn list-remote-tags "Return a map of tag to ref" [remote]
+  (let [lines (-> (sh (format "git ls-remote --tags %s" remote))
+                   :out
+                   clojure.string/split-lines)]
+    (into {} (map (fn [line]
+                    (let [[ref tag] (clojure.string/split line #"\s+")]
+                      [(subs tag 10) ref]))
+                  lines))))
 
 (defn clone! [url] (sh (str "git clone " url " .")))
 

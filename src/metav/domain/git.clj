@@ -164,7 +164,9 @@
 
 
 (defn push!
-  ([repo-dir] (git-in-dir repo-dir "push" "--tags")))
+  ([repo-dir]
+   (git-in-dir repo-dir "push"))
+  ([repo-dir tag] (git-in-dir repo-dir "push" "origin" tag)))
 
 
 (defn git-dir-opt [repo-dir]
@@ -193,6 +195,13 @@
       (throw (ex-info (str "Can't verify tag " tag " with GPG signature in directory " working-dir) {:working-dir working-dir :tag tag :result result}))
       result)))
 
+(defn list-remote-tags [remote]
+  (when remote
+    (let [lines (git-command "ls-remote" "--tags" remote)]
+      (into {} (map (fn [line]
+                      (let [[ref tag] (clojure.string/split line #"\s+")]
+                        [(subs tag 10) ref]))
+                    lines)))))
 
 (defn last-sha [working-dir]
   (first (git-in-dir working-dir "rev-parse" "HEAD")))

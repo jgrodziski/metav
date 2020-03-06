@@ -12,12 +12,15 @@
   ([path opts]
    (api/make-context (assoc opts :metav/working-dir path))))
 
-(defmacro with-repo [n & body]
-  `(let [~n (gs/shell! (gs/init!))]
+(defmacro with-repo [repo-dir & body]
+  `(let [~repo-dir (gs/shell! (gs/init!))
+         remote-dir# (gs/init-bare!)]
      (try
+       (gs/remote-add! "origin" remote-dir#)
        ~@body
        (finally
-         (fs/delete-dir ~n)))))
+         (fs/delete-dir ~repo-dir)
+         (fs/delete-dir remote-dir#)))))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Dedicated repo stuff
