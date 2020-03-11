@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file. 
 This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
+# [1.6.7] - 2020-03-06
+
+Fix bad git push command that send a `git push --tags` that was inappropriate and can mess up the git repo. Now issue a git push for the commit and only push the correct annotated tag of the release instead of all tags.
+
 # [1.6.6] - 2020-02-27
 
 Fix silent error when failure while tagging during release
