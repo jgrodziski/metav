@@ -43,11 +43,11 @@ Metav is a library that cleanly version Clojure projects based on git tags and h
 
 # Installation
 
-Latest version: 1.6.6 see the [CHANGELOG](https://github.com/jgrodziski/metav/blob/master/CHANGELOG.md).
+Latest version: 1.6.7 see the [CHANGELOG](https://github.com/jgrodziski/metav/blob/master/CHANGELOG.md).
 
 [deps.edn](https://clojure.org/guides/deps_and_cli) dependency information:
 ```
-{metav {:mvn/version "1.6.6"}}
+{metav {:mvn/version "1.6.7"}}
 ```
 
 Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several alias in your `deps.edn` for each main task (display, spit, release) like this with git ref:
@@ -60,14 +60,14 @@ Using [tools.deps](https://github.com/clojure/tools.deps.alpha), add several ali
                      :main-opts ["-m" "metav.release"]}}}
 ```
 
-Or using the clojars version `{metav {:mvn/version "1.6.6"}}` :
+Or using the clojars version `{metav {:mvn/version "1.6.7"}}` :
 ```clojure
-{:aliases {:metav {:extra-deps {metav {:mvn/version "1.6.6"}}}
-           :artifact-name {:extra-deps {metav {:mvn/version "1.6.6"}}
+{:aliases {:metav {:extra-deps {metav {:mvn/version "1.6.7"}}}
+           :artifact-name {:extra-deps {metav {:mvn/version "1.6.7"}}
                            :main-opts ["-m" "metav.display"]}
-           :release {:extra-deps {metav {:mvn/version "1.6.6"}}
+           :release {:extra-deps {metav {:mvn/version "1.6.7"}}
                      :main-opts ["-m" "metav.release"]}
-           :spit     {:extra-deps {metav {:mvn/version "1.6.6"}}
+           :spit     {:extra-deps {metav {:mvn/version "1.6.7"}}
                       :main-opts ["-m" "metav.spit"
                                   "--output-dir" "src"
                                   "--namespace" "yournamespace.meta"
