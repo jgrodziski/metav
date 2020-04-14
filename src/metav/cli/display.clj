@@ -31,7 +31,7 @@
   (cli-common/make-validate-args cli-options usage))
 
 
-(defn perform! [context]
+(defn display [context]
   (let [{:metav/keys [module-name-override artefact-name]} context
         output-format (:metav.display/output-format context)]
     (log/debug "Display artifact name and version in format " output-format
@@ -40,9 +40,7 @@
     (api/display context)))
 
 
-(def main* (cli-common/make-main
-             validate-args
-             perform!))
+(def main* (cli-common/make-main validate-args display))
 
 
 (comment

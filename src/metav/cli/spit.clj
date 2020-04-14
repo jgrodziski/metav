@@ -28,6 +28,10 @@
         ["-n" "--namespace NS" "Namespace used in code output"
          :id :metav.spit/namespace]
 
+        ["-p" "--pom" "Indicates the spit/release process should update (or create) the pom.xml file for the project"
+         :id :metav.spit/pom
+         :default-desc "false"]
+
         ["-f" "--formats FORMATS" "Comma-separated list of output formats (clj, cljc, cljs, edn, json)"
          :id :metav.spit/formats
          :parse-fn parse-formats
@@ -61,26 +65,19 @@
        (string/join \newline)))
 
 
-(def validate-args
-  (cli-common/make-validate-args cli-options
-                                   usage))
+(def validate-args (cli-common/make-validate-args cli-options usage))
 
-(defn perform! [context]
+(defn spit! [context]
   (when (:metav.cli/verbose? context)
     (-> context api/metadata-as-edn json/write-str print))
   (api/spit! context))
 
-
-(def main* (cli-common/make-main
-             validate-args
-             perform!))
+(def main* (cli-common/make-main validate-args spit!))
 
 (comment
   (main* "-c" "resources-test/example-conf.edn"
          "-f" "cljc, json, edn"
          "-n" "metav.meta"
          "-t" "mustache-template.txt"))
-
-
 
 (def main (cli-common/wrap-exit main*))

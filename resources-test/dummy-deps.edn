@@ -1,4 +1,4 @@
-{:paths ["resources" "src"]
+{:paths ["src" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.10.0"}}
 
  :jvm-opts ["-Djava.io.tmpdir=./tmp"]

@@ -6,29 +6,28 @@
    [cljstache.core :as cs]
    [metav.utils :as utils]
    [metav.domain.metadata :as metadata]
-   [metav.domain.git :as git]))
-
+   [metav.domain.git :as git]
+   [metav.domain.git-operations :as git-ops]
+   [metav.domain.pom :as pom]))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Spit conf
 ;;----------------------------------------------------------------------------------------------------------------------
-(def defaults-options
-  #:metav.spit{:output-dir "resources"
-               :namespace  "meta"
-               :formats    #{}})
+(def defaults-options #:metav.spit{:output-dir "resources" :namespace "meta" :formats #{}})
 
-(s/def :metav.spit/output-dir ::utils/non-empty-str)
-(s/def :metav.spit/namespace string?)
-(s/def :metav.spit/formats (s/coll-of #{:clj :cljc :cljs :edn :json} :kind set?))
-(s/def :metav.spit/template ::utils/resource-path)
+(s/def :metav.spit/output-dir       ::utils/non-empty-str)
+(s/def :metav.spit/namespace        string?)
+(s/def :metav.spit/formats          (s/coll-of #{:clj :cljc :cljs :edn :json} :kind set?))
+(s/def :metav.spit/template         ::utils/resource-path)
 (s/def :metav.spit/rendering-output ::utils/non-empty-str)
+(s/def :metav.spit/pom              boolean?)
 
-(s/def :metav.spit/options
-  (s/keys :opt [:metav.spit/output-dir
-                :metav.spit/namespace
-                :metav.spit/formats
-                :metav.spit/template
-                :metav.spit/rendering-output]))
+(s/def :metav.spit/options (s/keys :opt [:metav.spit/output-dir
+                                         :metav.spit/namespace
+                                         :metav.spit/formats
+                                         :metav.spit/template
+                                         :metav.spit/rendering-output
+                                         :metav.spit/pom]))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Spit functionality
@@ -43,12 +42,10 @@
 (defn ensure-dest! [context]
   (ensure-dir! (::dest context)))
 
-
 (defn run [f!]
-  (fn [c]
-    (f! c)
-    c))
-
+  (fn [x]
+    (f! x)
+    x))
 
 (defn add-extension [path ext]
   (let [path (fs/normalized path)]
@@ -124,29 +121,42 @@
             (map ::dest)
             (map str)) spits))
 
+(defn sync-pom-and-commit! [context]
+  (-> context
+      pom/sync-pom!
+      pom/git-add-pom!
+      (git-ops/commit! "Synced and added pom.xml")))
 
-(s/def ::spit!param (s/merge :metav/context
-                             :metav.spit/options))
+
+(defn maybe-sync-pom! [context]
+  (let [pom? (:metav.spit/pom context)]
+    (cond-> context
+      pom? sync-pom-and-commit!)))
+
+
+(s/def ::spit!param (s/merge :metav/context :metav.spit/options))
 
 (defn spit!
   "spit data and rendered template in files, return a map with keys {:data {:edn edn-file :json json-file ...} :rendered-template rendered-file}"
   [context]
-  (let [context (utils/merge&validate context defaults-options ::spit!param)
-        spitted-data (into {} (map spit-file! (data-spits context)))
+  (let [context               (utils/merge&validate context defaults-options ::spit!param)
+        spitted-data          (into {} (map spit-file! (data-spits context)))
         spitted-rendered-file (spit-file! (template-spit context))
-        spitted-result (cond-> {}
-                         (not-empty spitted-data) (assoc :data spitted-data)
-                         spitted-rendered-file (assoc :template spitted-rendered-file))]
-    (assoc context :metav.spit/spitted spitted-result)))
+        spitted-pom-context   (when (:metav.spit/pom context) (pom/sync-pom! context))
+        spitted-result        (cond-> {}
+                                      (not-empty spitted-data) (assoc :data spitted-data)
+                                      spitted-pom-context      (assoc :pom-file-path (:metav.maven.pom/pom-file-path spitted-pom-context))
+                                      spitted-rendered-file    (assoc :template spitted-rendered-file))]
+    (-> context
+        (merge spitted-pom-context)
+        (assoc :metav.spit/spitted spitted-result))))
 
 (s/def :metav.spit/spitted map?)
-(s/def ::git-add-spitted!-param (s/keys :req [:metav/working-dir
-                                              :metav.spit/spitted]))
+(s/def ::git-add-spitted!-param (s/keys :req [:metav/working-dir :metav.spit/spitted]))
 
 (defn git-add-spitted! [context]
   (utils/check-spec ::git-add-spitted!-param context)
-  (let [{working-dir :metav/working-dir
-         spitted     :metav.spit/spitted} context
-        spitted-files  (map str (filter identity (conj (vals (:data spitted)) (:rendered-file (:template spitted)))))
+  (let [{working-dir :metav/working-dir spitted :metav.spit/spitted} context
+        spitted-files      (map str (filter identity (conj  (vals (:data spitted)) (:rendered-file (:template spitted)) (:pom-file-path spitted))))
         add-spitted-result (apply git/add! working-dir spitted-files)]
     (assoc context :metav.spit/add-spitted-result add-spitted-result)))

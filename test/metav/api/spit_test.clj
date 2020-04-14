@@ -76,16 +76,18 @@
       (test-utils/prepare-base-repo! repo)
       (let [context (test-utils/make-context repo {:metav.spit/namespace        "metav.vfile"
                                                    :metav.spit/template         "mustache-template.txt"
+                                                   :metav.spit/pom              true
                                                    :metav.spit/rendering-output "resources/rendered.txt"
                                                    :metav.spit/formats          #{:edn :json :cljs :clj} })
-            {:keys [data template] :as spitted-result} (:metav.spit/spitted (api/spit! context))]
+            {:keys [pom-file-path data template] :as spitted-result} (:metav.spit/spitted (api/spit! context))]
         (facts
-         (fs/exists? (:edn  data))                 => truthy
-         (fs/exists? (:json data))                 => truthy
-         (fs/exists? (:cljs data))                 => truthy
-         (fs/exists? (:clj  data))                 => truthy
-         (fs/exists? (:rendered-file template))    => truthy
-         (utils/ancestor? repo (:rendered-file template))  => truthy))))
+         (fs/exists? pom-file-path)                       => truthy
+         (fs/exists? (:edn  data))                        => truthy
+         (fs/exists? (:json data))                        => truthy
+         (fs/exists? (:cljs data))                        => truthy
+         (fs/exists? (:clj  data))                        => truthy
+         (fs/exists? (:rendered-file template))           => truthy
+         (utils/ancestor? repo (:rendered-file template)) => truthy))))
 
   (testing "Spitting with only a template parameters should render the template and not spitting the data files unless explicitly given in the inputs"
     (test-utils/with-repo repo
@@ -93,8 +95,9 @@
       (let [context (test-utils/make-context repo {:metav.spit/namespace        "metav.vfile"
                                                    :metav.spit/template         "mustache-template.txt"
                                                    :metav.spit/rendering-output "resources/rendered.txt"})
-            {:keys [data template] :as spitted-result} (:metav.spit/spitted (api/spit! context))]
+            {:keys [pom-file-path data template] :as spitted-result} (:metav.spit/spitted (api/spit! context))]
         (facts
+         (fs/exists? pom-file-path)                       => falsey
          (fs/exists? (:edn data))                         => falsey
          (fs/exists? (:rendered-file template))           => truthy
          (utils/ancestor? repo (:rendered-file template)) => truthy)))))

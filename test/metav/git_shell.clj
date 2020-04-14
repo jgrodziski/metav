@@ -28,10 +28,10 @@
 (defmacro shell!
   [& body]
   `(let [tmpdir# (repo-temp-dir)]
-     (shell/with-sh-dir (str tmpdir#)
-       (shell/with-sh-env GIT_ENV
-         ~@body
-         (str tmpdir#)))))
+       (shell/with-sh-dir (str tmpdir#)
+         (shell/with-sh-env GIT_ENV
+           ~@body
+           (str tmpdir#)))))
 
 
 (defmacro shell-in-dir! [dir & body]
@@ -46,7 +46,7 @@
 (defn sh [command]
   (assert shell/*sh-dir* "Can't run commands without a specified directory.")
   (let [result (shell/sh "/bin/bash" "-c" command)]
-     (assert (->  result :exit zero?) (:err result))
+     (assert (-> result :exit zero?) (:err result))
      result))
 
 
@@ -56,9 +56,14 @@
   (println (:out (sh cmd))))
 
 
-(defn init! [] (sh "git init"))
-(defn init-bare! [] (sh "git init --bare"))
+(defn init! []  (sh "git init"))
+(defn init-bare! []  (sh "git init --bare"))
 
+(defn clone!
+  ([url]
+   (clone! url "."))
+  ([url clone-dir]
+   (sh (str "git clone " url " " clone-dir))))
 
 (defn mkdir-p!
   "create a bunch of dirs all at the same time"
@@ -105,7 +110,6 @@
                       [(subs tag 10) ref]))
                   lines))))
 
-(defn clone! [url] (sh (str "git clone " url " .")))
 
 
 (defn- current-branch []
@@ -113,14 +117,22 @@
       :out
       (clojure.string/replace "\n" "")))
 
+(defn- current-branch2 []
+  (:out (sh "git rev-parse --abbrev-ref HEAD -- .")))
 
 (defn remote-add! [name url]
-  (let [current-branch (current-branch)
+  (let [current-branch (or (current-branch) "master")
         add (format "git remote add %s %s" name url)
-        track (format "git branch -u %s/%s" name current-branch)]
+        track (format "git branch --set-upstream-to=%s/%s %s" name current-branch current-branch)]
     (sh add)
-    (sh track)))
+   ; (sh track)
+    ))
 
+(defn checkout!
+  ([branch-name]
+   (sh (format "git checkout -b %s" branch-name)))
+  ([branch-name remote-branch-name]
+   (sh (format "git checkout -t -b %s %s" branch-name remote-branch-name))))
 
 (defn dirty! [] (sh "echo \"Hello\" >> x && git add x"))
 

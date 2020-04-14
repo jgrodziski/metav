@@ -17,9 +17,6 @@
         [nil "--spit" "Indicates the release process should spit the metadata file as with the \"spit\" task, in that case the spit options must be provided"
          :id :metav.release/spit
          :default-desc "false"]
-        [nil "--pom" "Indicates the release process should update (or create) a pom.xml file for the project."
-         :id :metav.release/pom
-         :default-desc "false"]
         ["-w" "--without-push" "Execute the release process but without pushing at the end, if you want to control the pushing instant yourself"
          :id :metav.release/without-push
          :default-desc "false"]))
@@ -51,15 +48,14 @@
       (let [level (cli-common/parse-potential-keyword potential-level)]
         (if (s/valid? :metav.release/level level)
           (update processed-cli-opts :custom-opts assoc :metav.release/level level)
-          (assoc processed-cli-opts
-            :exit-message (s/explain-str :metav.release/level level))))
+          (assoc processed-cli-opts :exit-message (s/explain-str :metav.release/level level))))
       (assoc processed-cli-opts
         :exit-message "Release level not properly specified."))))
 
 (def validate-cli-args (cli-common/make-validate-args cli-options usage handle-cli-arguments))
 
 
-(defn perform! [context]
+(defn release! [context]
   (let [{:metav.cli/keys [verbose?]
          :metav.release/keys [spit level]} context]
     (log/debug "Release level is " level ". Assert everything is committed, bump the version, tag and push.")
@@ -77,7 +73,7 @@
       bumped-context)))
 
 
-(def main* (cli-common/make-main validate-cli-args perform!))
+(def main* (cli-common/make-main validate-cli-args release!))
 
 
 (def main (cli-common/wrap-exit main*))

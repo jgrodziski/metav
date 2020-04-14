@@ -89,20 +89,6 @@
     (cond-> context
             spit? do-spits-and-commit!)))
 
-
-(defn sync-pom-and-commit! [context]
-  (-> context
-      pom/sync-pom!
-      pom/git-add-pom!
-      (git-ops/commit! "Synced and added pom.xml")))
-
-
-(defn maybe-sync-pom! [context]
-  (let [pom? (:metav.release/pom context)]
-    (cond-> context
-            pom? sync-pom-and-commit!)))
-
-
 (defn maybe-push! [context]
   (let [without-push? (:metav.release/without-push context)]
     (cond-> context
@@ -112,6 +98,7 @@
 (s/def ::release!-params (s/and (s/merge :metav/context
                                          :metav.release/options)
                                 bump-level-valid?))
+
 
 
 (defn release!
@@ -136,7 +123,6 @@
       (utils/side-effect-from-context! log-bumped-data)
 
       maybe-spit!
-      maybe-sync-pom!
       git-ops/tag-repo!
       maybe-push!))
 
