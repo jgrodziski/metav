@@ -10,15 +10,21 @@
   ([path]
    (api/make-context {:metav/working-dir path}))
   ([path opts]
-   (api/make-context (assoc opts
-                         :metav/working-dir path))))
+   (api/make-context (assoc opts :metav/working-dir path))))
 
-(defmacro with-repo [n & body]
-  `(let [~n (gs/shell! (gs/init!))]
-     (try
-       ~@body
-       (finally
-         (fs/delete-dir ~n)))))
+(defmacro with-repo [repo-dir & body]
+  `(let [~repo-dir   (gs/shell! (gs/init!))]
+    (try
+      (gs/shell-in-dir! ~repo-dir
+                        (gs/checkout! "master")
+                        (let [remote-dir# (gs/shell! (gs/clone! ~repo-dir (gs/repo-temp-dir)))]
+                          (gs/remote-add! "origin" (str remote-dir# "/.git"))
+                          ~@body
+                          (fs/delete-dir remote-dir#))
+                        )
+      (finally
+        (fs/delete-dir ~repo-dir)
+        ))))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Dedicated repo stuff

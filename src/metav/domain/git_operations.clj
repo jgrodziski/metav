@@ -68,5 +68,8 @@
 ;;----------------------------------------------------------------------------------------------------------------------
 (defn push! [context]
   (utils/check-spec ::top-level-present context)
-  (let [top-level (:metav/top-level context)]
-    (assoc context :metav.release/push-result (git/push! top-level))))
+  (let [top-level (:metav/top-level context)
+        tag       (:metav/tag context)
+        push-commit-result (git/push! top-level)
+        push-tag-result (git/push! top-level tag)]
+    (assoc context :metav.release/push-results [push-commit-result push-tag-result])))

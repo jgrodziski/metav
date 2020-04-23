@@ -89,20 +89,6 @@
     (cond-> context
             spit? do-spits-and-commit!)))
 
-
-(defn sync-pom-and-commit! [context]
-  (-> context
-      pom/sync-pom!
-      pom/git-add-pom!
-      (git-ops/commit! "Synced and added pom.xml")))
-
-
-(defn maybe-sync-pom! [context]
-  (let [pom? (:metav.release/pom context)]
-    (cond-> context
-            pom? sync-pom-and-commit!)))
-
-
 (defn maybe-push! [context]
   (let [without-push? (:metav.release/without-push context)]
     (cond-> context
@@ -114,6 +100,7 @@
                                 bump-level-valid?))
 
 
+
 (defn release!
   "Assert that nothing leaves uncommitted or untracked,
   then bump version to a releasable one (depending on the release level),
@@ -121,7 +108,7 @@
 
   Returns the context passed as parameter with the keys `:metav/version` and `:metav/tag`
   updated to reflect the git state after release. If the release performed a git
-  push, the result of the push is found under the key `:metav.release/push-result`.
+  push, metav push the commits and tags in two successive push, the result of the pushs are found under the key `:metav.release/push-results`.
   If the release spited metadata, the paths of the spitted files can be found
   under the key `:metav.spit/spitted`.
   "
@@ -136,7 +123,6 @@
       (utils/side-effect-from-context! log-bumped-data)
 
       maybe-spit!
-      maybe-sync-pom!
       git-ops/tag-repo!
       maybe-push!))
 

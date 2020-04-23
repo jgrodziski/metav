@@ -2,6 +2,23 @@
 All notable changes to this project will be documented in this file. 
 This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
+# [1.6.7] - 2020-03-06
+
+Fix bad git push command that send a `git push --tags` that was inappropriate and can mess up the git repo. Now issue a git push for the commit and only push the correct annotated tag of the release instead of all tags.
+
+# [1.6.6] - 2020-02-27
+
+Fix silent error when failure while tagging during release
+
+# [1.6.3] - 2020-02-19
+
+Bump clojure.tools.deps.alpha to latest version to fix bug during reading deps.edn in user project
+
+# [1.6.2] - 2020-02-18
+
+Add explicit behavior for spit
+See (Issue 14)[https://github.com/jgrodziski/metav/issues/14]
+
 # [1.6.1] - 2019-10-28
 
 Refactor to provide a clean api to facilitate using metav within code and REPL, spec for options of operations.

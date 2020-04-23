@@ -1,33 +1,35 @@
 {:paths ["src"]
- :deps {org.clojure/clojure {:mvn/version "1.10.1"}
-        org.clojure/tools.cli {:mvn/version "0.4.1"}
-        org.clojure/tools.logging {:mvn/version "0.4.1"}
-        org.clojure/tools.deps.alpha {:mvn/version "0.8.584"}
-        org.clojure/data.json {:mvn/version "0.2.6"}
+ :deps  {org.clojure/clojure          {:mvn/version "1.10.1"}
+         org.clojure/tools.cli        {:mvn/version "0.4.1"}
+         org.clojure/tools.logging    {:mvn/version "0.4.1"}
+         org.clojure/tools.deps.alpha {:mvn/version "0.8.677"}
+         org.clojure/data.json        {:mvn/version "0.2.6"}
 
-        cljstache {:mvn/version "2.0.1"}
-        clj-commons/fs {:mvn/version "1.5.0"}}
+         org.slf4j/slf4j-simple {:mvn/version "1.7.30"}
+
+         cljstache      {:mvn/version "2.0.1"}
+         clj-commons/fs {:mvn/version "1.5.0"}}
 
  :jvm-opts ["-Djava.io.tmpdir=./tmp"]
- :aliases {:dev {:extra-paths ["logging"]
-                 :extra-deps {org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version"2.12.1"}
-                              org.apache.logging.log4j/log4j-core {:mvn/version "2.12.1"}}}
-           :test {:extra-paths ["test" "resources-test"]
-                  :extra-deps {org.clojure/test.check {:mvn/version "RELEASE"}
-                               lambdaisland/kaocha {:mvn/version "0.0-389"}
-                               metosin/testit {:mvn/version "0.4.0"}
-                               pjstadig/humane-test-output {:mvn/version "0.9.0"}}}
-           :runner {:extra-deps {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner"
-                                                            :sha "76568540e7f40268ad2b646110f237a60295fa3c"}}
-                    :main-opts ["-m" "cognitect.test-runner"
-                                "-d" "test"]}
-           :display {:main-opts ["-m" "metav.display"]}
-           :release {:main-opts ["-m" "metav.release"
-                                 "--spit"
-                                 "--output-dir" "src"
-                                 "--namespace" "metav.meta"
-                                 "--formats" "clj"]}
-           :spit    {:main-opts ["-m" "metav.spit"
-                                 "--output-dir" "src"
-                                 "--namespace" "metav.meta"
-                                 "--formats" "clj"]}}}
+ :aliases  {:dev     {:extra-paths ["logging"]
+                      :extra-deps  {org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version "2.12.1"}
+                                    org.apache.logging.log4j/log4j-core       {:mvn/version "2.12.1"}}}
+            :test    {:extra-paths ["test" "resources-test"]
+                      :extra-deps  {org.clojure/test.check      {:mvn/version "0.10.0"}
+                                    lambdaisland/kaocha         {:mvn/version "0.0-389"}
+                                    metosin/testit              {:mvn/version "0.4.0"}
+                                    pjstadig/humane-test-output {:mvn/version "0.9.0"}}}
+            :runner  {:extra-deps {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner"
+                                                              :sha     "76568540e7f40268ad2b646110f237a60295fa3c"}}
+                      :main-opts  ["-m" "cognitect.test-runner"
+                                   "-d" "test"]}
+            :display {:main-opts ["-m" "metav.display"]}
+            :release {:main-opts ["-m" "metav.release"
+                                  "--spit"
+                                  "--output-dir" "src"
+                                  "--namespace" "metav.meta"
+                                  "--formats" "clj"]}
+            :spit    {:main-opts ["-m" "metav.spit"
+                                  "--output-dir" "src"
+                                  "--namespace" "metav.meta"
+                                  "--formats" "clj"]}}}

@@ -7,13 +7,10 @@
             [clojure.tools.logging :as log]
             [me.raynes.fs :as fs]))
 
-
-
 (defn pwd
   "return working dir of the JVM (cannot be changed once JVM is started)"
   []
   (.getCanonicalFile (clojure.java.io/file ".")))
-
 
 (def GIT_ENV {"GIT_AUTHOR_NAME" "Test User"
               "GIT_AUTHOR_EMAIL" "user@domain.com"
@@ -22,21 +19,19 @@
               "GIT_COMMITTER_EMAIL" "user@domain.com"
               "GIT_COMMITTER_DATE" "2019-01-16T22:22:22"})
 
-
 (defn repo-temp-dir []
   (Files/createTempDirectory
    (.toPath (io/as-file (System/getProperty "java.io.tmpdir")))
    "repo"
    (into-array java.nio.file.attribute.FileAttribute [])))
 
-
 (defmacro shell!
   [& body]
   `(let [tmpdir# (repo-temp-dir)]
-     (shell/with-sh-dir (str tmpdir#)
-       (shell/with-sh-env GIT_ENV
-         ~@body
-         (str tmpdir#)))))
+       (shell/with-sh-dir (str tmpdir#)
+         (shell/with-sh-env GIT_ENV
+           ~@body
+           (str tmpdir#)))))
 
 
 (defmacro shell-in-dir! [dir & body]
@@ -51,7 +46,7 @@
 (defn sh [command]
   (assert shell/*sh-dir* "Can't run commands without a specified directory.")
   (let [result (shell/sh "/bin/bash" "-c" command)]
-     (assert (->  result :exit zero?) (:err result))
+     (assert (-> result :exit zero?) (:err result))
      result))
 
 
@@ -61,9 +56,14 @@
   (println (:out (sh cmd))))
 
 
-(defn init! [] (sh "git init"))
-(defn init-bare! [] (sh "git init --bare"))
+(defn init! []  (sh "git init"))
+(defn init-bare! []  (sh "git init --bare"))
 
+(defn clone!
+  ([url]
+   (clone! url "."))
+  ([url clone-dir]
+   (sh (str "git clone " url " " clone-dir))))
 
 (defn mkdir-p!
   "create a bunch of dirs all at the same time"
@@ -94,14 +94,22 @@
 
 (defn add! [] (sh "git add ."))
 
+(defn remote-add! [remote-name remote-dir] (sh (format "git remote add %s %s" remote-name remote-dir)))
 
 (defn commit! [] (sh "git commit -m \"Commit\" --allow-empty"))
 
 
 (defn tag! [t] (sh (format "git tag -a -m \"R %s\" %s" t t)))
 
+(defn list-remote-tags "Return a map of tag to ref" [remote]
+  (let [lines (-> (sh (format "git ls-remote --tags %s" remote))
+                   :out
+                   clojure.string/split-lines)]
+    (into {} (map (fn [line]
+                    (let [[ref tag] (clojure.string/split line #"\s+")]
+                      [(subs tag 10) ref]))
+                  lines))))
 
-(defn clone! [url] (sh (str "git clone " url " .")))
 
 
 (defn- current-branch []
@@ -109,14 +117,22 @@
       :out
       (clojure.string/replace "\n" "")))
 
+(defn- current-branch2 []
+  (:out (sh "git rev-parse --abbrev-ref HEAD -- .")))
 
 (defn remote-add! [name url]
-  (let [current-branch (current-branch)
+  (let [current-branch (or (current-branch) "master")
         add (format "git remote add %s %s" name url)
-        track (format "git branch -u %s/%s" name current-branch)]
+        track (format "git branch --set-upstream-to=%s/%s %s" name current-branch current-branch)]
     (sh add)
-    (sh track)))
+   ; (sh track)
+    ))
 
+(defn checkout!
+  ([branch-name]
+   (sh (format "git checkout -b %s" branch-name)))
+  ([branch-name remote-branch-name]
+   (sh (format "git checkout -t -b %s %s" branch-name remote-branch-name))))
 
 (defn dirty! [] (sh "echo \"Hello\" >> x && git add x"))
 
