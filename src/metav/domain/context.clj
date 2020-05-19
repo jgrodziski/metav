@@ -18,7 +18,8 @@
 (def default-options
   #:metav{:version-scheme :semver
           :min-sha-length 4
-          :use-full-name? false})
+          :use-full-name? false
+          :root-prefix "v"})
 
 
 (s/def :metav/working-dir fs/exists?)
@@ -27,6 +28,7 @@
 (s/def :metav/use-full-name? boolean?)
 (s/def :metav/module-name-override ::utils/non-empty-str)
 (s/def :metav/project-deps ::deps-specs/deps-map)
+(s/def :metav/root-prefix string?)
 
 
 (s/def :metav.context/options
@@ -35,7 +37,8 @@
           :metav/version-scheme
           :metav/min-sha-length
           :metav/use-full-name?
-          :metav/module-name-override]))
+          :metav/module-name-override
+          :metav/root-prefix]))
 
 
 (defn assoc-git-basics
@@ -139,10 +142,10 @@
 (defn version-prefix
   "Version prefix in git tags, \"v\" in dedicated repos \"artefact-name-\" in monorepos."
   [context]
-  (let [{:metav/keys [git-prefix artefact-name]} context]
+  (let [{:metav/keys [git-prefix artefact-name root-prefix]} context]
     (if git-prefix
       (str artefact-name "-")
-      "v")))
+      root-prefix)))
 
 
 (def version-scheme->builder
@@ -184,6 +187,13 @@
       (utils/assoc-computed :metav/version version)
       (utils/assoc-computed :metav/tag tag)))
 
+(defn assoc-root-prefix
+  [context]
+  (let [{:metav/keys [root-prefix]} context]
+    (if (= ":none" root-prefix)
+      (assoc context :metav/root-prefix "")
+      context)))
+
 
 (s/def :metav.context/required
   (s/keys :req [:metav/working-dir]))
@@ -195,6 +205,7 @@
 
 (defn make-context [opts]
   (-> opts
+      (assoc-root-prefix)
       (utils/merge&validate default-options ::make-context-param)
       assoc-git-basics
       check-repo-in-order
@@ -214,4 +225,5 @@
                                     :metav/version
                                     :metav/artefact-name
                                     :metav/version-prefix
+                                    :metav/root-prefix
                                     :metav/tag]))

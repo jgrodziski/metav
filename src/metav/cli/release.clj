@@ -19,7 +19,10 @@
          :default-desc "false"]
         ["-w" "--without-push" "Execute the release process but without pushing at the end, if you want to control the pushing instant yourself"
          :id :metav.release/without-push
-         :default-desc "false"]))
+         :default-desc "false"]
+        [nil "--prefix PREFIX" "version tags without an artifact prefix will have this prefix (use :none for no prefix)"
+         :id :metav/root-prefix
+         :default-desc "v"]))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Assembling Release main

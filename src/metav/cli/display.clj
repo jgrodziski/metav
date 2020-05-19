@@ -13,7 +13,10 @@
          :id :metav.display/output-format
          :parse-fn keyword
          :validate [(partial s/valid? :metav.display/output-format)
-                    "Format must be among: edn, json, tab"]]))
+                    "Format must be among: edn, json, tab"]]
+        [nil "--prefix PREFIX" "version tags without an artifact prefix will have this prefix (use :none for no prefix)"
+         :id :metav/root-prefix
+         :default-desc "v"]))
 
 
 (defn usage [summary]
