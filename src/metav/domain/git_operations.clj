@@ -14,19 +14,19 @@
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;;----------------------------------------------------------------------------------------------------------------------
-(defn check-committed? [context]
-  (-> context
-      (->> (utils/check-spec ::working-dir-present))
-      (-> :metav/working-dir
-          git/assert-committed?))
+(defn check-committed?
+  [context]
+  (utils/check-spec ::working-dir-present context)
+  (git/assert-committed? (:metav/working-dir context))
   context)
+(comment  ([working-dir]
+           (git/assert-committed? working-dir)))
 
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;;----------------------------------------------------------------------------------------------------------------------
 (def default-tag-options
   #:metav.git{:without-sign false})
-
 
 (s/def :metav.git/without-sign boolean?)
 
@@ -35,41 +35,38 @@
 (s/def ::tag-repo!-param (s/merge :metav/context
                                   :metav.git.tag-repo/options))
 
-(defn tag-repo! [context]
-  (let [context (-> context
-                    (utils/merge&validate default-tag-options ::tag-repo!-param)
-                    (check-committed?))
-        {:metav/keys  [top-level tag]
-         :metav.git/keys [without-sign]} context
-        annotation (json/write-str (metadata/metadata-as-edn context))
-        tag-result (apply git/tag! top-level
-                          tag
-                          annotation
-                          (when without-sign [:sign false]))]
-    (if (int? (first tag-result)) ;;error exit code if so return stderr
-      (throw (Exception. (str "Error with git tag command:" (get tag-result 2))))
-      (assoc context
-        :metav.release/tag-result {:git-res tag-result
-                                   :tag tag
-                                   :annotation annotation}))))
+(defn tag-repo!
+  ([context]
+   (let [context (-> context
+                     (utils/merge&validate default-tag-options ::tag-repo!-param)
+                     (check-committed?))
+         {:metav/keys     [top-level tag]
+          :metav.git/keys [without-sign]} context
+         annotation (json/write-str (metadata/metadata-as-edn context))
+         tag-result (tag-repo! top-level tag annotation without-sign)]
+     (assoc context :metav.release/tag-result tag-result)))
+  ([top-level tag annotation without-sign]
+   (let [git-cmd-result (apply git/tag! top-level tag annotation (when without-sign [:sign false]))]
+     (if (int? (first git-cmd-result)) ;;error exit code if so return stderr
+       (throw (Exception. (str "Error with git tag command:" (get git-cmd-result 2))))
+       {:git-res git-cmd-result :tag tag :annotation annotation}))))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;;----------------------------------------------------------------------------------------------------------------------
 (defn commit! [context msg]
-  (let [commit-res (-> context
-                       (->> (utils/check-spec ::working-dir-present))
-                       (-> :metav/working-dir
-                           (git/commit! msg)))]
-    (assoc context :metav.git/committed
-                   {:commit-res commit-res
-                    :msg msg})))
+  (utils/check-spec ::working-dir-present context)
+  (let [commit-res (git/commit! (:metav/working-dir context) msg)]
+    (assoc context :metav.git/committed {:commit-res commit-res :msg msg})))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;;----------------------------------------------------------------------------------------------------------------------
-(defn push! [context]
-  (utils/check-spec ::top-level-present context)
-  (let [top-level (:metav/top-level context)
-        tag       (:metav/tag context)
-        push-commit-result (git/push! top-level)
-        push-tag-result (git/push! top-level tag)]
-    (assoc context :metav.release/push-results [push-commit-result push-tag-result])))
+(defn push!
+  ([context]
+   (utils/check-spec ::top-level-present context)
+   (let [top-level (:metav/top-level context)
+         tag       (:metav/tag context)]
+     (assoc context :metav.release/push-results (push! top-level tag))))
+  ([top-level tag]
+   (let [push-commit-result (git/push! top-level)
+         push-tag-result    (git/push! top-level tag)]
+     [push-commit-result push-tag-result])))

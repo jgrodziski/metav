@@ -21,12 +21,12 @@
           :use-full-name? false})
 
 
-(s/def :metav/working-dir fs/exists?)
-(s/def :metav/version-scheme #{:semver :maven})
-(s/def :metav/min-sha-length integer?)
-(s/def :metav/use-full-name? boolean?)
+(s/def :metav/working-dir          fs/exists?)
+(s/def :metav/version-scheme       #{:semver :maven})
+(s/def :metav/min-sha-length       integer?)
+(s/def :metav/use-full-name?       boolean?)
 (s/def :metav/module-name-override ::utils/non-empty-str)
-(s/def :metav/project-deps ::deps-specs/deps-map)
+(s/def :metav/project-deps         ::deps-specs/deps-map)
 
 
 (s/def :metav.context/options
@@ -41,15 +41,15 @@
 (defn assoc-git-basics
   [opts]
   (let [working-dir (-> opts :metav/working-dir fs/normalized str)
-        top (git/toplevel working-dir)
-        prefix  (git/prefix working-dir)]
-    (when-not (string? top)
+        top-level   (git/toplevel working-dir)
+        prefix      (git/prefix working-dir)]
+    (when-not (string? top-level)
       (let [e (Exception. "Probably not working inside a git repository.")]
-        (log/error e (str "git-top-level returned: " top " prefix returned:" (if (nil? prefix) "nil" prefix)))
+        (log/error e (str "git-top-level returned: " top-level " prefix returned:" (if (nil? prefix) "nil" prefix)))
         (throw e)))
     (assoc opts
       :metav/working-dir working-dir
-      :metav/top-level top
+      :metav/top-level   top-level
       :metav/git-prefix  prefix)))
 
 
@@ -63,7 +63,7 @@
     (fs/file? build-file)))
 
 
-(defn check-repo-in-order
+(defn assert-repo-has-commits-and-deps-edn?
   "Checks that the working dir has a build file and is in a repo
   which already has at least one commit."
   [context]
@@ -112,8 +112,7 @@
 
 
 (defn definitive-module-name
-  "Choose the module name to be used between the one metav generates automaticaly or
-  an overide provided by the user."
+  "Choose the module name to be used between the one metav generates automatically or the override provided by the user."
   [context]
   (let [{:metav/keys [module-name-override module-name]} context]
     (or module-name-override module-name)))
@@ -144,33 +143,32 @@
       (str artefact-name "-")
       "v")))
 
-
 (def version-scheme->builder
   {:semver semver/version
-   :maven maven/version})
-
+   :maven  maven/version})
 
 (defn version
   "Construct a version from a context and git state."
-  [context]
-  (let [{:metav/keys [working-dir version-scheme version-prefix min-sha-length]} context
-        make-version (get version-scheme->builder version-scheme)
-        state (git/working-copy-description working-dir
-                                              :prefix version-prefix
-                                              :min-sha-length min-sha-length)]
-    (when-not make-version
-      (throw (Exception. (str "No version scheme " version-scheme " found! version scheme currently supported are: \"maven\" or \"semver\" "))))
-    (when-not state
-      (log/warn "No Git data available in directory " working-dir "! is it a git repository?
-                 is there a proper .git dir? if so is there any commits? return default starting version"))
-    (apply make-version state)))
+  ([{:metav/keys [working-dir version-scheme version-prefix min-sha-length] :as context}]
+   (version working-dir version-scheme version-prefix min-sha-length))
+  ([working-dir version-scheme version-prefix min-sha-length]
+   (let [version-fn (get version-scheme->builder version-scheme)
+         state      (git/working-copy-description working-dir :prefix version-prefix :min-sha-length min-sha-length)]
+     (when-not version-fn
+       (throw (Exception. (str "No version scheme " version-scheme " found! version scheme currently supported are: \"maven\" or \"semver\" "))))
+     (when-not state
+       (log/warn "No Git data available in directory " working-dir "! is it a git repository?
+                  is there a proper .git dir? if so is there any commits? return default starting version"))
+     (apply version-fn state))))
 
+(defn format-tag [])
 
 (defn tag
   "Makes a tag name from a context using the version prefix and the version number."
-  [context]
-  (let [{:metav/keys [version version-prefix]} context]
-    (str version-prefix version)))
+  ([context]
+   (tag (:metav/version-prefix context) (:metav/version context)))
+  ([version-prefix version]
+   (str version-prefix version)))
 
 
 (defn assoc-computed-keys
@@ -197,7 +195,7 @@
   (-> opts
       (utils/merge&validate default-options ::make-context-param)
       assoc-git-basics
-      check-repo-in-order
+      assert-repo-has-commits-and-deps-edn?
       assoc-names
       assoc-deps
       assoc-computed-keys

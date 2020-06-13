@@ -74,7 +74,7 @@
 
 (defn write-dummy-file-in! [& dirs]
   (apply mkdir-p! dirs)
-  (let [command (str "echo \"some stuff\" >> " (apply str (interpose "/" dirs)) (when dirs "/") (fs/temp-name "dummy" ".txt"))]
+  (let [command (str "echo \"some stuff: " (str (java.util.UUID/randomUUID)) "\" >> " (apply str (interpose "/" dirs)) (when dirs "/") (fs/temp-name "dummy" ".txt"))]
     (log/debug "will execute: " command)
     (sh command)))
 

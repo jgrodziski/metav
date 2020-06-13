@@ -7,7 +7,8 @@
   (tag [this])
   (distance [this])
   (sha [this])
-  (dirty? [this]))
+  (dirty? [this])
+  (to-vector [this]))
 
 
 (defprotocol Bumpable

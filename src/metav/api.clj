@@ -107,7 +107,9 @@
 ;;----------------------------------------------------------------------------------------------------------------------
 
 (defn bump [context]
-  (release/bump-context context))
+  (-> context
+      release/bump-version
+      release/tag))
 
 
 (defn release!

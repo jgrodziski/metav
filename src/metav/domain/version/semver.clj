@@ -12,9 +12,8 @@
    [clojure.string :as string]
    [clojure.spec.alpha :as s]
    [clojure.tools.logging :as log]
-   [metav.domain.version.protocols :refer [SCMHosted Bumpable]]
-   [metav.domain.version.common :as common]
-   ))
+   [metav.domain.version.protocols :refer [SCMHosted Bumpable to-vector]]
+   [metav.domain.version.common :as common]))
 
 
 (def allowed-bumps #{:major :minor :patch})
@@ -23,7 +22,7 @@
 (s/def ::accepted-bumps allowed-bumps)
 
 
-(deftype SemVer [subversions distance sha dirty?]
+(defrecord SemVer [subversions distance sha dirty?]
   Object
   (toString [this] (let [be (string/join "." subversions); (conj subversions distance))
                          _ (log/debug "be" be)
@@ -42,6 +41,8 @@
   (distance [this] distance)
   (sha [this] sha)
   (dirty? [this] dirty?)
+  (to-vector [this]
+    [(get (:subversions this) 0) (get (:subversions this) 1) (get (:subversions this) 2) (:distance this) (:sha this) (:dirty? this)])
   Bumpable
   (bump [this level]
     (condp contains? level
@@ -61,8 +62,13 @@
 
 (defn version
   ([] (SemVer. common/default-initial-subversions 0 nil nil))
+  ([major minor patch]
+   (version major minor patch nil nil nil))
   ([base distance sha dirty?]
    (if base
      (let [subversions (parse-base base)]
        (SemVer. subversions distance sha dirty?))
-     (SemVer. common/default-initial-subversions distance sha dirty?))))
+     (SemVer. common/default-initial-subversions distance sha dirty?)))
+  ([major minor patch distance sha dirty?]
+   (SemVer. [major minor patch] distance sha dirty?)))
+

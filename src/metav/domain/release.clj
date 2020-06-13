@@ -44,22 +44,22 @@
     (s/valid? spec level)))
 
 
-(defn new-version [context]
-  (let [{current-version :metav/version
-         level :metav.release/level} context]
-    (version/bump current-version level)))
+(defn new-version [{current-version :metav/version
+                    level           :metav.release/level
+                    :as context}]
+  (version/bump current-version level))
 
 
 (s/def ::bump-context-param (s/and (s/merge :metav/context
                                             (s/keys :req [:metav.release/level]))
                                    bump-level-valid?))
 
-(defn bump-context [context]
-  (-> context
-      (->> (utils/check-spec ::bump-context-param))
-      (utils/assoc-computed :metav/version new-version)
-      (utils/assoc-computed :metav/tag context/tag)))
+(defn bump-version [context]
+  (utils/check-spec ::bump-context-param context)
+  (assoc context :metav/version (new-version context)))
 
+(defn tag [context]
+  (assoc context :metav/tag (context/tag (:metav/version-prefix context) (:metav/version context))))
 
 (defn log-before-bump [context]
   (let [{:metav/keys [artefact-name version]
@@ -100,7 +100,6 @@
                                 bump-level-valid?))
 
 
-
 (defn release!
   "Assert that nothing leaves uncommitted or untracked,
   then bump version to a releasable one (depending on the release level),
@@ -119,7 +118,8 @@
       git-ops/check-committed?
 
       (utils/side-effect-from-context! log-before-bump)
-      bump-context
+      bump-version
+      tag
       (utils/side-effect-from-context! log-bumped-data)
 
       maybe-spit!

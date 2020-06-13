@@ -65,14 +65,14 @@
        (string/join \newline)))
 
 
-(def validate-args (cli-common/make-validate-args cli-options usage))
+(def validate-args-fn (cli-common/make-validate-args cli-options usage))
 
 (defn spit! [context]
   (when (:metav.cli/verbose? context)
     (-> context api/metadata-as-edn json/write-str print))
   (api/spit! context))
 
-(def main* (cli-common/make-main validate-args spit!))
+(def main* (cli-common/make-main validate-args-fn spit!))
 
 (comment
   (main* "-c" "resources-test/example-conf.edn"
@@ -81,3 +81,28 @@
          "-t" "mustache-template.txt"))
 
 (def main (cli-common/wrap-exit main*))
+
+
+(comment 
+  (defn -main [& args]
+    (let [{:keys [exit? ctxt-opts] :as parsed-and-validated} (validate-args-fn args)]
+      (if exit?
+        parsed-and-validated
+        (let [res (try
+                    (-> ctxt-opts api/make-context perform-command-fn)
+                    (catch ExceptionInfo e
+                      {::error e
+                       ::error-msg (ex-message e)})
+                    (catch Exception e
+                      {::error e
+                       ::error-msg (.getMessage e)}))]
+          (if-let [error (::error-msg res)]
+            (assoc parsed-and-validated
+                   :ret res
+                   :exit? true
+                   :ok? false
+                   :exit-message error)
+            (assoc parsed-and-validated
+                   :ret res
+                   :exit? true
+                   :ok? true)))))))

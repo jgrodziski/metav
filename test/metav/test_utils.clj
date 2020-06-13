@@ -37,21 +37,23 @@
     (gs/commit!)
     (gs/tag! "v0.1.0")))
 
-;;----------------------------------------------------------------------------------------------------------------------
-;; Monorepo stuff
-;;----------------------------------------------------------------------------------------------------------------------
+(defn make-standalone-project! [dir version tag]
+  (gs/write-dummy-deps-edn-in! dir)
+  (gs/write-dummy-file-in! dir "src")
+  (gs/add!)
+  (gs/commit!)
+  (gs/tag! tag))
+
 (defn make-project! [{:keys [name version full-name?]}]
   (let [repo-name (fs/base-name shell/*sh-dir*)
         full-name (str repo-name "-" name)
-        tag-name (if full-name? full-name name)
-        tag (str tag-name "-" version)]
+        tag-name  (if full-name? full-name name)
+        tag       (str tag-name "-" version)]
     (gs/write-dummy-deps-edn-in! name)
     (gs/write-dummy-file-in! name "src")
     (gs/add!)
     (gs/commit!)
     (gs/tag! tag)))
-
-
 
 (def project1-version "0.0.0")
 (def project2-version "1.1.2")
@@ -61,6 +63,30 @@
 (def sysB-c2-version "1.5.7")
 (def sysB-c3-version "0.1.0")
 
+
+(defn make-repo! []
+  (let [remote (gs/shell! (gs/init-bare!))
+        repo (gs/shell!
+              (gs/clone! remote)
+              (make-standalone-project! "standalone-project" "1.2.3" "v1.2.3")
+
+              (gs/write-dummy-file-in! "src" "com" "company" "domain")
+              (gs/add!)
+              (gs/commit!)
+              (gs/tag! "v1.2.4")
+
+              (gs/write-dummy-file-in! "src" "com" "company" "domain")
+
+              (gs/write-dummy-file-in! "sysA" "container2" "src")
+              (gs/add!)
+              (gs/commit!)
+              (gs/tag! "v1.2.5"))]
+    {:remote remote
+     :repo   repo}))
+
+;;----------------------------------------------------------------------------------------------------------------------
+;; Monorepo stuff
+;;----------------------------------------------------------------------------------------------------------------------
 
 (defn make-monorepo! []
   (let [remote (gs/shell! (gs/init-bare!))
