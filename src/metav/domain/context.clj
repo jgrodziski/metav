@@ -50,9 +50,11 @@
         (log/error e (str "git-top-level returned: " top-level " prefix returned:" (if (nil? prefix) "nil" prefix)))
         (throw e)))
     (assoc opts
-      :metav/working-dir working-dir
-      :metav/top-level   top-level
-      :metav/git-prefix  prefix)))
+      :metav/working-dir      working-dir
+      :metav/top-level        top-level
+      :metav/git-prefix       prefix
+      :metav/monorepo?        (boolean prefix)
+      :metav/standalone-repo? (boolean (not prefix)))))
 
 
 (def module-build-file "deps.edn")
@@ -129,13 +131,11 @@
                   is there a proper .git dir? if so is there any commits? return default starting version"))
      (apply version-fn state))))
 
-(defn format-tag [])
-
-
 
 (defn assoc-computed-keys
   "Adds to a context all the computed info from a base context and git state."
   [context]
+  (prn "myversion" (version context))
   (-> context
       (utils/assoc-computed :metav/definitive-module-name name/definitive-module-name)
       (utils/assoc-computed :metav/full-name              name/full-name)

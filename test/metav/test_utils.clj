@@ -1,9 +1,8 @@
 (ns metav.test-utils
-  (:require
-    [clojure.java.shell :as shell]
-    [me.raynes.fs :as fs]
-    [metav.git-shell :as gs]
-    [metav.api :as api]))
+  (:require [clojure.java.shell :as shell]
+            [me.raynes.fs :as fs]
+            [metav.git-shell :as gs]
+            [metav.api :as api]))
 
 
 (defn make-context
