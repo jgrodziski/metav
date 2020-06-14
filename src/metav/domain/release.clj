@@ -1,16 +1,16 @@
 (ns metav.domain.release
-  (:require
-   [clojure.spec.alpha          :as s]
-   [clojure.tools.logging       :as log]
-   [clojure.set :refer [union]]
-   [metav.utils                 :as utils]
-   [metav.domain.context        :as context]
-   [metav.domain.git-operations :as git-ops]
-   [metav.domain.pom            :as pom]
-   [metav.domain.spit           :as spit]
-   [metav.domain.version.common :as version]
-   [metav.domain.version.semver :as semver]
-   [metav.domain.version.maven  :as maven]))
+  (:require [clojure.spec.alpha          :as s]
+            [clojure.tools.logging       :as log]
+            [clojure.set :refer [union]]
+            [metav.utils                 :as utils]
+            [metav.domain.context        :as context]
+            [metav.domain.git-operations :as git-ops]
+            [metav.domain.pom            :as pom]
+            [metav.domain.spit           :as spit]
+            [metav.domain.version.common :as version]
+            [metav.domain.version.semver :as semver]
+            [metav.domain.version.maven  :as maven]
+            [metav.domain.tag            :as tag]))
 
 
 ;;----------------------------------------------------------------------------------------------------------------------
@@ -59,7 +59,7 @@
   (assoc context :metav/version (new-version context)))
 
 (defn tag [context]
-  (assoc context :metav/tag (context/tag (:metav/version-prefix context) (:metav/version context))))
+  (assoc context :metav/tag (tag/tag context)))
 
 (defn log-before-bump [context]
   (let [{:metav/keys [artefact-name version]

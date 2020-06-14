@@ -12,12 +12,12 @@
   []
   (.getCanonicalFile (clojure.java.io/file ".")))
 
-(def GIT_ENV {"GIT_AUTHOR_NAME" "Test User"
-              "GIT_AUTHOR_EMAIL" "user@domain.com"
-              "GIT_AUTHOR_DATE" "2019-01-16T22:22:22"
-              "GIT_COMMITTER_NAME" "Test User"
+(def GIT_ENV {"GIT_AUTHOR_NAME"     "Test User"
+              "GIT_AUTHOR_EMAIL"    "user@domain.com"
+              "GIT_AUTHOR_DATE"     "2019-01-16T22:22:22"
+              "GIT_COMMITTER_NAME"  "Test User"
               "GIT_COMMITTER_EMAIL" "user@domain.com"
-              "GIT_COMMITTER_DATE" "2019-01-16T22:22:22"})
+              "GIT_COMMITTER_DATE"  "2019-01-16T22:22:22"})
 
 (defn repo-temp-dir []
   (Files/createTempDirectory

@@ -1,16 +1,18 @@
 (ns metav.domain.context
   (:require
-    [clojure.spec.alpha :as s]
-    [clojure.string :as string]
-    [clojure.tools.logging :as log]
-    [clojure.tools.deps.alpha.specs :as deps-specs]
-    [clojure.tools.deps.alpha.reader :as deps-reader]
-    [me.raynes.fs :as fs]
-    [metav.utils :as utils]
-    [metav.domain.version.semver :as semver]
-    [metav.domain.version.maven :as maven]
-    [metav.domain.version.protocols :as ps]
-    [metav.domain.git :as git]))
+   [clojure.spec.alpha :as s]
+   [clojure.string :as string]
+   [clojure.tools.logging :as log]
+   [clojure.tools.deps.alpha.specs :as deps-specs]
+   [clojure.tools.deps.alpha.reader :as deps-reader]
+   [me.raynes.fs :as fs]
+   [metav.utils :as utils]
+   [metav.domain.version.semver :as semver]
+   [metav.domain.version.maven :as maven]
+   [metav.domain.version.protocols :as ps]
+   [metav.domain.name :as name]
+   [metav.domain.git :as git]
+   [metav.domain.tag :as tag]))
 
 
 
@@ -55,13 +57,11 @@
 
 (def module-build-file "deps.edn")
 
-
 (defn has-build-file?
   "Checking that the working dir contains a `deps.edn` file."
   [working-dir]
   (let [build-file (fs/file working-dir module-build-file)]
     (fs/file? build-file)))
-
 
 (defn assert-repo-has-commits-and-deps-edn?
   "Checks that the working dir has a build file and is in a repo
@@ -69,7 +69,7 @@
   [context]
   (let [working-dir (:metav/working-dir context)]
     (when-not (git/any-commits? working-dir)
-      (let [msg "No commits  found."
+      (let [msg "No commits found."
             e (Exception. msg)]
         (log/fatal e msg)
         (throw e)))
@@ -78,7 +78,6 @@
             e (Exception. msg)]
         (log/fatal e msg)
         (throw e))))
-
   context)
 
 
@@ -111,37 +110,6 @@
                               deps-reader/slurp-deps))))
 
 
-(defn definitive-module-name
-  "Choose the module name to be used between the one metav generates automatically or the override provided by the user."
-  [context]
-  (let [{:metav/keys [module-name-override module-name]} context]
-    (or module-name-override module-name)))
-
-
-(defn full-name
-  "Full name of a project, constructed with the project name and the module name."
-  [context]
-  (let [{:metav/keys [git-prefix project-name definitive-module-name]} context]
-    (if git-prefix
-      (str project-name "-" definitive-module-name)
-      definitive-module-name)))
-
-
-(defn artefact-name
-  "The name used to create tag prefixes and maven artifact name."
-  [context]
-  (if (get context :metav/use-full-name?)
-    (:metav/full-name context)
-    (:metav/definitive-module-name context)))
-
-
-(defn version-prefix
-  "Version prefix in git tags, \"v\" in dedicated repos \"artefact-name-\" in monorepos."
-  [context]
-  (let [{:metav/keys [git-prefix artefact-name]} context]
-    (if git-prefix
-      (str artefact-name "-")
-      "v")))
 
 (def version-scheme->builder
   {:semver semver/version
@@ -163,24 +131,18 @@
 
 (defn format-tag [])
 
-(defn tag
-  "Makes a tag name from a context using the version prefix and the version number."
-  ([context]
-   (tag (:metav/version-prefix context) (:metav/version context)))
-  ([version-prefix version]
-   (str version-prefix version)))
 
 
 (defn assoc-computed-keys
   "Adds to a context all the computed info from a base context and git state."
   [context]
   (-> context
-      (utils/assoc-computed :metav/definitive-module-name definitive-module-name)
-      (utils/assoc-computed :metav/full-name full-name)
-      (utils/assoc-computed :metav/artefact-name artefact-name)
-      (utils/assoc-computed :metav/version-prefix version-prefix)
-      (utils/assoc-computed :metav/version version)
-      (utils/assoc-computed :metav/tag tag)))
+      (utils/assoc-computed :metav/definitive-module-name name/definitive-module-name)
+      (utils/assoc-computed :metav/full-name              name/full-name)
+      (utils/assoc-computed :metav/artefact-name          name/artefact-name)
+      (utils/assoc-computed :metav/version-prefix         tag/version-prefix)
+      (utils/assoc-computed :metav/version                version)
+      (utils/assoc-computed :metav/tag                    tag/tag)))
 
 
 (s/def :metav.context/required
