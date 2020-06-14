@@ -135,7 +135,6 @@
 (defn assoc-computed-keys
   "Adds to a context all the computed info from a base context and git state."
   [context]
-  (prn "myversion" (version context))
   (-> context
       (utils/assoc-computed :metav/definitive-module-name name/definitive-module-name)
       (utils/assoc-computed :metav/full-name              name/full-name)
