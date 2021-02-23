@@ -22,8 +22,7 @@
                           (fs/delete-dir remote-dir#))
                         )
       (finally
-        (fs/delete-dir ~repo-dir)
-        ))))
+        (fs/delete-dir ~repo-dir)))))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Dedicated repo stuff
@@ -67,7 +66,7 @@
   (let [remote (gs/shell! (gs/init-bare!))
         repo (gs/shell!
               (gs/clone! remote)
-              (make-standalone-project! "standalone-project" "1.2.3" "v1.2.3")
+              (make-standalone-project! "." "1.2.3" "v1.2.3")
 
               (gs/write-dummy-file-in! "src" "com" "company" "domain")
               (gs/add!)
@@ -75,13 +74,9 @@
               (gs/tag! "v1.2.4")
 
               (gs/write-dummy-file-in! "src" "com" "company" "domain")
-
-              (gs/write-dummy-file-in! "sysA" "container2" "src")
               (gs/add!)
-              (gs/commit!)
-              (gs/tag! "v1.2.5"))]
-    {:remote remote
-     :repo   repo}))
+              (gs/commit!))]
+    {:remote remote :repo repo}))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Monorepo stuff
@@ -148,6 +143,10 @@
     (fs/delete-dir remote)
     (fs/delete-dir monorepo)))
 
+(defn delete-repo [r]
+  (let [{:keys [remote repo]} r]
+    (fs/delete-dir remote)
+    (fs/delete-dir repo)))
 
 (defmacro with-example-monorepo [n & body]
   `(let [~n (make-monorepo!)]
@@ -155,3 +154,10 @@
        ~@body
        (finally
          (delete-monorepo ~n)))))
+
+(defmacro with-example-standalone-repo [n & body]
+  `(let [~n (make-repo!)]
+     (try
+       ~@body
+       (finally
+         (delete-repo ~n)))))

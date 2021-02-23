@@ -4,6 +4,7 @@
             [clojure.set :refer [union]]
             [metav.utils                 :as utils]
             [metav.domain.context        :as context]
+            [metav.domain.git            :as git]
             [metav.domain.git-operations :as git-ops]
             [metav.domain.pom            :as pom]
             [metav.domain.spit           :as spit]
@@ -76,18 +77,15 @@
     (log/debug "Next tag is" bumped-tag)))
 
 
-(defn do-spits-and-commit! [bumped-context]
-  (let [{:metav/keys [artefact-name version]} bumped-context]
-    (-> bumped-context
-        (spit/spit!)
-        (spit/git-add-spitted!)
-        (git-ops/commit! (format "Bump %s to %s and spit metadata" artefact-name version)))))
+(defn do-spits-and-commit! [{:metav/keys [artefact-name version] :as bumped-context}]
+  (-> bumped-context
+      (spit/spit!)
+      (spit/git-add-spitted!)
+      (git-ops/commit! (format "Bump %s to %s and spit metadata" artefact-name version))))
 
 
-(defn maybe-spit! [context]
-  (let [spit? (:metav.release/spit context)]
-    (cond-> context
-            spit? do-spits-and-commit!)))
+(defn maybe-spit! [{spit? :metav.release/spit :as context}]
+    (when spit? (do-spits-and-commit! context)))
 
 (defn maybe-push! [context]
   (let [without-push? (:metav.release/without-push context)]
@@ -111,19 +109,36 @@
   If the release spited metadata, the paths of the spitted files can be found
   under the key `:metav.spit/spitted`.
   "
-  [context]
+  ([context]
+   (utils/check-spec ::git-ops/working-dir-present context)
+   (let [working-dir   (:metav/working-dir context)
+         version       (:metav/version context)
+         scheme        (:metav/version-scheme context)
+         monorepo?     (:metav/monorepo? context)
+         artefact-name (:metav/artefact-name context)
+         level         (:metav.release/level context)])
+   (-> context
+       (utils/merge&validate default-options ::release!-params)
+       git-ops/check-committed?
 
-  (-> context
-      (utils/merge&validate default-options ::release!-params)
-      git-ops/check-committed?
+       (utils/side-effect-from-context! log-before-bump)
+       bump-version
+       tag
+       (utils/side-effect-from-context! log-bumped-data)
 
-      (utils/side-effect-from-context! log-before-bump)
-      bump-version
-      tag
-      (utils/side-effect-from-context! log-bumped-data)
+       maybe-spit!
+       git-ops/tag-repo!
+       maybe-push!))
+  ;;FIXME refactoring in progress, push the context only on the edge of the functions for maintanability
+  ([context working-dir artefact-name scheme version level monorepo?]
+   (git/assert-committed? working-dir)
+   (utils/side-effect-from-context! context log-before-bump)
 
-      maybe-spit!
-      git-ops/tag-repo!
-      maybe-push!))
+   (bump-version version level)
+   (tag monorepo? version artefact-name)
+   (utils/side-effect-from-context! log-bumped-data)
+
+   (maybe-spit! context)
+   (git-ops/tag-repo! context)))
 
 

@@ -8,16 +8,12 @@
     [me.raynes.fs :as fs]
     [metav.api :as api]))
 
-
-
-
 (defn version [repo-path]
   (let [ctxt (test-utils/make-context repo-path)]
     (-> ctxt :metav/version)))
 
 (defn version-str [repo-path]
   (str (version repo-path)))
-
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Testing context

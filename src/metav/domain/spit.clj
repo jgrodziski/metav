@@ -93,17 +93,19 @@
       {(::format context) dest}))
 
 
-(defn data-spits [context]
-  (let [{:metav/keys [working-dir]
-         :metav.spit/keys [formats output-dir namespace]} context
-        output-dir (fs/file working-dir output-dir)]
-    (utils/check (utils/ancestor? working-dir output-dir)
-                 "Spitted files must be inside the repo.")
-    (mapv (fn [format]
-            (assoc context
-                   ::dest (metafile output-dir namespace format)
-                   ::format format))
-          formats)))
+(defn data-spits
+  ([context]
+   (let [{:metav/keys [working-dir]
+          :metav.spit/keys [formats output-dir namespace]} context]
+     (data-spits context working-dir formats output-dir namespace)))
+  ([context working-dir formats output-dir namespace]
+   (let [output-dir (fs/file working-dir output-dir)]
+     (utils/check (utils/ancestor? working-dir output-dir)
+                  "Spitted files must be inside the repo.")
+     (mapv (fn [format]
+             (assoc context
+                    ::dest (metafile output-dir namespace format)
+                    ::format format)) formats))))
 
 (defn template-spit [context]
   (let [{:metav/keys [working-dir]
@@ -138,18 +140,20 @@
 
 (defn spit!
   "spit data and rendered template in files, return a map with keys {:data {:edn edn-file :json json-file ...} :rendered-template rendered-file}"
-  [context]
-  (let [context               (utils/merge&validate context defaults-options ::spit!param)
-        spitted-data          (into {} (map spit-file! (data-spits context)))
-        spitted-rendered-file (spit-file! (template-spit context))
-        spitted-pom-context   (when (:metav.spit/pom context) (pom/sync-pom! context))
-        spitted-result        (cond-> {}
-                                      (not-empty spitted-data) (assoc :data spitted-data)
-                                      spitted-pom-context      (assoc :pom-file-path (:metav.maven.pom/pom-file-path spitted-pom-context))
-                                      spitted-rendered-file    (assoc :template spitted-rendered-file))]
-    (-> context
-        (merge spitted-pom-context)
-        (assoc :metav.spit/spitted spitted-result))))
+  ([context]
+   (let [context               (utils/merge&validate context defaults-options ::spit!param)
+         spitted-data          (into {} (map spit-file! (data-spits context)))
+         spitted-rendered-file (spit-file! (template-spit context))
+         spitted-pom-context   (when (:metav.spit/pom context) (pom/sync-pom! context))
+         spitted-result        (cond-> {}
+                                 (not-empty spitted-data) (assoc :data spitted-data)
+                                 spitted-pom-context      (assoc :pom-file-path (:metav.maven.pom/pom-file-path spitted-pom-context))
+                                 spitted-rendered-file    (assoc :template spitted-rendered-file))]
+     (-> context
+         (merge spitted-pom-context)
+         (assoc :metav.spit/spitted spitted-result))))
+  ([]
+   (let [spitted-data  (into {} (map spit-file! (data-spits)))])))
 
 (s/def :metav.spit/spitted map?)
 (s/def ::git-add-spitted!-param (s/keys :req [:metav/working-dir :metav.spit/spitted]))

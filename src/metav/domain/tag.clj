@@ -54,6 +54,6 @@
   ([context]
    (tag (:metav/monorepo? context) (:metav/version context) (:metav/artefact-name context)))
   ([monorepo? version artefact-name]
-   (if monorepo? 
+   (if monorepo?
      (format DEFAULT-FORMAT-STRING-MONOREPO version artefact-name)
      (format DEFAULT-FORMAT-STRING-STANDALONE-REPO version artefact-name))))

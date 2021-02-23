@@ -34,6 +34,54 @@
 ;; TODO: Figure out how to use the git env from metav.git-shell/GIT_ENV when calling metav.domain.git functions.
 ;;       Right now, it's my git conf that's used instead.
 (deftest release-repo
+  (testing "Test releasing a standalone repo with default format string and regex for tags"
+    (test-utils/with-example-standalone-repo m
+      (let [{:keys [repo remote]}                  m
+            options                                {:metav.git/without-sign  true
+                                                    :metav.release/spit      true
+                                                    :metav.spit/pom          true
+                                                    :metav.spit/output-dir   "resources"
+                                                    :metav.spit/namespace    "metav.meta"
+                                                    :metav.spit/formats      #{:edn :clj :json}
+                                                    :metav/tag-format-string "v%1$s.%2$s.%3$s"
+                                                    :metav/tag-regex-string  "v(?<major>.*)\\.(?<minor>.*)\\.(?<patch>.*)"}
+            context                                (test-utils/make-context repo options)
+            {bumped-version :metav/version
+             bumped-tag     :metav/tag
+             prefix         :metav/prefix
+             :as            context-after-release} (api/release! context)
+            [base distance sha dirty?]             (git/working-copy-description repo)]
+        (is (thrown? clojure.lang.ExceptionInfo (git/tag-verify repo bumped-tag)))
+        (facts
+         (str bumped-version)         => "1.2.5"
+         base                         => "1.2.5"
+         bumped-tag                   => "v1.2.5"
+         (fs/exists? (str repo "/resources/metav/meta.edn"))  => true
+         (fs/exists? (str repo "/resources/metav/meta.clj"))  => true
+         (fs/exists? (str repo "/resources/metav/meta.json")) => true))))
+  (testing "Test releasing a standalone repo with custom format string and regex for tags"
+    (test-utils/with-example-standalone-repo m
+      (let [{:keys [repo remote]}                  m
+            options                                {:metav.git/without-sign true
+                                                   :metav.release/spit     true
+                                                   :metav.spit/pom         true
+                                                   :metav.spit/output-dir  "resources"
+                                                   :metav.spit/namespace   "metav.meta"
+                                                   :metav.spit/formats     #{:edn :clj :json}}
+            context                                (test-utils/make-context repo options)
+            {bumped-version :metav/version
+             bumped-tag     :metav/tag
+             prefix         :metav/prefix
+             :as            context-after-release} (api/release! context)
+            [base distance sha dirty?]             (git/working-copy-description repo)]
+        (is (thrown? clojure.lang.ExceptionInfo (git/tag-verify repo bumped-tag)))
+        (facts
+         (str bumped-version)         => "1.2.5"
+         base                         => "1.2.5"
+         bumped-tag                   => "v1.2.5"
+         (fs/exists? (str repo "/resources/metav/meta.edn"))  => true
+         (fs/exists? (str repo "/resources/metav/meta.clj"))  => true
+         (fs/exists? (str repo "/resources/metav/meta.json")) => true))))
   (testing "bump from a clean tagged repo, testing the spitted files"
     (test-utils/with-example-monorepo m
       (let [{:keys [monorepo modules]}             m

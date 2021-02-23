@@ -101,7 +101,6 @@
     (merge context #:metav{:project-name project-name
                            :module-name module-name})))
 
-
 (defn assoc-deps
   "Slurps the build file and adds it to the context under the key `:metav/project-deps`."
   [context]
@@ -110,7 +109,6 @@
       :metav/project-deps (-> working-dir
                               (fs/file module-build-file)
                               deps-reader/slurp-deps))))
-
 
 
 (def version-scheme->builder

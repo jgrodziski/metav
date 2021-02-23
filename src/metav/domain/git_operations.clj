@@ -19,6 +19,7 @@
   (utils/check-spec ::working-dir-present context)
   (git/assert-committed? (:metav/working-dir context))
   context)
+
 (comment  ([working-dir]
            (git/assert-committed? working-dir)))
 
