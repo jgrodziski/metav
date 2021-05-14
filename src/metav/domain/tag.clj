@@ -8,19 +8,19 @@
 (def DEFAULT-FORMAT-STRING-MULTIREPO       "%4$s-%1$s.%2$s.%3$s")
 (def DEFAULT-REGEX-MULTIREPO               #"(?<artefactname>.*-.*)-(?<major>.*)\.(?<minor>.*)\.(?<patch>.*)")
 
-(defn format
+(defn format-tag
   ([context]
-   (format (:metav/tag-format-string context)
+   (format-tag (:metav/tag-format-string context)
            ;(:metav/tag-parse-re context)
                                         ;[major minor patch distance sha dirty?]
            ;artefact-name full-name definitive-module-name
            ))
   ([version artefact-name]
-   (format DEFAULT-FORMAT-STRING-STANDALONE-REPO artefact-name version))
+   (format-tag DEFAULT-FORMAT-STRING-STANDALONE-REPO artefact-name version))
   ([format-string version artefact-name]
-   (apply format format-string (to-vector version) artefact-name))
+   (apply format-tag format-string (to-vector version) artefact-name))
   ([major minor patch artefact-name distance sha dirty?]
-   (format DEFAULT-FORMAT-STRING-STANDALONE-REPO major minor patch artefact-name distance sha dirty?))
+   (format-tag DEFAULT-FORMAT-STRING-STANDALONE-REPO major minor patch artefact-name distance sha dirty?))
   ([format-string major minor patch artefact-name distance sha dirty?]
    (clojure.core/format format-string major minor patch artefact-name distance sha dirty?)))
 

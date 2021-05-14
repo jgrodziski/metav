@@ -3,7 +3,7 @@
 RELEASE_LEVEL=$1
 MODULE_NAME=${PWD##*/}
 echo "Release \"$MODULE_NAME\" with level '$RELEASE_LEVEL'"
-tag=$(clj -A:release $RELEASE_LEVEL)
+tag=$(clj -M:release $RELEASE_LEVEL)
 
 if [ $? -eq 0 ]; then
     echo "Successfully released \"$MODULE_NAME\" to $tag"

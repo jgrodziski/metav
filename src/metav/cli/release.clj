@@ -1,12 +1,13 @@
 (ns metav.cli.release
   (:require
-    [clojure.spec.alpha :as s]
-    [clojure.string :as string]
-    [clojure.tools.logging :as log]
-    [clojure.data.json :as json]
-    [metav.cli.common :as cli-common]
-    [metav.cli.spit :as cli-spit]
-    [metav.api :as api]))
+   [clojure.spec.alpha :as s]
+   [clojure.string :as string]
+   [clojure.tools.logging :as log]
+   [clojure.data.json :as json]
+   [metav.cli.common :as cli-common]
+   [metav.cli.spit :as cli-spit]
+   [metav.api :as api]
+   [metav.domain.tag :as tag]))
 
 
 (def cli-options
@@ -69,7 +70,7 @@
     (let [{bumped-tag :metav/tag :as bumped-context} (api/release! context)]
       (if verbose?
         (println (json/write-str (api/metadata-as-edn context)))
-        (println bumped-tag))
+        (println (tag/format-tag bumped-tag)))
       bumped-context)))
 
 
