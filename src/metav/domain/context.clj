@@ -4,7 +4,7 @@
    [clojure.string :as string]
    [clojure.tools.logging :as log]
    [clojure.tools.deps.alpha.specs :as deps-specs]
-   [clojure.tools.deps.alpha.reader :as deps-reader]
+   [clojure.tools.deps.alpha :as deps]
    [me.raynes.fs :as fs]
    [metav.utils :as utils]
    [metav.domain.version.semver :as semver]
@@ -107,7 +107,7 @@
     (assoc context
       :metav/project-deps (-> working-dir
                               (fs/file module-build-file)
-                              deps-reader/slurp-deps))))
+                              deps/slurp-deps))))
 
 
 
