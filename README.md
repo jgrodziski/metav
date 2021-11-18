@@ -291,7 +291,7 @@ See [spit function](#spit-current-version-in-a-file).
 
 ## Release semantic
 
-_Release_ means some source code changes in one or several commits are ready to be "published" in the repository for later deployment. The _Release_ process assigns a version number, tags the repo with it and push the changes. The _Release_ task is invoked by developer when she considers changes in source code are ready. Pushing binary artefact (JAR, docker image, etc.) somewhere is out of the scope of the _Release_ process and should be the responsibility of the CI system.
+_Release_ means changes in source code in one or several commits are stable and ready to be "published" for later deployment. The _Release_ process takes as an input the semantic of the release (major, minor or patch, see below) and then assigns a proper version number according to this semantic, tags the repo with it and push the changes. The _Release_ task is invoked by developer when she considers changes in source code are ready and stable and she provides the semantic as parameter. Pushing binary artefact (JAR, docker image, etc.) somewhere is out of the scope of the _Release_ process and should be the responsibility of the CI system.
 
 
 ## Change level (major, minor, patch)
