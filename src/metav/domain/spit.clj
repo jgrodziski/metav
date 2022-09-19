@@ -8,7 +8,8 @@
    [metav.domain.metadata :as metadata]
    [metav.domain.git :as git]
    [metav.domain.git-operations :as git-ops]
-   [metav.domain.pom :as pom]))
+   [metav.domain.pom :as pom]
+   [metav.domain.leningen :as lein]))
 
 ;;----------------------------------------------------------------------------------------------------------------------
 ;; Spit conf
@@ -142,13 +143,16 @@
   (let [context               (utils/merge&validate context defaults-options ::spit!param)
         spitted-data          (into {} (map spit-file! (data-spits context)))
         spitted-rendered-file (spit-file! (template-spit context))
+        spitted-lein-context  (when (:metav.spit/lein context) (lein/sync-lein-version! context))
         spitted-pom-context   (when (:metav.spit/pom context) (pom/sync-pom! context))
         spitted-result        (cond-> {}
                                       (not-empty spitted-data) (assoc :data spitted-data)
                                       spitted-pom-context      (assoc :pom-file-path (:metav.maven.pom/pom-file-path spitted-pom-context))
+                                      spitted-lein-context     (assoc :lein-file-path (:metav.lein/project-file-path spitted-lein-context))
                                       spitted-rendered-file    (assoc :template spitted-rendered-file))]
     (-> context
         (merge spitted-pom-context)
+        (merge spitted-lein-context)
         (assoc :metav.spit/spitted spitted-result))))
 
 (s/def :metav.spit/spitted map?)
@@ -157,6 +161,9 @@
 (defn git-add-spitted! [context]
   (utils/check-spec ::git-add-spitted!-param context)
   (let [{working-dir :metav/working-dir spitted :metav.spit/spitted} context
-        spitted-files      (map str (filter identity (conj  (vals (:data spitted)) (:rendered-file (:template spitted)) (:pom-file-path spitted))))
+        spitted-files (map str (filter identity (conj (vals (:data spitted))
+                                                      (:rendered-file (:template spitted))
+                                                      (:pom-file-path spitted)
+                                                      (:lein-file-path spitted))))
         add-spitted-result (apply git/add! working-dir spitted-files)]
     (assoc context :metav.spit/add-spitted-result add-spitted-result)))

@@ -41,6 +41,7 @@
 
 
 (def deps-edn-path (-> "dummy-deps.edn" io/resource io/file str))
+(def project-clj-path (-> "dummy-project.clj" io/resource io/file str))
 
 
 (defn sh [command]
@@ -88,6 +89,18 @@
                    (->> (apply fs/file))
                    str))
         command (str "cp " deps-edn-path " " dest)]
+    ;(log/debug "will execute: "command)
+    (sh command)))
+
+(defn write-dummy-project-clj-in! [& dirs]
+  (apply mkdir-p! dirs)
+  (let [dest (fs/with-cwd shell/*sh-dir*
+                          (-> dirs
+                              vec
+                              (conj "project.clj")
+                              (->> (apply fs/file))
+                              str))
+        command (str "cp " project-clj-path " " dest)]
     ;(log/debug "will execute: "command)
     (sh command)))
 

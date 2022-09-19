@@ -32,6 +32,10 @@
          :id :metav.spit/pom
          :default-desc "false"]
 
+        ["-l" "--lein" "Indicates the spit/release process should update the project.clj file for the project"
+         :id :metav.spit/lein
+         :default-desc "false"]
+
         ["-f" "--formats FORMATS" "Comma-separated list of output formats (clj, cljc, cljs, edn, json)"
          :id :metav.spit/formats
          :parse-fn parse-formats
