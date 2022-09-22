@@ -24,6 +24,8 @@ else
     echo "unable to parse tag $tag"
     exit 1
 fi
+
+echo "Set pom's new version of \"$MODULE_NAME\" to $newversion"
 mvn versions:set -DgenerateBackupPoms=false -DnewVersion=$newversion  2>&1 > /dev/null
 
 if [ $? -eq 0 ]; then
