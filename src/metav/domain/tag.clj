@@ -9,12 +9,13 @@
 (def DEFAULT-REGEX-MULTIREPO               #"(?<artefactname>.*-.*)-(?<major>.*)\.(?<minor>.*)\.(?<patch>.*)")
 
 (defn format-tag
-  ([context]
-   (format-tag (:metav/tag-format-string context)
+  ([context]                                                ;; FIXME will stackoverflow, what's the intention ?
+   #_(format-tag (:metav/tag-format-string context)
            ;(:metav/tag-parse-re context)
                                         ;[major minor patch distance sha dirty?]
            ;artefact-name full-name definitive-module-name
-           ))
+           )
+   context)
   ([version artefact-name]
    (format-tag DEFAULT-FORMAT-STRING-STANDALONE-REPO artefact-name version))
   ([format-string version artefact-name]
