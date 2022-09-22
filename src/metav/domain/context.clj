@@ -19,7 +19,7 @@
 ;; TODO make sure that in release, we actually release from repos, not the top level for instance.
 (def default-options
   #:metav{:version-scheme :semver
-          :min-sha-length 4
+          :min-sha-length 8
           :use-full-name? false})
 
 

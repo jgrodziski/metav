@@ -4,7 +4,7 @@
             [clojure.tools.logging :as log]))
 
 (def ^:dynamic *prefix* "v")
-(def ^:dynamic *min-sha-length* 4)
+(def ^:dynamic *min-sha-length* 8)
 (def ^:dynamic *dirty-mark* "DIRTY")
 
 
